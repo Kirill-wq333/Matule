@@ -1,4 +1,4 @@
-package com.example.matule.ui.theme
+package com.example.matule.ui.presintation.theme
 
 import androidx.compose.ui.graphics.Color
 
