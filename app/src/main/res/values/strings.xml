@@ -1,3 +1,95 @@
 <resources>
     <string name="app_name">Matule</string>
+
+
+    <!--  Sign in  -->
+    <string name="auth_hello_heading">Привет!</string>
+    <string name="auth_under_heading">Заполните Свои данные или продолжите через социальные медиа</string>
+    <string name="new_user">Вы впервые?</string>
+    <string name="create_account">Создать пользователя</string>
+
+    <!--  Popup  -->
+    <string name="popup_heading">Проверьте Ваш Email</string>
+    <string name="popup_under_heading">Мы отправили код восстановления пароля на вашу электронную почту.</string>
+
+    <!--  Verification  -->
+    <string name="otr_verification">OTP проверка</string>
+    <string name="under_heading_verification">Пожалуйста, проверьте свою электронную почту, чтобы увидеть код подтверждения</string>
+    <string name="otr_code">OTP Код</string>
+
+    <!--  Main  -->
+    <string name="main">Главная</string>
+    <string name="category">Категории</string>
+    <string name="new_arrivals">Акции</string>
+
+    <!--  Forgot Password  -->
+    <string name="forgot_password">Forgot Password</string>
+    <string name="forgot_password_under_heading">Введите свою учетную запись для сброса</string>
+
+
+    <!--  Register account  -->
+    <string name="register_account">Регистрация</string>
+    <string name="your_name">Ваше имя</string>
+    <string name="already_have_account">Есть аккаунт?</string>
+    <string name="log_in">Войти</string>
+    <string name="checkbox_agree">Даю согласие на обработку персональных данных</string>
+
+    <!--  Onboarding  -->
+    <string name="onboarding_heading">Добро пожаловать</string>
+    <string name="onboarding_heading2">Начнем путешествие</string>
+    <string name="onboarding_heading3">У вас есть сила, чтобы</string>
+    <string name="onboarding_under_heading2">Умная, великолепная и модная коллекция Изучите сейчас</string>
+    <string name="onboarding_under_heading3">В вашей комнате много красивых и привлекательных растений</string>
+
+    <!--  Order  -->
+    <string name="orders">Заказы</string>
+    <string name="min_ago">%1$s мин назад</string>
+    <string name="recent">Недавний</string>
+    <string name="yesterday">Вчера</string>
+
+    <!--  Checkout  -->
+    <string name="payment_method">Способ оплаты</string>
+    <string name="checkout_popup">Вы успешно оформили заказ</string>
+
+    <!--  Popular  -->
+    <string name="popular">Популярное</string>
+
+    <!--  Favourite  -->
+    <string name="favourite">Избранное</string>
+
+    <!--  Cart  -->
+    <string name="cart">Корзина</string>
+    <string name="cart_items">%1$s товара</string>
+
+    <!--  Side menu  -->
+    <string name="setting">Настройки</string>
+    <string name="sign_out">Выйти</string>
+
+    <!--  Profile  -->
+    <string name="change_profile_picture">Изменить фото профиля</string>
+    <string name="name">Имя</string>
+    <string name="last_name">Фамилия</string>
+
+    <!--  More details  -->
+    <string name="email">Email</string>
+    <string name="password">Пароль</string>
+    <string name="btn_sign_up">Зарегистрироваться</string>
+    <string name="btn_sign_in">Войти</string>
+    <string name="btn_send">Отправить</string>
+    <string name="btn_add_to_cart">В корзину</string>
+    <string name="btn_back_to_shopping">Вернуться к покупкам</string>
+    <string name="btn_save">Сохранить</string>
+    <string name="btn_checkout">Оформить заказ</string>
+    <string name="recovery_password">Воcстановить</string>
+    <string name="search">Поиск</string>
+    <string name="see_all">Все</string>
+    <string name="subtotal">Сумма</string>
+    <string name="delivery">Доставка</string>
+    <string name="total_cost">Доставка</string>
+    <string name="contact_info">Контактная информация</string>
+    <string name="address">Адрес</string>
+    <string name="open">Открыть</string>
+    <string name="notifications">Уведомления</string>
+    <string name="view_map">Посмотреть на карте</string>
+
 </resources>

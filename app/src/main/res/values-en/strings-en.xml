@@ -1,0 +1,93 @@
+<resources>
+    <string name="app_name">Matule</string>
+
+    <!--  Sign in  -->
+    <string name="auth_hello_heading">Hello Again!</string>
+    <string name="auth_under_heading">Fill your details or continue with social media</string>
+    <string name="new_user">New User?</string>
+    <string name="create_account">Create Account</string>
+
+    <!--  Popup  -->
+    <string name="popup_heading">Check your email</string>
+    <string name="popup_under_heading">We have send password recovery code in your email</string>
+
+    <!--  Verification  -->
+    <string name="otr_verification">OTP Verification</string>
+    <string name="under_heading_verification">Please check your email to see the verification code</string>
+    <string name="otr_code">OTP Code</string>
+
+    <!--  Main  -->
+    <string name="main">Main</string>
+    <string name="category">Select Category</string>
+    <string name="new_arrivals">New Arrivals</string>
+
+    <!--  Forgot Password  -->
+    <string name="forgot_password">Forgot Password</string>
+    <string name="forgot_password_under_heading">Enter your Email account to reset your password</string>
+
+    <!--  Register account  -->
+    <string name="register_account">Register Account</string>
+    <string name="already_have_account">Already Have Account?</string>
+    <string name="your_name">Your Name</string>
+    <string name="log_in">Log In</string>
+    <string name="checkbox_agree">I agree to the processing of personal data</string>
+
+    <!--  Onboarding  -->
+    <string name="onboarding_heading">Welcome</string>
+    <string name="onboarding_heading2">Let’s Start Journey</string>
+    <string name="onboarding_heading3">You Have the Power To</string>
+    <string name="onboarding_under_heading2">Smart, Gorgeous &amp; Fashionable Collection Explor Now</string>
+    <string name="onboarding_under_heading3">There Are Many Beautiful And Attractive Plants To Your Room</string>
+
+    <!--  Order  -->
+    <string name="orders">Orders</string>
+    <string name="min_ago">%1$s min ago</string>
+    <string name="recent">Recent</string>
+    <string name="yesterday">Yesterday</string>
+
+    <!--  Checkout  -->
+    <string name="payment_method">Payment Method</string>
+    <string name="checkout_popup">Your Payment Is Successful</string>
+
+    <!--  Popular  -->
+    <string name="popular">Popular shoes</string>
+
+    <!--  Favourite  -->
+    <string name="favourite">Favourite</string>
+
+    <!--  Cart  -->
+    <string name="cart">Cart</string>
+    <string name="cart_items">%1$s Items</string>
+
+    <!--  Side menu  -->
+    <string name="setting">SETTINGS</string>
+    <string name="sign_out">Sign Out</string>
+
+    <!--  Profile  -->
+    <string name="change_profile_picture">Change Profile Picture</string>
+    <string name="name">Name</string>
+    <string name="last_name">Last name</string>
+
+    <!--  More details  -->
+    <string name="email">Email Address</string>
+    <string name="password">Password</string>
+    <string name="btn_sign_up">Sign up</string>
+    <string name="btn_sign_in">Sign In</string>
+    <string name="btn_send">Send</string>
+    <string name="btn_add_to_cart">Add to Cart</string>
+    <string name="btn_back_to_shopping">Back To Shopping</string>
+    <string name="btn_save">save Now</string>
+    <string name="btn_checkout">Checkout</string>
+    <string name="recovery_password">Recovery Password</string>
+    <string name="search">Search</string>
+    <string name="see_all">See all</string>
+    <string name="subtotal">Subtotal</string>
+    <string name="delivery">Delivery</string>
+    <string name="total_cost">Total Cost</string>
+    <string name="contact_info">Contact Information</string>
+    <string name="address">Address</string>
+    <string name="open">OPEN</string>
+    <string name="notifications">Notifications</string>
+    <string name="view_map">View Map</string>
+
+</resources>
