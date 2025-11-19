@@ -1,4 +1,4 @@
-package com.example.matule.ui.presintation.theme
+package com.example.matule.ui.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

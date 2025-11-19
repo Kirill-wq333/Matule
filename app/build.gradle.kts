@@ -54,6 +54,12 @@ dependencies {
 
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
+    implementation(libs.landscapist.coil)
+    implementation(libs.landscapist.glide)
+    implementation(libs.landscapist.fresco)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.svg)
+
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.logging.interceptor)

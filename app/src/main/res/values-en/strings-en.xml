@@ -6,6 +6,8 @@
     <string name="auth_under_heading">Fill your details or continue with social media</string>
     <string name="new_user">New User?</string>
     <string name="create_account">Create Account</string>
+    <string name="auth_error_email"></string>
+    <string name="auth_error_password"></string>
 
     <!--  Popup  -->
     <string name="popup_heading">Check your email</string>
@@ -73,7 +75,7 @@
     <string name="password">Password</string>
     <string name="btn_sign_up">Sign up</string>
     <string name="btn_sign_in">Sign In</string>
-    <string name="btn_send">Send</string>
+    <string name="btn_sent">Send</string>
     <string name="btn_add_to_cart">Add to Cart</string>
     <string name="btn_back_to_shopping">Back To Shopping</string>
     <string name="btn_save">save Now</string>
@@ -89,5 +91,7 @@
     <string name="open">OPEN</string>
     <string name="notifications">Notifications</string>
     <string name="view_map">View Map</string>
+    <string name="best_seller">BEST SELLER</string>
+    <string name="money">$%1$s</string>
 
 </resources>

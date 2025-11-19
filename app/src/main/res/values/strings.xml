@@ -7,6 +7,8 @@
     <string name="auth_under_heading">Заполните Свои данные или продолжите через социальные медиа</string>
     <string name="new_user">Вы впервые?</string>
     <string name="create_account">Создать пользователя</string>
+    <string name="auth_error_email"></string>
+    <string name="auth_error_password"></string>
 
     <!--  Popup  -->
     <string name="popup_heading">Проверьте Ваш Email</string>
@@ -75,7 +77,7 @@
     <string name="password">Пароль</string>
     <string name="btn_sign_up">Зарегистрироваться</string>
     <string name="btn_sign_in">Войти</string>
-    <string name="btn_send">Отправить</string>
+    <string name="btn_sent">Отправить</string>
     <string name="btn_add_to_cart">В корзину</string>
     <string name="btn_back_to_shopping">Вернуться к покупкам</string>
     <string name="btn_save">Сохранить</string>
@@ -91,5 +93,7 @@
     <string name="open">Открыть</string>
     <string name="notifications">Уведомления</string>
     <string name="view_map">Посмотреть на карте</string>
+    <string name="best_seller">BEST SELLER</string>
+    <string name="money">₽%1$s</string>
 
 </resources>
