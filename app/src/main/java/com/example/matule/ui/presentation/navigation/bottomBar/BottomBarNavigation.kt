@@ -4,6 +4,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -96,6 +97,7 @@ fun BottomContent(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(Colors.background)
                 .heightIn(max = 105.dp)
         ) {
             Image(
@@ -115,7 +117,7 @@ fun BottomContent(
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_cart),
-                contentDescription = null
+                contentDescription = null,
             )
         }
         Actions(
@@ -178,13 +180,14 @@ private fun CustomButtonItemInBottom(
 
             val colorState by animateColorAsState(
                 targetValue = tint,
-                animationSpec = tween(700)
+                animationSpec = tween(500)
             )
 
             Icon(
                 imageVector = ImageVector.vectorResource(item.icon),
                 contentDescription = null,
-                tint = colorState
+                tint = colorState,
+                modifier = Modifier.clickable{ navController.navigate(item.route) }
             )
         }
     }

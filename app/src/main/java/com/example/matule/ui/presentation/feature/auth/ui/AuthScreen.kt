@@ -52,12 +52,13 @@ private interface AuthScreenCallback{
 @Preview
 @Composable
 private fun Prev() {
-    AuthScreen()
+    AuthScreen(){}
 }
 
 @Composable
 fun AuthScreen(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    openMainScreen: () -> Unit
 ) {
 
     var email by remember { mutableStateOf("") }
@@ -66,6 +67,7 @@ fun AuthScreen(
     val callback = object: AuthScreenCallback{
         override fun openMainScreen() {
             navController.navigate(AppRouts.MAIN)
+           openMainScreen()
         }
 
         override fun openForgotScreen() {

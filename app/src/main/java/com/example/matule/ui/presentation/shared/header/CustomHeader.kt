@@ -4,14 +4,20 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.matule.R
@@ -49,10 +55,58 @@ private fun PrevHeader() {
                 cardItem = 1,
                 visibleNameScreen = true
             )
+            CustomHeaderMain(
+                text = R.string.main,
+            )
+            CustomHeaderMain(
+                text = R.string.main,
+                cardItem = 1
+            )
         }
     }
 }
 
+
+@Composable
+fun CustomHeaderMain(
+    openSideMenu: () -> Unit = {},
+    openCartScreen: () -> Unit = {},
+    text: Int,
+    endIcon: Int = R.drawable.ic_cart,
+    cardItem: Int = 0,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Icon(
+            imageVector = ImageVector.vectorResource(R.drawable.highlight_05),
+            contentDescription = null,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .offset(x = -(65).dp)
+        )
+        CustomIconButton(
+            icon = R.drawable.ic_hamburger,
+            onClick = openSideMenu,
+            tint = Color.Unspecified,
+            backColor = Color.Transparent,
+            modifier = Modifier.align(Alignment.CenterStart),
+        )
+        Text(
+            text = stringResource(text),
+            color = Colors.text,
+            style = MatuleTypography.headlineLarge,
+            modifier = Modifier.align(Alignment.Center)
+        )
+        CustomIconButton(
+            icon = endIcon,
+            onClick = openCartScreen,
+            cardItem = cardItem,
+            modifier = Modifier.align(Alignment.CenterEnd)
+        )
+    }
+}
 
 @Composable
 fun CustomHeader(

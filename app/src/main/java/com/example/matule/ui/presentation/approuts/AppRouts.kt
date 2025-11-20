@@ -16,4 +16,5 @@ object AppRouts {
     const val PROFILE = "profile"
     const val ORDERS = "orders"
     const val NOTIFICATION = "notification"
+    const val ARRIVALS = "arrivals"
 }

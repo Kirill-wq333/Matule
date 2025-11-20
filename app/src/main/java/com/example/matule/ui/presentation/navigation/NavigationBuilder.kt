@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.matule.ui.presentation.approuts.AppRouts
 import com.example.matule.ui.presentation.feature.auth.ui.AuthScreen
+import com.example.matule.ui.presentation.feature.main.MainScreen
 import com.example.matule.ui.presentation.feature.onboarding.ui.OnboardingScreen
 
 @Composable
@@ -32,18 +33,31 @@ fun NavigationBuilder(
     ) {
 
         composable(AppRouts.MAIN) {
-
+            MainScreen(
+                navController = navController
+            )
         }
 
         composable(
             AppRouts.AUTH,
             enterTransition = { fadeIn(tween(1500)) }
         ) {
-            AuthScreen(navController = navController)
+            AuthScreen(
+                navController = navController,
+                openMainScreen = {
+                    visibleBottomBar(true)
+                }
+            )
         }
 
         composable(AppRouts.ONBOARDING) {
-            OnboardingScreen(navController = navController)
+            OnboardingScreen(
+                navController = navController
+            )
+        }
+
+        composable(AppRouts.ARRIVALS) {
+
         }
 
         composable(AppRouts.POPULAR) {

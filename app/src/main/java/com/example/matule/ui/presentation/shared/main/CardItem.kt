@@ -14,6 +14,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -41,17 +45,13 @@ private fun PreviewCard() {
             horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             CardItem(
-                liked = false,
                 cardName = "Nike Air Max",
                 cardImage = "https://cdn.imgbin.com/21/14/17/imgbin-skate-shoe-sneakers-nike-converse-nike-wgVVd0RPVGxgPcrtg39U9Kajd.jpg",
-                cartIcon = false,
                 money = 773
             )
             CardItem(
-                liked = false,
                 cardName = "Nike Air Max",
                 cardImage = "https://cdn.imgbin.com/21/14/17/imgbin-skate-shoe-sneakers-nike-converse-nike-wgVVd0RPVGxgPcrtg39U9Kajd.jpg",
-                cartIcon = true,
                 money = 773
             )
         }
@@ -62,17 +62,13 @@ private fun PreviewCard() {
             horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             CardItem(
-                liked = true,
                 cardName = "Nike Air Max",
                 cardImage = "https://cdn.imgbin.com/21/14/17/imgbin-skate-shoe-sneakers-nike-converse-nike-wgVVd0RPVGxgPcrtg39U9Kajd.jpg",
-                cartIcon = false,
                 money = 773
             )
             CardItem(
-                liked = true,
                 cardName = "Nike Air Max",
                 cardImage = "https://cdn.imgbin.com/21/14/17/imgbin-skate-shoe-sneakers-nike-converse-nike-wgVVd0RPVGxgPcrtg39U9Kajd.jpg",
-                cartIcon = true,
                 money = 773
             )
         }
@@ -82,15 +78,16 @@ private fun PreviewCard() {
 
 @Composable
 fun CardItem(
-    liked: Boolean,
     cardName: String,
     cardImage: String,
     money: Int,
-    cartIcon: Boolean,
     addedInCart: (Int) -> Unit = {},
     openCartScreen: () -> Unit = {},
     openDetailScreen: () -> Unit = {}
 ) {
+
+    var liked by remember { mutableStateOf(false) }
+    var cartIcon by remember { mutableStateOf(false) }
 
     val icon = if (liked) R.drawable.ic_favorite_fill else R.drawable.ic_favorite
     val colorIcon = if (liked) Colors.red else Colors.text
@@ -107,9 +104,10 @@ fun CardItem(
             icon = icon,
             padding = 6.dp,
             size = 16.dp,
+            backColor = Colors.background,
             modifier = Modifier.padding(9.dp),
             tint = colorIcon,
-            onClick = { liked == !liked }
+            onClick = { liked = !liked }
         )
 
         Content(
@@ -137,13 +135,11 @@ fun Content(
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Box {
-            CardContent(
-                cardName = cardName,
-                cardImage = cardImage,
-                openDetailScreen = openDetailScreen
-            )
-        }
+        CardContent(
+            cardName = cardName,
+            cardImage = cardImage,
+            openDetailScreen = openDetailScreen
+        )
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -156,7 +152,7 @@ fun Content(
                 modifier = Modifier.padding(start = 9.dp)
             )
 
-            if (cartIcon){
+            if (cartIcon) {
                 CardIconButton(
                     icon = R.drawable.ic_cart,
                     onClick = openCartScreen,
@@ -164,11 +160,13 @@ fun Content(
                         .padding(11.dp)
                         .size(12.dp)
                 )
-            }
-            else{
+            } else {
                 CardIconButton(
                     icon = R.drawable.ic_add,
-                    onClick = { addedInCart },
+                    onClick = {
+                        addedInCart
+                        cartIcon
+                    },
                     modifier = Modifier
                         .padding(start = 7.dp, end = 6.dp, top = 8.86.dp, bottom = 9.82.dp)
                         .size(width = 21.dp, height = 15.32.dp)

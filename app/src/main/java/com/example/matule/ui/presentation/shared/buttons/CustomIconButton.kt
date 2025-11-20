@@ -27,7 +27,7 @@ fun CustomIconButton(
     onClick: () -> Unit = {},
     cardItem: Int = 0,
     padding: Dp = 10.dp,
-    tint: Color = Colors.text,
+    tint: Color = Color.Unspecified,
     size: Dp = 24.dp
 ) {
     Box(
