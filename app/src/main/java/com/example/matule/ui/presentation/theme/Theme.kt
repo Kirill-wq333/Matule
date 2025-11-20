@@ -64,7 +64,7 @@ fun MatuleTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = MatuleTypography,
         content = content
     )
 }

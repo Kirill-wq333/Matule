@@ -7,8 +7,8 @@
     <string name="auth_under_heading">Заполните Свои данные или продолжите через социальные медиа</string>
     <string name="new_user">Вы впервые?</string>
     <string name="create_account">Создать пользователя</string>
-    <string name="auth_error_email"></string>
-    <string name="auth_error_password"></string>
+    <string name="auth_error_email">Неверный пароль!</string>
+    <string name="auth_error_password">Неверный пароль!</string>
 
     <!--  Popup  -->
     <string name="popup_heading">Проверьте Ваш Email</string>
@@ -82,6 +82,8 @@
     <string name="btn_back_to_shopping">Вернуться к покупкам</string>
     <string name="btn_save">Сохранить</string>
     <string name="btn_checkout">Оформить заказ</string>
+    <string name="btn_next">Далее</string>
+    <string name="btn_start">Начать</string>
     <string name="recovery_password">Воcстановить</string>
     <string name="search">Поиск</string>
     <string name="see_all">Все</string>

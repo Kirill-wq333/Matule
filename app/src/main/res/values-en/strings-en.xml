@@ -6,8 +6,8 @@
     <string name="auth_under_heading">Fill your details or continue with social media</string>
     <string name="new_user">New User?</string>
     <string name="create_account">Create Account</string>
-    <string name="auth_error_email"></string>
-    <string name="auth_error_password"></string>
+    <string name="auth_error_email">Incorrect email!</string>
+    <string name="auth_error_password">Incorrect password!</string>
 
     <!--  Popup  -->
     <string name="popup_heading">Check your email</string>
@@ -80,6 +80,8 @@
     <string name="btn_back_to_shopping">Back To Shopping</string>
     <string name="btn_save">save Now</string>
     <string name="btn_checkout">Checkout</string>
+    <string name="btn_next">Next</string>
+    <string name="btn_start">Start</string>
     <string name="recovery_password">Recovery Password</string>
     <string name="search">Search</string>
     <string name="see_all">See all</string>

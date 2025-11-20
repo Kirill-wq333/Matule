@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.matule.ui.presentation.NavigationHost
+import com.example.matule.ui.presentation.theme.MatuleTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -21,10 +22,11 @@ class MainActivity : ComponentActivity() {
         setContent {
 
             navController = rememberNavController()
-
-            NavigationHost(
-                navController = navController
-            )
+            MatuleTheme {
+                NavigationHost(
+                    navController = navController
+                )
+            }
         }
     }
 }
