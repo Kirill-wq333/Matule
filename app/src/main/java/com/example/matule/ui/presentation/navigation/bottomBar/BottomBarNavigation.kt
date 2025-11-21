@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -101,9 +102,9 @@ fun BottomContent(
                 .heightIn(max = 105.dp)
         ) {
             Image(
-                painter = painterResource(R.drawable.custom_bottom),
+                imageVector = ImageVector.vectorResource(R.drawable.bottom_bar),
                 contentDescription = null,
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.FillWidth,
                 modifier = Modifier
                     .fillMaxSize()
             )

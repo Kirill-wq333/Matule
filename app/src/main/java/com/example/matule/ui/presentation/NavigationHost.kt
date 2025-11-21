@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.matule.ui.presentation.approuts.AppRouts
 import com.example.matule.ui.presentation.navigation.NavigationBuilder
 import com.example.matule.ui.presentation.navigation.bottomBar.BottomBarNavigation
@@ -16,7 +17,21 @@ import com.example.matule.ui.presentation.navigation.bottomBar.BottomBarNavigati
 fun NavigationHost(
     navController: NavHostController?
 ) {
-    var visibleBottomBar by remember { mutableStateOf(false) }
+
+    val screensWithBottomBar = listOf(
+        AppRouts.MAIN,
+        AppRouts.FAVOURITE,
+        AppRouts.NOTIFICATION,
+        AppRouts.PROFILE
+    )
+
+    val currentDestination = navController
+        ?.currentBackStackEntryAsState()
+        ?.value
+        ?.destination
+        ?.route
+
+    val shouldShowBottomBar = currentDestination in screensWithBottomBar
 
     if (navController == null) return
     HostScaffold(
@@ -24,15 +39,15 @@ fun NavigationHost(
             NavigationBuilder(
                 navController = navController,
                 paddingValues = paddingValues,
-                visibleBottomBar = { visibleBottomBar = it }
             )
         },
         bottomBar = {
-            if (visibleBottomBar)
-            BottomBarNavigation(
-                navController = navController,
-                openCartScreen = { navController.navigate(AppRouts.CART) }
-            )
+            if (shouldShowBottomBar) {
+                BottomBarNavigation(
+                    navController = navController,
+                    openCartScreen = { navController.navigate(AppRouts.CART) }
+                )
+            }
         }
     )
 }

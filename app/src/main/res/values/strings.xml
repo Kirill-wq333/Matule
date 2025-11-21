@@ -68,9 +68,13 @@
     <string name="sign_out">Выйти</string>
 
     <!--  Profile  -->
+    <string name="profile">Профиль</string>
     <string name="change_profile_picture">Изменить фото профиля</string>
     <string name="name">Имя</string>
     <string name="last_name">Фамилия</string>
+
+    <!--  Notification  -->
+    <string name="notifications">Уведомления</string>
 
     <!--  More details  -->
     <string name="email">Email</string>
@@ -93,7 +97,6 @@
     <string name="contact_info">Контактная информация</string>
     <string name="address">Адрес</string>
     <string name="open">Открыть</string>
-    <string name="notifications">Уведомления</string>
     <string name="view_map">Посмотреть на карте</string>
     <string name="best_seller">BEST SELLER</string>
     <string name="money">₽%1$s</string>

@@ -1,4 +1,4 @@
-package com.example.matule.ui.presentation.feature.main
+package com.example.matule.ui.presentation.feature.main.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,8 +14,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,15 +26,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.example.matule.R
 import com.example.matule.ui.presentation.approuts.AppRouts
+import com.example.matule.ui.presentation.feature.main.viewmodel.MainScreenContract
+import com.example.matule.ui.presentation.shared.buttons.CustomIconButton
 import com.example.matule.ui.presentation.shared.header.CustomHeaderMain
 import com.example.matule.ui.presentation.shared.main.CardItem
+import com.example.matule.ui.presentation.shared.text.TextFieldWithLeadingAndTrailingIcons
 import com.example.matule.ui.presentation.theme.Colors
 import com.example.matule.ui.presentation.theme.MatuleTypography
 
@@ -43,6 +52,7 @@ private interface MainScreenCallback{
     fun openCartScreen() {}
     fun openArrivalsScreen() {}
     fun openDetailScreen() {}
+    fun onBack() {}
 }
 
 @Composable
@@ -52,11 +62,11 @@ fun MainScreen(
 
     val callback = object : MainScreenCallback{
         override fun openCatalogScreen() {
-            navController.navigate(AppRouts.CATALOG)
+
         }
 
         override fun openPopularScreen() {
-            navController.navigate(AppRouts.POPULAR)
+
         }
 
         override fun openCartScreen() {
@@ -64,7 +74,6 @@ fun MainScreen(
         }
 
         override fun openArrivalsScreen() {
-            navController.navigate(AppRouts.ARRIVALS)
         }
 
         override fun openDetailScreen() {
@@ -106,18 +115,21 @@ private fun Preview() {
 private fun Main(
     callback: MainScreenCallback
 ) {
-
+    var search by remember { mutableStateOf("") }
 
     Content(
         openPopularScreen = callback::openPopularScreen,
         openCatalogScreen = callback::openCatalogScreen,
         openArrivalsScreen = callback::openArrivalsScreen,
         openCartScreen = callback::openCartScreen,
-        cardName = "",
+        cardName = "dfgjjfg",
+        search = search,
+        arrivalsImage = "https://trc-tobolsk.com/img/trc/action/thumb800x568x1-57.jpg",
         cardImage = "https://cdn.imgbin.com/21/14/17/imgbin-skate-shoe-sneakers-nike-converse-nike-wgVVd0RPVGxgPcrtg39U9Kajd.jpg",
         money = 214,
         addedInCart = { },
-        openDetailScreen = { },
+        onSearchChange = { search = it },
+        openDetailScreen = callback::openDetailScreen,
         openSideMenu = { },
     )
 }
@@ -127,6 +139,9 @@ private fun Content(
     cardName: String,
     cardImage: String,
     money: Int,
+    search: String,
+    arrivalsImage: String,
+    onSearchChange: (String) -> Unit,
     addedInCart: (Int) -> Unit = {},
     openCartScreen: () -> Unit = {},
     openDetailScreen: () -> Unit = {},
@@ -147,9 +162,15 @@ private fun Content(
             openSideMenu = openSideMenu,
             openCartScreen = openCartScreen
         )
-
+        Spacer(modifier = Modifier.height(21.dp))
+        SearchAndFeature(
+            query = search,
+            onTextChange = onSearchChange
+        )
         Spacer(modifier = Modifier.height(22.dp))
-        CatalogCard()
+        CatalogCard(
+            openCatalogScreen = openCatalogScreen
+        )
         Spacer(modifier = Modifier.height(24.dp))
         PopularCard(
             openPopularScreen = openPopularScreen,
@@ -162,10 +183,51 @@ private fun Content(
         )
         Spacer(modifier = Modifier.height(29.dp))
         ArrivalsCard(
-            openArrivalsScreen = openArrivalsScreen
+            openArrivalsScreen = openArrivalsScreen,
+            arrivalsImage = arrivalsImage
         )
     }
 
+}
+
+@Composable
+fun SearchAndFeature(
+    query: String,
+    onTextChange: (String) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        TextFieldWithLeadingAndTrailingIcons(
+            query = query,
+            onTextChange = onTextChange,
+            placeholder = stringResource(R.string.search),
+            trailingIcon = {
+
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_search),
+                    contentDescription = null,
+                    tint = Colors.hint
+                )
+            }
+        )
+        CustomIconButton(
+            modifier = Modifier
+                .shadow(
+                    elevation = 4.dp,
+                    clip = false,
+                    shape = CircleShape
+                ),
+            padding = 14.dp,
+            icon = R.drawable.ic_sliders,
+            backColor = Colors.accent,
+            tint = Colors.background
+        )
+    }
 }
 
 @Composable
@@ -203,7 +265,9 @@ private fun PopularCard(
 }
 
 @Composable
-private fun CatalogCard() {
+private fun CatalogCard(
+    openCatalogScreen: () -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(19.dp)
@@ -220,7 +284,8 @@ private fun CatalogCard() {
         ) {
             repeat(4) {
                 Item(
-                    text = "fghf"
+                    text = "fghf",
+                    onClick = openCatalogScreen
                 )
             }
         }
@@ -229,20 +294,43 @@ private fun CatalogCard() {
 
 @Composable
 private fun ArrivalsCard(
-    openArrivalsScreen: () -> Unit
+    openArrivalsScreen: () -> Unit,
+    arrivalsImage: String
 ) {
     Card(
         text = R.string.new_arrivals,
         spacer = 20.dp,
         content = {
-            Box(
-                modifier = Modifier
-                    .clip(shape = RoundedCornerShape(16.dp))
-                    .fillMaxWidth()
-            )
+            Arrivals(arrivalsImage = arrivalsImage)
         },
         onClick = openArrivalsScreen
     )
+}
+
+@Composable
+fun Arrivals(
+    arrivalsImage: String
+) {
+    Box(
+        modifier = Modifier
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(16.dp),
+                clip = false
+            )
+            .fillMaxWidth()
+            .background(color = Colors.block,shape = RoundedCornerShape(16.dp))
+            .height(95.dp)
+    ){
+        AsyncImage(
+            model = arrivalsImage,
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .fillMaxWidth(1f)
+        )
+    }
 }
 
 @Composable
@@ -279,11 +367,17 @@ private fun Card(
 
 @Composable
 private fun Item(
-    text: String
+    text: String,
+    onClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .width(108.dp)
+            .shadow(
+                elevation = 2.dp,
+                shape = RoundedCornerShape(8.dp),
+                clip = false
+            )
             .background(color = Colors.block, shape = RoundedCornerShape(8.dp)),
         contentAlignment = Alignment.Center
     ) {
@@ -291,7 +385,9 @@ private fun Item(
             text = text,
             color = Colors.text,
             style = MatuleTypography.bodySmall,
-            modifier = Modifier.padding(top = 11.dp, bottom = 17.dp)
+            modifier = Modifier
+                .clickable(onClick = onClick)
+                .padding(top = 11.dp, bottom = 17.dp)
         )
     }
 }

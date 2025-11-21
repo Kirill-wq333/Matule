@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -94,6 +95,11 @@ fun CardItem(
 
     Box(
         modifier = Modifier
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(16.dp),
+                clip = false
+            )
             .width(160.dp)
             .background(
                 color = Colors.block,
@@ -219,7 +225,7 @@ private fun CardContent(
             AsyncImage(
                 model = cardImage,
                 contentDescription = null,
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
                     .size(height = 70.dp, width = 118.dp),

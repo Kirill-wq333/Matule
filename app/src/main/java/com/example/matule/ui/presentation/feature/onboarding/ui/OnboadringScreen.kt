@@ -113,17 +113,11 @@ private fun Content(
     nextOnboarding: () -> Unit
 ) {
 
-    val spacerImageAndHeadingUnderHeading =
-        if (onboarding.visibleDownHeadingAndUnderHeading) 60.dp
-        else 26.dp
 
     val spacerCircle =
         if (onboarding.visibleDownHeadingAndUnderHeading) 95.dp
         else 136.dp
 
-    val paddingImage =
-        if (onboarding.visibleDownHeadingAndUnderHeading) 37.dp
-        else 0.dp
 
     Column(
         modifier = Modifier.fillMaxSize(),

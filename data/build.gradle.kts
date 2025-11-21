@@ -38,6 +38,7 @@ dependencies {
 
     // Hilt Core
     implementation (libs.hilt.android)
+    implementation(libs.firebase.firestore.ktx)
     kapt (libs.hilt.compiler)
 
     // Для поддержки ViewModel с Hilt

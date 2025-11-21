@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,17 +34,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.matule.R
 import com.example.matule.ui.presentation.approuts.AppRouts
+import com.example.matule.ui.presentation.feature.auth.viewmodel.AuthScreenContract
+import com.example.matule.ui.presentation.feature.auth.viewmodel.AuthScreenViewModel
 import com.example.matule.ui.presentation.shared.buttons.CustomButton
 import com.example.matule.ui.presentation.shared.text.CustomTextField
 import com.example.matule.ui.presentation.theme.Colors
 import com.example.matule.ui.presentation.theme.MatuleTypography
 
 private interface AuthScreenCallback{
-    fun openMainScreen() {}
+    fun openMainScreen(email: String, password: String) {}
     fun openForgotScreen() {}
     fun openRegistrationScreen() {}
 }
@@ -52,22 +56,21 @@ private interface AuthScreenCallback{
 @Preview
 @Composable
 private fun Prev() {
-    AuthScreen(){}
+    AuthScreen()
 }
 
 @Composable
 fun AuthScreen(
+    vm: AuthScreenViewModel = hiltViewModel(),
     navController: NavHostController = rememberNavController(),
-    openMainScreen: () -> Unit
 ) {
 
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    val authData by vm.authData.collectAsState()
 
     val callback = object: AuthScreenCallback{
-        override fun openMainScreen() {
+        override fun openMainScreen(email: String, password: String) {
+            vm.handleEvent(AuthScreenContract.Event.Login(email, password))
             navController.navigate(AppRouts.MAIN)
-           openMainScreen()
         }
 
         override fun openForgotScreen() {
@@ -80,11 +83,11 @@ fun AuthScreen(
     }
 
     Content(
-        email = email,
-        password = password,
-        onEmailChange = { email = it },
+        email = authData.email,
+        password = authData.password,
+        onEmailChange = { vm.updateEmail(it) },
         callback = callback,
-        onPasswordChange = { password = it }
+        onPasswordChange = { vm.updatePassword(it) }
     )
 }
 
@@ -146,7 +149,7 @@ fun HeadingAndUnderHeadingAuth() {
 private fun AuthContent(
     email: String,
     password: String,
-    openMainScreen: () -> Unit,
+    openMainScreen: (String, String) -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     openForgotScreen: () -> Unit,
@@ -204,7 +207,7 @@ private fun AuthContent(
         CustomButton(
             modifier = Modifier.fillMaxWidth(),
             text = R.string.btn_sign_in,
-            onClick = openMainScreen
+            onClick = { openMainScreen(email, password) }
         )
     }
 }

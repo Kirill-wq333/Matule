@@ -4,8 +4,6 @@ object AppRouts {
     const val MAIN = "main"
     const val AUTH = "auth"
     const val ONBOARDING = "onboarding"
-    const val POPULAR = "popular"
-    const val CATALOG = "catalog"
     const val FAVOURITE = "favourite"
     const val DETAILS = "detail"
     const val CART = "cart"
@@ -16,5 +14,4 @@ object AppRouts {
     const val PROFILE = "profile"
     const val ORDERS = "orders"
     const val NOTIFICATION = "notification"
-    const val ARRIVALS = "arrivals"
 }

@@ -43,6 +43,8 @@ dependencies {
     implementation (libs.androidx.hilt.navigation.compose)
     kapt (libs.androidx.hilt.compiler)
 
+    implementation(libs.kotlinx.serialization.json)
+
     implementation (libs.androidx.lifecycle.viewmodel.ktx)
 
     // Retrofit

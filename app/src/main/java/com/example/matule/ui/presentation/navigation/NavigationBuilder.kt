@@ -4,7 +4,6 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -14,14 +13,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.matule.ui.presentation.approuts.AppRouts
 import com.example.matule.ui.presentation.feature.auth.ui.AuthScreen
-import com.example.matule.ui.presentation.feature.main.MainScreen
+import com.example.matule.ui.presentation.feature.main.ui.MainScreen
 import com.example.matule.ui.presentation.feature.onboarding.ui.OnboardingScreen
 
 @Composable
 fun NavigationBuilder(
     navController: NavHostController,
     paddingValues: PaddingValues,
-    visibleBottomBar: (Boolean) -> Unit
 ) {
     NavHost(
         navController = navController,
@@ -45,7 +43,6 @@ fun NavigationBuilder(
             AuthScreen(
                 navController = navController,
                 openMainScreen = {
-                    visibleBottomBar(true)
                 }
             )
         }
@@ -54,18 +51,6 @@ fun NavigationBuilder(
             OnboardingScreen(
                 navController = navController
             )
-        }
-
-        composable(AppRouts.ARRIVALS) {
-
-        }
-
-        composable(AppRouts.POPULAR) {
-
-        }
-
-        composable(AppRouts.CATALOG) {
-
         }
 
         composable(AppRouts.FAVOURITE) {

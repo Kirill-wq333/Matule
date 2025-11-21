@@ -66,9 +66,13 @@
     <string name="sign_out">Sign Out</string>
 
     <!--  Profile  -->
+    <string name="profile">Profile</string>
     <string name="change_profile_picture">Change Profile Picture</string>
     <string name="name">Name</string>
     <string name="last_name">Last name</string>
+
+    <!--  Notification  -->
+    <string name="notifications">Notifications</string>
 
     <!--  More details  -->
     <string name="email">Email Address</string>
@@ -91,7 +95,6 @@
     <string name="contact_info">Contact Information</string>
     <string name="address">Address</string>
     <string name="open">OPEN</string>
-    <string name="notifications">Notifications</string>
     <string name="view_map">View Map</string>
     <string name="best_seller">BEST SELLER</string>
     <string name="money">$%1$s</string>

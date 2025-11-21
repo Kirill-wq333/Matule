@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.VisualTransformation
@@ -145,6 +146,11 @@ fun TextFieldWithLeadingAndTrailingIcons(
     ) {
         TextField(
             modifier = modifier
+                .shadow(
+                    elevation = 4.dp,
+                    shape = RoundedCornerShape(14.dp),
+                    clip = false
+                )
                 .clip(RoundedCornerShape(14.dp)),
             value = query,
             onValueChange = { onTextChange(it) },
@@ -152,10 +158,10 @@ fun TextFieldWithLeadingAndTrailingIcons(
             textStyle = MatuleTypography.bodyMedium,
             colors = TextFieldDefaults.colors(
                 cursorColor = Colors.text,
-                focusedContainerColor = Colors.background,
-                errorContainerColor = Colors.background,
-                disabledContainerColor = Colors.background,
-                unfocusedContainerColor = Colors.background,
+                focusedContainerColor = Colors.block,
+                errorContainerColor = Colors.block,
+                disabledContainerColor = Colors.block,
+                unfocusedContainerColor = Colors.block,
                 errorTextColor = Colors.red,
                 disabledTextColor = Colors.text,
                 focusedTextColor = Colors.text,
