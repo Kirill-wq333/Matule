@@ -3,14 +3,13 @@ package com.example.matule.ui.presentation.feature.main.ui.screenscomponents
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateValue
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,7 +24,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,11 +37,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -52,7 +49,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.matule.R
@@ -60,17 +56,19 @@ import com.example.matule.ui.presentation.approuts.AppRouts
 import com.example.matule.ui.presentation.shared.buttons.CustomIconButton
 import com.example.matule.ui.presentation.theme.Colors
 import com.example.matule.ui.presentation.theme.MatuleTypography
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
 @Preview
 @Composable
 private fun PreviewContent() {
-   SideMenuScreen()
+   SideMenuScreen(onBack = {})
 }
 
 
 @Composable
 fun SideMenuScreen(
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit,
     navController: NavHostController = rememberNavController()
 ) {
 
@@ -109,14 +107,15 @@ fun SideMenuScreen(
     )
 
     val exit = SideMenuExit(
-        route = navController.popBackStack(),
         label = R.string.sign_out,
-        icon = R.drawable.ic_logout
+        icon = R.drawable.ic_logout,
+        onClick = {
+            onBack()
+        }
     )
 
     var visibleCard by remember { mutableStateOf(false) }
     var visibleCard2 by remember { mutableStateOf(false) }
-
     val offsetX1 by animateDpAsState(
         targetValue = if (visibleCard) 0.dp else (-100).dp,
         animationSpec = tween(durationMillis = 1500, easing = EaseOut)
@@ -128,28 +127,41 @@ fun SideMenuScreen(
     )
 
     LaunchedEffect(Unit) {
-        launch {
-            visibleCard = true
-            visibleCard2 = true
-        }
+        visibleCard = true
+        delay(200)
+        visibleCard2 = true
     }
 
-    Content(
-        photo = "",
-        name = "jdhfkd",
-        lastName = "hdfhdhdhd",
-        visibleCard = visibleCard,
-        visibleCard2 = visibleCard2,
-        offsetX1 = offsetX1,
-        offsetX2 = offsetX2,
-        sideMenu = sideMenu,
-        navController = navController,
-        exit = exit
-    )
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures { change, dragAmount ->
+                    if (dragAmount < -30f) {
+                        onBack()
+                    }
+                }
+            }
+    ) {
+        Content(
+            modifier = modifier,
+            photo = "",
+            name = "jdhfkd",
+            lastName = "hdfhdhdhd",
+            visibleCard = visibleCard,
+            visibleCard2 = visibleCard2,
+            offsetX1 = offsetX1,
+            offsetX2 = offsetX2,
+            sideMenu = sideMenu,
+            navController = navController,
+            exit = exit
+        )
+    }
 }
 
 @Composable
 private fun Content(
+    modifier: Modifier = Modifier,
     visibleCard: Boolean,
     visibleCard2: Boolean,
     offsetX2: Dp,
@@ -162,13 +174,13 @@ private fun Content(
     lastName: String,
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(color = Colors.accent)
     ) {
         AnimatedVisibility(
             visible = visibleCard,
-            enter = fadeIn() + expandHorizontally()
+            enter = fadeIn() + slideInHorizontally(initialOffsetX = { -it })
         ) {
             SideMenuContent(
                 modifier = Modifier
@@ -185,7 +197,7 @@ private fun Content(
         }
         AnimatedVisibility(
             visible = visibleCard2,
-            enter = fadeIn() + expandHorizontally()
+            enter = fadeIn() + slideInHorizontally(initialOffsetX = { it })
         ) { }
         Box(
             modifier = Modifier
@@ -295,7 +307,7 @@ fun Block(
         BlockItem(
             text = exit.label,
             icon = exit.icon,
-            onClick = { exit.route }
+            onClick = { exit.onClick() }
         )
     }
 }

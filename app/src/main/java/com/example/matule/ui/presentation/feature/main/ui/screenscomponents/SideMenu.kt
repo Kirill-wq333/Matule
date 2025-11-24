@@ -8,7 +8,7 @@ data class SideMenu(
 )
 
 data class SideMenuExit(
-    val route: Boolean,
     val icon: Int,
     val label: Int,
+    val onClick: () -> Unit
 )

@@ -48,12 +48,12 @@ private fun PreviewCard() {
             CardItem(
                 cardName = "Nike Air Max",
                 cardImage = "https://cdn.imgbin.com/21/14/17/imgbin-skate-shoe-sneakers-nike-converse-nike-wgVVd0RPVGxgPcrtg39U9Kajd.jpg",
-                money = 773
+                money = 773.0
             )
             CardItem(
                 cardName = "Nike Air Max",
                 cardImage = "https://cdn.imgbin.com/21/14/17/imgbin-skate-shoe-sneakers-nike-converse-nike-wgVVd0RPVGxgPcrtg39U9Kajd.jpg",
-                money = 773
+                money = 773.0
             )
         }
         Row(
@@ -65,12 +65,12 @@ private fun PreviewCard() {
             CardItem(
                 cardName = "Nike Air Max",
                 cardImage = "https://cdn.imgbin.com/21/14/17/imgbin-skate-shoe-sneakers-nike-converse-nike-wgVVd0RPVGxgPcrtg39U9Kajd.jpg",
-                money = 773
+                money = 773.0
             )
             CardItem(
                 cardName = "Nike Air Max",
                 cardImage = "https://cdn.imgbin.com/21/14/17/imgbin-skate-shoe-sneakers-nike-converse-nike-wgVVd0RPVGxgPcrtg39U9Kajd.jpg",
-                money = 773
+                money = 773.0
             )
         }
     }
@@ -81,14 +81,15 @@ private fun PreviewCard() {
 fun CardItem(
     cardName: String,
     cardImage: String,
-    money: Int,
-    addedInCart: (Int) -> Unit = {},
+    money: Double,
+    addedInCart: () -> Unit = {},
     openCartScreen: () -> Unit = {},
+    cartIcon: Boolean = false,
+    addedInFavorite: () -> Unit = {},
+    liked: Boolean = false,
     openDetailScreen: () -> Unit = {}
 ) {
 
-    var liked by remember { mutableStateOf(false) }
-    var cartIcon by remember { mutableStateOf(false) }
 
     val icon = if (liked) R.drawable.ic_favorite_fill else R.drawable.ic_favorite
     val colorIcon = if (liked) Colors.red else Colors.text
@@ -113,7 +114,7 @@ fun CardItem(
             backColor = Colors.background,
             modifier = Modifier.padding(9.dp),
             tint = colorIcon,
-            onClick = { liked = !liked }
+            onClick = addedInFavorite
         )
 
         Content(
@@ -132,9 +133,9 @@ fun CardItem(
 fun Content(
     cardName: String,
     cardImage: String,
-    money: Int,
+    money: Double,
     cartIcon: Boolean,
-    addedInCart: (Int) -> Unit,
+    addedInCart: () -> Unit,
     openCartScreen: () -> Unit,
     openDetailScreen: () -> Unit
 ) {
@@ -170,8 +171,7 @@ fun Content(
                 CardIconButton(
                     icon = R.drawable.ic_add,
                     onClick = {
-                        addedInCart
-                        cartIcon
+                        addedInCart()
                     },
                     modifier = Modifier
                         .padding(start = 7.dp, end = 6.dp, top = 8.86.dp, bottom = 9.82.dp)

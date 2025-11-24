@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,19 +67,35 @@ fun AuthScreen(
 ) {
 
     val authData by vm.authData.collectAsState()
+    val effects = vm.effect.collectAsState(initial = null)
 
     val callback = object: AuthScreenCallback{
         override fun openMainScreen(email: String, password: String) {
             vm.handleEvent(AuthScreenContract.Event.Login(email, password))
-            navController.navigate(AppRouts.MAIN)
         }
 
         override fun openForgotScreen() {
-            navController.navigate(AppRouts.FORGOT_PASSWORD)
         }
 
         override fun openRegistrationScreen() {
-            navController.navigate(AppRouts.REGISTER_ACCOUNT)
+        }
+    }
+
+    LaunchedEffect(effects.value) {
+        effects.value?.let { effect ->
+            when (effect) {
+                is AuthScreenContract.Effect.NavigateToMain -> {
+                    navController.navigate(AppRouts.MAIN) {
+                        popUpTo(AppRouts.AUTH) { inclusive = true }
+                    }
+                }
+                is AuthScreenContract.Effect.NavigateToLogin -> {
+                    navController.navigate(AppRouts.AUTH) {
+                        popUpTo(AppRouts.MAIN) { inclusive = true }
+                    }
+                }
+                is AuthScreenContract.Effect.ShowError -> {}
+            }
         }
     }
 

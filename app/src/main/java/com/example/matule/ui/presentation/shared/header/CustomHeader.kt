@@ -82,6 +82,7 @@ fun CustomHeaderMain(
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.highlight_05),
             contentDescription = null,
+            tint = Colors.text,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .offset(x = -(65).dp)
@@ -120,8 +121,8 @@ fun CustomHeader(
 ) {
     Box(
         modifier = Modifier
+            .padding(top = 20.dp)
             .fillMaxWidth()
-            .padding(horizontal = 20.dp)
     ) {
         CustomIconButton(
             icon = R.drawable.ic_back,

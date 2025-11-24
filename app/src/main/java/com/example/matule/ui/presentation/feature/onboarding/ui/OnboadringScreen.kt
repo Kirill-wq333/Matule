@@ -5,7 +5,6 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,29 +15,29 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.LinearGradient
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.matule.R
 import com.example.matule.ui.presentation.approuts.AppRouts
 import com.example.matule.ui.presentation.feature.onboarding.Onboarding
+import com.example.matule.ui.presentation.feature.onboarding.viewmodel.OnboardingViewModel
 import com.example.matule.ui.presentation.mock.Mock
 import com.example.matule.ui.presentation.shared.buttons.CustomButton
 import com.example.matule.ui.presentation.theme.Colors
@@ -53,11 +52,31 @@ private interface OnboardingScreenCallback{
 fun OnboardingScreen(
     navController: NavHostController
 ) {
+    val vm: OnboardingViewModel = hiltViewModel()
     val onboarding = Mock.demoOnboarding
 
     val callback = object : OnboardingScreenCallback{
         override fun openAuthScreen() {
+            vm.completeOnboarding()
             navController.navigate(AppRouts.AUTH)
+        }
+    }
+
+
+    LaunchedEffect(vm) {
+        vm.onOnboardingCompleted.collect { completed ->
+            if (completed) {
+                val token = vm.getToken()
+                if (token != null) {
+                    navController.navigate(AppRouts.MAIN) {
+                        popUpTo(AppRouts.ONBOARDING) { inclusive = true }
+                    }
+                } else {
+                    navController.navigate(AppRouts.AUTH) {
+                        popUpTo(AppRouts.ONBOARDING) { inclusive = true }
+                    }
+                }
+            }
         }
     }
 
@@ -114,11 +133,6 @@ private fun Content(
 ) {
 
 
-    val spacerCircle =
-        if (onboarding.visibleDownHeadingAndUnderHeading) 95.dp
-        else 136.dp
-
-
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceBetween,
@@ -128,7 +142,6 @@ private fun Content(
             onboarding = onboarding,
             activeCircle = activeCircle
         )
-//        Spacer(modifier = Modifier.height(spacerCircle))
         if (onboarding.visibleDownHeadingAndUnderHeading) {
             val isLastScreen = activeCircle == 2
 
