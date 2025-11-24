@@ -1,8 +1,12 @@
 package com.example.data.ui.presentation.feature.auth
 
 import android.content.Context
+import android.content.SharedPreferences
 import com.example.data.ui.presentation.feature.auth.datasource.AuthApiService
+import com.example.data.ui.presentation.feature.auth.dto.request.ForgotPasswordRequest
 import com.example.data.ui.presentation.feature.auth.dto.request.LoginRequest
+import com.example.data.ui.presentation.feature.auth.dto.request.RegisterRequest
+import com.example.data.ui.presentation.storage.tokenprovider.TokenProvider
 import com.example.domain.ui.presentation.feature.auth.model.User
 import com.example.domain.ui.presentation.feature.auth.repository.AuthRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -10,51 +14,128 @@ import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
     private val apiService: AuthApiService,
+    private val tokenProvider: TokenProvider,
+    private val sharedPreferences: SharedPreferences,
     @ApplicationContext private val context: Context
 ) : AuthRepository {
 
-    private val sharedPreferences by lazy {
-        context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
-    }
-
     private companion object {
-        const val AUTH_TOKEN_KEY = "auth_token"
+        const val USER_ID_KEY = "user_id"
+        const val USER_EMAIL_KEY = "user_email"
+        const val USER_NAME_KEY = "user_name"
+        const val USER_FIRST_NAME_KEY = "user_first_name"
+        const val USER_LAST_NAME_KEY = "user_last_name"
+        const val USER_PHONE_KEY = "user_phone"
     }
 
     override suspend fun login(email: String, password: String): Result<User> {
         return try {
             val response = apiService.login(LoginRequest(email, password))
-            if (response.success && response.user != null && response.token != null) {
-                saveToken(response.token)
+
+
+            if (response.success == true && response.user != null && response.token != null) {
+                tokenProvider.saveToken(response.token)
+
+                saveUser(response.user.toUser())
+
                 Result.success(response.user.toUser())
             } else {
-                Result.failure(Exception(response.error ?: "Ошибка авторизации"))
+                val errorMessage = response.error ?: "Неизвестная ошибка авторизации"
+                Result.failure(Exception(errorMessage))
             }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Result.failure(Exception("Сетевая ошибка: ${e.message}"))
+        }
+    }
+
+    override suspend fun register(
+        email: String,
+        password: String,
+        firstName: String,
+        lastName: String?,
+        phone: String?
+    ): Result<User> {
+
+        return try {
+            val response = apiService.register(RegisterRequest(email, password, firstName, lastName, phone))
+
+            if (response.success == true && response.user != null && response.token != null) {
+                tokenProvider.saveToken(response.token)
+                saveUser(response.user.toUser())
+
+                Result.success(response.user.toUser())
+            } else {
+                val errorMessage = when {
+                    else -> "Неизвестная ошибка регистрации"
+                }
+                Result.failure(Exception(errorMessage))
+            }
+
+        } catch (e: Exception) {
+            Result.failure(Exception("Сетевая ошибка: ${e.message}"))
+        }
+    }
+
+    override suspend fun forgotPassword(email: String): Result<Boolean> {
+        return try {
+            val response = apiService.forgotPassword(ForgotPasswordRequest(email))
+            Result.success(response.success)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-
-    override suspend fun logout() {
-        with(sharedPreferences.edit()) {
-            remove(AUTH_TOKEN_KEY)
-            apply()
-        }
-    }
-
     override suspend fun saveToken(token: String) {
-        with(sharedPreferences.edit()) {
-            putString(AUTH_TOKEN_KEY, token)
-            apply()
-        }
+        tokenProvider.saveToken(token)
     }
 
     override suspend fun getToken(): String? {
-        return sharedPreferences.getString(AUTH_TOKEN_KEY, null)
+        return tokenProvider.getToken()
     }
 
     override suspend fun getCurrentUser(): User? {
-        return null
+        val id = sharedPreferences.getLong(USER_ID_KEY, -1L)
+        val email = sharedPreferences.getString(USER_EMAIL_KEY, null)
+
+        if (id == -1L || email == null) {
+            return null
+        }
+
+        return User(
+            id = id,
+            email = email,
+            name = sharedPreferences.getString(USER_NAME_KEY, "") ?: "",
+            firstName = sharedPreferences.getString(USER_FIRST_NAME_KEY, null),
+            lastName = sharedPreferences.getString(USER_LAST_NAME_KEY, null),
+            phone = sharedPreferences.getString(USER_PHONE_KEY, null)
+        )
+    }
+
+    private suspend fun saveUser(user: User) {
+        with(sharedPreferences.edit()) {
+            putLong(USER_ID_KEY, user.id)
+            putString(USER_EMAIL_KEY, user.email)
+            putString(USER_NAME_KEY, user.name)
+
+            user.firstName?.let { putString(USER_FIRST_NAME_KEY, it) }
+            user.lastName?.let { putString(USER_LAST_NAME_KEY, it) }
+            user.phone?.let { putString(USER_PHONE_KEY, it) }
+
+            apply()
+        }
+    }
+
+    private fun clearUserData() {
+        with(sharedPreferences.edit()) {
+            remove(USER_ID_KEY)
+            remove(USER_EMAIL_KEY)
+            remove(USER_NAME_KEY)
+            remove(USER_FIRST_NAME_KEY)
+            remove(USER_LAST_NAME_KEY)
+            remove(USER_PHONE_KEY)
+            apply()
+        }
     }
 }

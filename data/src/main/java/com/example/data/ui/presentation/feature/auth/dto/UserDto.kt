@@ -4,23 +4,20 @@ import com.example.domain.ui.presentation.feature.auth.model.User
 import com.google.gson.annotations.SerializedName
 
 data class UserDto(
-    @SerializedName("id") val id: Int,
+    @SerializedName("id") val id: Long,
     @SerializedName("email") val email: String,
-    @SerializedName("firstName") val firstName: String,
-    @SerializedName("lastName") val lastName: String,
-    @SerializedName("phone") val phone: String,
-    @SerializedName("country") val country: String,
-    @SerializedName("avatar") val avatar: String,
-    @SerializedName("createdAt") val createdAt: String
+    @SerializedName("firstName") val firstName: String? = null,
+    @SerializedName("lastName") val lastName: String? = null,
+    @SerializedName("phone") val phone: String? = null,
+    @SerializedName("country") val country: String? = null,
+    @SerializedName("avatar") val avatar: String? = null,
+    @SerializedName("createdAt") val createdAt: String? = null
 ) {
     fun toUser(): User = User(
         id = id,
         email = email,
         firstName = firstName,
         lastName = lastName,
-        phone = phone,
-        country = country,
-        avatar = avatar,
-        createdAt = createdAt
+        name = "$firstName $lastName"
     )
 }
