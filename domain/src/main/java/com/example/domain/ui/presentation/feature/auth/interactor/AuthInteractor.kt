@@ -10,12 +10,18 @@ class AuthInteractor(
         return authRepository.login(email, password)
     }
 
-    suspend fun logout() {
-        authRepository.logout()
+    suspend fun register(
+        email: String,
+        password: String,
+        firstName: String,
+        lastName: String? = null,
+        phone: String? = null
+    ): Result<User> {
+        return authRepository.register(email, password, firstName, lastName, phone)
     }
 
-    suspend fun saveToken(token: String) {
-        authRepository.saveToken(token)
+    suspend fun forgotPassword(email: String): Result<Boolean> {
+        return authRepository.forgotPassword(email)
     }
 
     suspend fun getToken(): String? {

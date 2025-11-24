@@ -4,12 +4,10 @@ import com.google.gson.annotations.SerializedName
 
 
 data class User(
-    val id: Int,
+    val id: Long,
     val email: String,
-    val firstName: String,
-    val lastName: String,
-    val phone: String,
-    val country: String,
-    val avatar: String,
-    val createdAt: String
+    val name: String,
+    val firstName: String? = null,
+    val lastName: String? = null,
+    val phone: String? = null
 )
