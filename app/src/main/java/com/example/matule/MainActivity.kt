@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.matule.ui.manage.AppStartManager
 import com.example.matule.ui.presentation.NavigationHost
 import com.example.matule.ui.presentation.approuts.AppRouts
+import com.example.matule.ui.presentation.shared.screen.MainLoadingScreen
 import com.example.matule.ui.presentation.theme.Colors
 import com.example.matule.ui.presentation.theme.MatuleTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -43,11 +44,7 @@ class MainActivity : ComponentActivity() {
 
             MatuleTheme {
                 if (isLoading.value) {
-                    Box(
-                        Modifier.fillMaxSize().background(Colors.background),
-                        contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
+                    MainLoadingScreen()
                 } else {
                     val navController = rememberNavController()
                     NavigationHost(

@@ -107,15 +107,6 @@ fun CardItem(
                 shape = RoundedCornerShape(16.dp)
             )
     ) {
-        CustomIconButton(
-            icon = icon,
-            padding = 6.dp,
-            size = 16.dp,
-            backColor = Colors.background,
-            modifier = Modifier.padding(9.dp),
-            tint = colorIcon,
-            onClick = addedInFavorite
-        )
 
         Content(
             cardName = cardName,
@@ -125,6 +116,15 @@ fun CardItem(
             addedInCart = addedInCart,
             openCartScreen = openCartScreen,
             openDetailScreen = openDetailScreen
+        )
+        CustomIconButton(
+            icon = icon,
+            padding = 6.dp,
+            size = 16.dp,
+            backColor = Colors.background,
+            modifier = Modifier.padding(9.dp),
+            tint = colorIcon,
+            onClick = addedInFavorite
         )
     }
 }

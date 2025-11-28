@@ -3,10 +3,11 @@ package com.example.matule.ui.presentation.feature.main.viewmodel
 import androidx.lifecycle.viewModelScope
 import com.example.domain.ui.presentation.feature.auth.interactor.AuthInteractor
 import com.example.domain.ui.presentation.feature.cart.interactor.CartInteractor
+import com.example.domain.ui.presentation.feature.favorite.interactor.FavoriteInteractor
 import com.example.domain.ui.presentation.feature.main.interactor.MainInteractor
-import com.example.domain.ui.presentation.feature.main.model.Category
-import com.example.domain.ui.presentation.feature.main.model.FavoriteResult
-import com.example.domain.ui.presentation.feature.main.model.Product
+import com.example.domain.ui.presentation.feature.favorite.model.FavoriteResult
+import com.example.domain.ui.presentation.feature.popular.interactor.PopularInteractor
+import com.example.domain.ui.presentation.feature.popular.model.Product
 import com.example.matule.ui.core.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -17,7 +18,9 @@ import kotlin.math.max
 class MainViewModel @Inject constructor(
     private val mainInteractor: MainInteractor,
     private val cartInteractor: CartInteractor,
-    private val authInteractor: AuthInteractor
+    private val authInteractor: AuthInteractor,
+    private val popularInteractor: PopularInteractor,
+    private val favoriteInteractor: FavoriteInteractor,
 ) : BaseViewModel<MainScreenContract.Event, MainScreenContract.State, MainScreenContract.Effect>() {
 
     override fun setInitialState(): MainScreenContract.State = MainScreenContract.State.Loading
@@ -31,9 +34,14 @@ class MainViewModel @Inject constructor(
         is MainScreenContract.Event.AddToCart -> addToCart(event.productId,event.quantity)
     }
 
-
-
     init {
+
+        viewModelScope.launch {
+            favoriteInteractor.favoriteUpdates.collect { (productId, isFavorite) ->
+                updateProductFavoriteStatus(productId, isFavorite)
+            }
+        }
+
         checkAuthAndLoadContent()
     }
 
@@ -42,7 +50,6 @@ class MainViewModel @Inject constructor(
             val isLoggedIn = authInteractor.isUserLoggedIn()
 
             if (isLoggedIn) {
-                val cartItems = cartInteractor.getLocalCartItems()
                 loadHomeContent()
             }
         }
@@ -54,13 +61,15 @@ class MainViewModel @Inject constructor(
             setState ( MainScreenContract.State.Loading )
 
             val result = mainInteractor.loadHomeContent()
-
             if (result.isSuccess) {
                 val content = result.getOrNull()!!
+
+                val cart = cartInteractor.getLocalCartItems()
 
                 setState (
                     MainScreenContract.State.Loaded(
                         categories = content.categories,
+                        cartItems = cart,
                         popularProducts = content.popularProducts,
                         promotions = content.promotions
                     )
@@ -78,11 +87,10 @@ class MainViewModel @Inject constructor(
 
             updateProductFavoriteStatusOptimistic(productId, !currentlyFavorite)
 
-            val result = mainInteractor.toggleFavorite(productId, currentlyFavorite)
+            val result = favoriteInteractor.toggleFavorite(productId, currentlyFavorite)
 
             if (result.isSuccess) {
-                val favoriteResult = result.getOrNull()!!
-                when (favoriteResult) {
+                when (val favoriteResult = result.getOrNull()!!) {
                     is FavoriteResult.Success -> {
                         setEffect { MainScreenContract.Effect.FavoriteStatusUpdated(favoriteResult) }
                         updateProductFavoriteStatus(favoriteResult.productId, favoriteResult.isFavorite)
@@ -103,7 +111,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             setState ( MainScreenContract.State.Loading )
 
-            val result = mainInteractor.loadProductsByCategory(category)
+            val result = popularInteractor.loadProductsByCategory(category)
 
             if (result.isSuccess) {
                 val products = result.getOrNull()!!
@@ -138,7 +146,7 @@ class MainViewModel @Inject constructor(
     }
 
     private fun refreshContent() {
-        loadHomeContent()
+        setState(MainScreenContract.State.Loading)
     }
 
     private fun updateProductFavoriteStatusOptimistic(productId: Long, isFavorite: Boolean) {

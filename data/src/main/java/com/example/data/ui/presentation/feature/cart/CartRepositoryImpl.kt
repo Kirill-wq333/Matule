@@ -10,12 +10,12 @@ import com.example.domain.ui.presentation.feature.cart.model.CartItem
 import com.example.domain.ui.presentation.feature.cart.model.CartResult
 import com.example.domain.ui.presentation.feature.cart.model.CartState
 import com.example.domain.ui.presentation.feature.cart.repository.CartRepository
-import com.example.domain.ui.presentation.feature.main.repository.MainRepository
+import com.example.domain.ui.presentation.feature.popular.repository.PopularRepository
 import javax.inject.Inject
 
 class CartRepositoryImpl @Inject constructor(
+    private val popularRepository: PopularRepository,
     private val apiService: CartApiService,
-    private val mainRepository: MainRepository,
     private val tokenProvider: TokenProvider,
     private val appPreferences: AppPreferencesImpl
 ) : CartRepository {
@@ -79,7 +79,7 @@ class CartRepositoryImpl @Inject constructor(
         return cartItems.map { cartItem ->
             if (cartItem.product == null) {
                 try {
-                    val productResult = mainRepository.getProductById(cartItem.productId)
+                    val productResult = popularRepository.getProductById(cartItem.productId)
                     if (productResult.isSuccess) {
                         cartItem.copy(product = productResult.getOrNull())
                     } else {

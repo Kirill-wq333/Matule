@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -52,9 +51,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import com.example.domain.ui.presentation.feature.main.model.Category
-import com.example.domain.ui.presentation.feature.main.model.Product
-import com.example.domain.ui.presentation.feature.main.model.Promotion
+import com.example.domain.ui.presentation.feature.catalog.model.Category
+import com.example.domain.ui.presentation.feature.popular.model.Product
+import com.example.domain.ui.presentation.feature.arrivals.model.Promotion
 import com.example.matule.R
 import com.example.matule.ui.presentation.approuts.AppRouts
 import com.example.matule.ui.presentation.feature.main.viewmodel.MainScreenContract
@@ -63,6 +62,7 @@ import com.example.matule.ui.presentation.shared.buttons.CustomIconButton
 import com.example.matule.ui.presentation.shared.header.CustomHeader
 import com.example.matule.ui.presentation.shared.header.CustomHeaderMain
 import com.example.matule.ui.presentation.shared.main.CardItem
+import com.example.matule.ui.presentation.shared.screen.MainLoadingScreen
 import com.example.matule.ui.presentation.shared.text.TextFieldWithLeadingAndTrailingIcons
 import com.example.matule.ui.presentation.theme.Colors
 import com.example.matule.ui.presentation.theme.MatuleTypography
@@ -113,7 +113,7 @@ fun MainScreen(
         }
 
         override fun openSideMenu() {
-            navController.navigate(AppRouts.SIDEMENU)
+            navController.navigate(AppRouts.SIDE_MENU)
         }
     }
     when (val currentState = state) {
@@ -136,14 +136,7 @@ fun MainScreen(
         }
 
         is MainScreenContract.State.Loading -> {
-            Box(
-                modifier = Modifier
-                    .background(Colors.background)
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+            MainLoadingScreen()
         }
 
         else -> {}
@@ -203,8 +196,8 @@ private fun Content(
     ) {
         AnimatedVisibility(
             visible = catalogScreen,
-            enter = slideInHorizontally(animationSpec = tween(700)) { -it } + fadeIn(animationSpec = tween(700)),
-            exit = slideOutHorizontally(animationSpec = tween(700)) { -it } + fadeOut(animationSpec = tween(700))
+            enter = slideInHorizontally(animationSpec = tween(1700)) { it } + fadeIn(animationSpec = tween(700)),
+            exit = slideOutHorizontally(animationSpec = tween(700)) { it } + fadeOut(animationSpec = tween(700))
         ) {
             CustomHeader(
                 text = R.string.category,
@@ -217,15 +210,15 @@ private fun Content(
 
         AnimatedVisibility(
             visible = showSearchHeader && !catalogScreen,
-            enter = slideInHorizontally(animationSpec = tween(700)) { -it } + fadeIn(animationSpec = tween(700)),
-            exit = slideOutHorizontally(animationSpec = tween(700)) { -it } + fadeOut(animationSpec = tween(700))
+            enter = slideInHorizontally(animationSpec = tween(1700)) { it } + fadeIn(animationSpec = tween(700)),
+            exit = slideOutHorizontally(animationSpec = tween(700)) { it } + fadeOut(animationSpec = tween(700))
         ) {
             Column {
                 CustomHeader(
                     text = R.string.search,
                     onBack = {
                         searchScreen = false
-                        onSearchChange("")
+                        onSearchChange(search)
                     },
                     visibleNameScreen = true
                 )
@@ -235,13 +228,13 @@ private fun Content(
 
         AnimatedVisibility(
             visible = !catalogScreen && !showSearchHeader,
-            enter = slideInHorizontally(animationSpec = tween(700)) { -it } + fadeIn(animationSpec = tween(700)),
+            enter = slideInHorizontally(animationSpec = tween(1700)) { -it } + fadeIn(animationSpec = tween(700)),
             exit = slideOutHorizontally(animationSpec = tween(700)) { -it } + fadeOut(animationSpec = tween(700))
         ) {
             Column {
                 CustomHeaderMain(
                     text = R.string.main,
-                    cardItem = state.popularProducts.size,
+                    cardItem = state.cartItems.size,
                     openSideMenu = openSideMenu,
                     openCartScreen = openCartScreen
                 )
@@ -251,7 +244,7 @@ private fun Content(
 
         AnimatedVisibility(
             visible = !catalogScreen,
-            enter = slideInHorizontally(animationSpec = tween(700)) { -it } + fadeIn(animationSpec = tween(700)),
+            enter = slideInHorizontally(animationSpec = tween(1700)) { -it } + fadeIn(animationSpec = tween(700)),
             exit = slideOutHorizontally(animationSpec = tween(700)) { -it } + fadeOut(animationSpec = tween(700))
         ) {
             SearchAndFeature(
@@ -372,7 +365,7 @@ private fun PopularCard(
     openCartScreen: () -> Unit = {},
     openDetailScreen: (Long) -> Unit = {}
 ) {
-    val randomProducts = popularProducts.take(2)
+    val products = popularProducts.take(2)
 
     Card(
         text = R.string.popular,
@@ -382,7 +375,7 @@ private fun PopularCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                randomProducts.forEach { product ->
+                products.forEach { product ->
 
                     val isInCart = cartItems.contains(product.id)
 

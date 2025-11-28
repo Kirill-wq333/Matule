@@ -1,10 +1,10 @@
 package com.example.matule.ui.presentation.feature.main.viewmodel
 
 import com.example.domain.ui.presentation.feature.cart.model.CartState
-import com.example.domain.ui.presentation.feature.main.model.Category
-import com.example.domain.ui.presentation.feature.main.model.FavoriteResult
-import com.example.domain.ui.presentation.feature.main.model.Product
-import com.example.domain.ui.presentation.feature.main.model.Promotion
+import com.example.domain.ui.presentation.feature.catalog.model.Category
+import com.example.domain.ui.presentation.feature.popular.model.Product
+import com.example.domain.ui.presentation.feature.arrivals.model.Promotion
+import com.example.domain.ui.presentation.feature.favorite.model.FavoriteResult
 import com.example.matule.ui.core.viewmodel.ViewEffect
 import com.example.matule.ui.core.viewmodel.ViewEvent
 import com.example.matule.ui.core.viewmodel.ViewState
@@ -27,8 +27,6 @@ object MainScreenContract {
             val popularProducts: List<Product> = emptyList(),
             val promotions: List<Promotion> = emptyList(),
             val selectedCategoryId: Long? = null,
-            val isLoading: Boolean = false,
-            val error: String? = null,
             val cartState: CartState = CartState(),
             val cartItems: Set<Long> = emptySet()
         ) : State

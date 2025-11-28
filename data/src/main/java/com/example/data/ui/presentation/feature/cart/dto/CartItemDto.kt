@@ -1,7 +1,7 @@
 package com.example.data.ui.presentation.feature.cart.dto
 
-import com.example.data.ui.presentation.feature.main.dto.ProductDto
-import com.example.data.ui.presentation.feature.main.dto.ProductDto.Companion.toProductDto
+import com.example.data.ui.presentation.feature.popular.dto.ProductDto
+import com.example.data.ui.presentation.feature.popular.dto.ProductDto.Companion.toProductDto
 import com.example.domain.ui.presentation.feature.cart.model.CartItem
 import com.google.gson.annotations.SerializedName
 

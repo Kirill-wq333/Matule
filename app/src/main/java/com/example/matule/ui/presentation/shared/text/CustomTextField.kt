@@ -26,7 +26,7 @@ import com.example.matule.ui.presentation.theme.MatuleTypography
 @Composable
 fun CustomTextField(
     query: String,
-    textError: Int,
+    textError: Int? = null,
     label: Int,
     onTextChange: (String) -> Unit,
     isError: Boolean = false,
@@ -55,7 +55,7 @@ fun CustomTextField(
             visualTransformation = visualTransformation,
             errorText = {
                 Text(
-                    text = stringResource(textError),
+                    text = stringResource(textError!!),
                     color = Colors.red,
                     style = MatuleTypography.bodySmall
                 )
@@ -101,11 +101,13 @@ fun TextFieldWithTrailingIcon(
                 focusedTextColor = Colors.text,
                 unfocusedTextColor = Colors.hint,
                 unfocusedTrailingIconColor = Colors.hint,
+                errorTrailingIconColor = Colors.hint,
                 focusedTrailingIconColor = Colors.text,
                 disabledTrailingIconColor = Colors.hint,
                 disabledLeadingIconColor = Colors.hint,
                 focusedLeadingIconColor = Colors.hint,
                 unfocusedLeadingIconColor = Colors.hint,
+                errorLeadingIconColor = Colors.hint,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent,
@@ -194,3 +196,4 @@ fun TextFieldWithLeadingAndTrailingIcons(
         )
     }
 }
+

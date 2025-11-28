@@ -103,7 +103,7 @@ class AppPreferencesImpl @Inject constructor(
         }
     }
 
-    suspend fun clearUserData() {
+    suspend fun clearAllUserData() {
         dataStore.edit { preferences ->
             preferences[IS_LOGGED_IN] = false
             preferences.remove(USER_TOKEN)

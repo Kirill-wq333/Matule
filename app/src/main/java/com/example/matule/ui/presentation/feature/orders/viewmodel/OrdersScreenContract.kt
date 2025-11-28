@@ -1,0 +1,4 @@
+package com.example.matule.ui.presentation.feature.orders.viewmodel
+
+object OrdersScreenContract {
+}

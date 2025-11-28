@@ -1,6 +1,5 @@
 package com.example.domain.ui.presentation.feature.auth.model
 
-import com.google.gson.annotations.SerializedName
 
 
 data class User(

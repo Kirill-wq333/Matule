@@ -50,9 +50,9 @@ private interface OnboardingScreenCallback{
 
 @Composable
 fun OnboardingScreen(
+    vm: OnboardingViewModel,
     navController: NavHostController
 ) {
-    val vm: OnboardingViewModel = hiltViewModel()
     val onboarding = Mock.demoOnboarding
 
     val callback = object : OnboardingScreenCallback{

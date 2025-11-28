@@ -22,7 +22,7 @@ class OnboardingViewModel @Inject constructor(
     fun completeOnboarding() {
         viewModelScope.launch {
             appPreferences.setOnboardingCompleted(true)
-            val savedPrefs = appPreferences.getAppPreferences()
+            appPreferences.getAppPreferences()
             _onOnboardingCompleted.emit(true)
         }
     }

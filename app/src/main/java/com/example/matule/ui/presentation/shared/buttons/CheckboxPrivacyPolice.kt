@@ -3,6 +3,7 @@ package com.example.matule.ui.presentation.shared.buttons
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,7 +19,8 @@ import com.example.matule.ui.presentation.theme.Colors
 
 @Composable
 fun CheckboxPrivacyPolice(
-    isSelected: Boolean
+    isSelected: Boolean,
+    onClick: () -> Unit
 ){
     val backColor = if (isSelected) Colors.accent else Colors.background
 
@@ -27,7 +29,9 @@ fun CheckboxPrivacyPolice(
         animationSpec = tween(700)
     )
     Box(
-        modifier = Modifier.background(color = colorState, shape = RoundedCornerShape(6.dp))
+        modifier = Modifier
+            .clickable(onClick = onClick)
+            .background(color = colorState, shape = RoundedCornerShape(6.dp))
     ) {
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.ic_policy_check),

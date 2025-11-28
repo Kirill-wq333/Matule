@@ -18,7 +18,7 @@ class AuthScreenViewModel @Inject constructor(
     private val _authData = MutableStateFlow(AuthData())
     val authData = _authData.asStateFlow()
 
-    override fun setInitialState(): AuthScreenContract.State = AuthScreenContract.State.Idle
+    override fun setInitialState(): AuthScreenContract.State = AuthScreenContract.State.Auth
 
     override fun handleEvent(event: AuthScreenContract.Event) = when (event) {
         is AuthScreenContract.Event.Login -> login(event.email, event.password)
@@ -27,40 +27,31 @@ class AuthScreenViewModel @Inject constructor(
     }
 
     init {
-        println("🔄 AuthScreenViewModel initialized")
         checkExistingToken()
     }
 
     private fun checkExistingToken() {
         viewModelScope.launch {
-            val existingToken = authInteractor.getToken()
-            println("🔍 Existing token on app start: $existingToken")
+            authInteractor.getToken()
         }
     }
 
     private fun login(email: String, password: String) {
         viewModelScope.launch {
-            println("🔄 ViewModel.login() called")
-            setState(AuthScreenContract.State.Loading)
 
             val result = authInteractor.login(email, password)
 
             when {
                 result.isSuccess -> {
                     val user = result.getOrNull()!!
-                    println("✅ Login successful in ViewModel")
 
-                    // Токен уже сохранен в interactor, просто проверяем
-                    val savedToken = tokenProvider.getToken() // Добавь этот метод в interactor если нужно
-                    println("🔍 User logged in: ${user.name}, email: ${user.email}")
+                    tokenProvider.getToken()
 
-                    println("🎉 SUCCESS: User authenticated!")
                     setState(AuthScreenContract.State.Success(user))
                     setEffect { AuthScreenContract.Effect.NavigateToMain }
                 }
                 result.isFailure -> {
                     val error = result.exceptionOrNull()!!
-                    println("❌ Login failed in ViewModel: ${error.message}")
                     setState(AuthScreenContract.State.Error(error.message ?: "Ошибка входа"))
                 }
             }
@@ -77,26 +68,24 @@ class AuthScreenViewModel @Inject constructor(
 
     private fun checkAuthStatus() {
         viewModelScope.launch {
-            setState ( AuthScreenContract.State.Loading )
 
             val isLoggedIn = authInteractor.isUserLoggedIn()
             if (isLoggedIn) {
                 val user = authInteractor.getCurrentUser()
                 if (user != null) {
                     setState ( AuthScreenContract.State.Success(user) )
-                    setEffect { AuthScreenContract.Effect.NavigateToMain }
                 } else {
-                    setState ( AuthScreenContract.State.Idle )
+                    setState ( AuthScreenContract.State.Auth )
                 }
             } else {
-                setState ( AuthScreenContract.State.Idle )
+                setState ( AuthScreenContract.State.Auth )
             }
         }
     }
 
     private fun clearError() {
         _authData.value = _authData.value.copy(errorMessage = null)
-        setState ( AuthScreenContract.State.Idle )
+        setState ( AuthScreenContract.State.Auth )
     }
 
     data class AuthData(

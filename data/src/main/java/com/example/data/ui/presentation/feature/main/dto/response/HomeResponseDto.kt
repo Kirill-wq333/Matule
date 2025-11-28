@@ -1,11 +1,11 @@
 package com.example.data.ui.presentation.feature.main.dto.response
 
-import com.example.data.ui.presentation.feature.main.dto.CategoryDto
-import com.example.data.ui.presentation.feature.main.dto.CategoryDto.Companion.toCategory
-import com.example.data.ui.presentation.feature.main.dto.ProductDto
-import com.example.data.ui.presentation.feature.main.dto.ProductDto.Companion.toProductDto
-import com.example.data.ui.presentation.feature.main.dto.PromotionDto
-import com.example.data.ui.presentation.feature.main.dto.PromotionDto.Companion.toPromotion
+import com.example.data.ui.presentation.feature.catalog.dto.CategoryDto
+import com.example.data.ui.presentation.feature.catalog.dto.CategoryDto.Companion.toCategory
+import com.example.data.ui.presentation.feature.popular.dto.ProductDto
+import com.example.data.ui.presentation.feature.popular.dto.ProductDto.Companion.toProductDto
+import com.example.data.ui.presentation.feature.arrivals.dto.PromotionDto
+import com.example.data.ui.presentation.feature.arrivals.dto.PromotionDto.Companion.toPromotion
 import com.example.domain.ui.presentation.feature.main.model.HomeContent
 
 data class MainResponseDto(

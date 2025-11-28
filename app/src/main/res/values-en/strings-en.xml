@@ -6,8 +6,13 @@
     <string name="auth_under_heading">Fill your details or continue with social media</string>
     <string name="new_user">New User?</string>
     <string name="create_account">Create Account</string>
-    <string name="auth_error_email">Incorrect email!</string>
-    <string name="auth_error_password">Incorrect password!</string>
+    <string name="auth_incorrect_email">Incorrect email!</string>
+    <string name="auth_incorrect_password">Incorrect password!</string>
+    <string name="register_enter_name">Enter the Name</string>
+    <string name="empty_text"></string>
+    <string name="register_enter_email">Enter your email address!</string>
+    <string name="register_enter_password">Enter the password!</string>
+    <string name="register_error_email">This email address is already registered!</string>
 
     <!--  Popup  -->
     <string name="popup_heading">Check your email</string>
@@ -90,6 +95,7 @@
     <string name="search">Search</string>
     <string name="see_all">See all</string>
     <string name="subtotal">Subtotal</string>
+    <string name="phone">Phone</string>
     <string name="delivery">Delivery</string>
     <string name="total_cost">Total Cost</string>
     <string name="contact_info">Contact Information</string>

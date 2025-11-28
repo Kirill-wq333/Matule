@@ -6,6 +6,7 @@ import com.example.data.ui.presentation.feature.auth.datasource.AuthApiService
 import com.example.data.ui.presentation.feature.auth.dto.request.ForgotPasswordRequest
 import com.example.data.ui.presentation.feature.auth.dto.request.LoginRequest
 import com.example.data.ui.presentation.feature.auth.dto.request.RegisterRequest
+import com.example.data.ui.presentation.storage.preferences.AppPreferencesImpl
 import com.example.data.ui.presentation.storage.tokenprovider.TokenProvider
 import com.example.domain.ui.presentation.feature.auth.model.User
 import com.example.domain.ui.presentation.feature.auth.repository.AuthRepository
@@ -16,7 +17,8 @@ class AuthRepositoryImpl @Inject constructor(
     private val apiService: AuthApiService,
     private val tokenProvider: TokenProvider,
     private val sharedPreferences: SharedPreferences,
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val appPreferences: AppPreferencesImpl
 ) : AuthRepository {
 
     private companion object {
@@ -47,43 +49,6 @@ class AuthRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             e.printStackTrace()
             Result.failure(Exception("Сетевая ошибка: ${e.message}"))
-        }
-    }
-
-    override suspend fun register(
-        email: String,
-        password: String,
-        firstName: String,
-        lastName: String?,
-        phone: String?
-    ): Result<User> {
-
-        return try {
-            val response = apiService.register(RegisterRequest(email, password, firstName, lastName, phone))
-
-            if (response.success == true && response.user != null && response.token != null) {
-                tokenProvider.saveToken(response.token)
-                saveUser(response.user.toUser())
-
-                Result.success(response.user.toUser())
-            } else {
-                val errorMessage = when {
-                    else -> "Неизвестная ошибка регистрации"
-                }
-                Result.failure(Exception(errorMessage))
-            }
-
-        } catch (e: Exception) {
-            Result.failure(Exception("Сетевая ошибка: ${e.message}"))
-        }
-    }
-
-    override suspend fun forgotPassword(email: String): Result<Boolean> {
-        return try {
-            val response = apiService.forgotPassword(ForgotPasswordRequest(email))
-            Result.success(response.success)
-        } catch (e: Exception) {
-            Result.failure(e)
         }
     }
 
@@ -127,15 +92,8 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
-    private fun clearUserData() {
-        with(sharedPreferences.edit()) {
-            remove(USER_ID_KEY)
-            remove(USER_EMAIL_KEY)
-            remove(USER_NAME_KEY)
-            remove(USER_FIRST_NAME_KEY)
-            remove(USER_LAST_NAME_KEY)
-            remove(USER_PHONE_KEY)
-            apply()
-        }
+    override suspend fun clearTokens() {
+        appPreferences.clearAllUserData()
     }
+
 }

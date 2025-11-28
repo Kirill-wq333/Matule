@@ -44,6 +44,7 @@ import com.example.matule.ui.presentation.feature.auth.viewmodel.AuthScreenContr
 import com.example.matule.ui.presentation.feature.auth.viewmodel.AuthScreenViewModel
 import com.example.matule.ui.presentation.shared.buttons.CustomButton
 import com.example.matule.ui.presentation.shared.text.CustomTextField
+import com.example.matule.ui.presentation.shared.text.PasswordTextField
 import com.example.matule.ui.presentation.theme.Colors
 import com.example.matule.ui.presentation.theme.MatuleTypography
 
@@ -66,18 +67,21 @@ fun AuthScreen(
     navController: NavHostController = rememberNavController(),
 ) {
 
+    val state by vm.state.collectAsState()
     val authData by vm.authData.collectAsState()
     val effects = vm.effect.collectAsState(initial = null)
 
-    val callback = object: AuthScreenCallback{
+    val callback = object : AuthScreenCallback {
         override fun openMainScreen(email: String, password: String) {
             vm.handleEvent(AuthScreenContract.Event.Login(email, password))
         }
 
         override fun openForgotScreen() {
+            navController.navigate(AppRouts.FORGOT_PASSWORD)
         }
 
         override fun openRegistrationScreen() {
+            navController.navigate(AppRouts.REGISTER)
         }
     }
 
@@ -89,30 +93,35 @@ fun AuthScreen(
                         popUpTo(AppRouts.AUTH) { inclusive = true }
                     }
                 }
+
                 is AuthScreenContract.Effect.NavigateToLogin -> {
                     navController.navigate(AppRouts.AUTH) {
                         popUpTo(AppRouts.MAIN) { inclusive = true }
                     }
                 }
+
                 is AuthScreenContract.Effect.ShowError -> {}
             }
         }
     }
 
     Content(
-        email = authData.email,
-        password = authData.password,
+        authData = authData,
         onEmailChange = { vm.updateEmail(it) },
         callback = callback,
-        onPasswordChange = { vm.updatePassword(it) }
+        onClearError = { vm.handleEvent(AuthScreenContract.Event.ClearError) },
+        onPasswordChange = { vm.updatePassword(it) },
+        state = state
     )
+
 }
 
 @Composable
 private fun Content(
-    email: String,
-    password: String,
+    state: AuthScreenContract.State,
+    authData: AuthScreenViewModel.AuthData,
     callback: AuthScreenCallback,
+    onClearError: () -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit
 ) {
@@ -121,19 +130,25 @@ private fun Content(
             .fillMaxSize()
             .background(color = Colors.block)
             .padding(top = 121.dp, start = 20.dp, end = 20.dp, bottom = 50.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        HeadingAndUnderHeadingAuth()
-        Spacer(modifier = Modifier.height(35.dp))
-        AuthContent(
-            email = email,
-            password = password,
-            openMainScreen = callback::openMainScreen,
-            openForgotScreen = callback::openForgotScreen,
-            onEmailChange = onEmailChange,
-            onPasswordChange = onPasswordChange
-        )
-        Spacer(modifier = Modifier.height(209.dp))
+        Column() {
+            HeadingAndUnderHeadingAuth(
+                heading = R.string.auth_hello_heading,
+                underHeading = R.string.auth_under_heading
+            )
+            Spacer(modifier = Modifier.height(35.dp))
+            AuthContent(
+                authData = authData,
+                openMainScreen = callback::openMainScreen,
+                openForgotScreen = callback::openForgotScreen,
+                onEmailChange = onEmailChange,
+                onPasswordChange = onPasswordChange,
+                onClearError = onClearError,
+                state = state
+            )
+        }
         ActionsTexts(
             text = R.string.new_user,
             textClick = R.string.create_account,
@@ -143,19 +158,22 @@ private fun Content(
 }
 
 @Composable
-fun HeadingAndUnderHeadingAuth() {
+fun HeadingAndUnderHeadingAuth(
+    heading: Int,
+    underHeading: Int
+) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(R.string.auth_hello_heading),
+            text = stringResource(heading),
             color = Colors.text,
             style = MatuleTypography.headlineLarge
         )
         Text(
             textAlign = TextAlign.Center,
-            text = stringResource(R.string.auth_under_heading),
+            text = stringResource(underHeading),
             color = Colors.subTextDark,
             style = MatuleTypography.titleMedium
         )
@@ -164,14 +182,20 @@ fun HeadingAndUnderHeadingAuth() {
 
 @Composable
 private fun AuthContent(
-    email: String,
-    password: String,
+    state: AuthScreenContract.State,
+    onClearError: () -> Unit,
+    authData: AuthScreenViewModel.AuthData,
     openMainScreen: (String, String) -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     openForgotScreen: () -> Unit,
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
+
+    val hasError = state is AuthScreenContract.State.Error
+
+    var isPasswordError by remember { mutableStateOf(false) }
+    var isEmailError by remember { mutableStateOf(false) }
 
     val icon =  if (passwordVisible) {
         R.drawable.ic_eye_open
@@ -184,34 +208,47 @@ private fun AuthContent(
     } else {
         PasswordVisualTransformation()
     }
+    LaunchedEffect(authData.email) {
+        if (hasError) {
+            onClearError()
+        }
+        isEmailError = false
+    }
+
+    LaunchedEffect(authData.password) {
+        if (hasError) {
+            onClearError()
+        }
+        isPasswordError = false
+    }
 
     Column(
         horizontalAlignment = Alignment.End
     ) {
         CustomTextField(
-            query = email,
-            onTextChange = onEmailChange,
+            query = authData.email,
+            onTextChange = {
+                onEmailChange(it)
+                isEmailError = false
+            },
             label = R.string.email,
+            isError = isEmailError || hasError,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            textError = R.string.auth_error_email,
+            textError = if (isEmailError) R.string.register_enter_email else R.string.empty_text,
             placeholder = "example@gmail.com"
         )
         Spacer(modifier = Modifier.height(26.dp))
-        CustomTextField(
-            query = password,
-            onTextChange = onPasswordChange,
-            label = R.string.password,
-            textError = R.string.auth_error_password,
-            placeholder = "********",
-            visualTransformation = transformation,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            trailingIcon = {
-                Icon(
-                    imageVector = ImageVector.vectorResource(icon),
-                    contentDescription = null,
-                    modifier = Modifier.clickable(onClick = { passwordVisible = !passwordVisible })
-                )
-            }
+        PasswordTextField(
+            password = authData.password,
+            onPasswordChange = {
+                onPasswordChange(it)
+                isPasswordError = false
+            },
+            icon = icon,
+            isError = isPasswordError || hasError,
+            onCLickEye = { passwordVisible = !passwordVisible},
+            transformation = transformation,
+            textError = if (isPasswordError) R.string.register_enter_password else R.string.empty_text
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
@@ -221,11 +258,32 @@ private fun AuthContent(
             modifier = Modifier.clickable(onClick = openForgotScreen)
         )
         Spacer(modifier = Modifier.height(24.dp))
-        CustomButton(
-            modifier = Modifier.fillMaxWidth(),
-            text = R.string.btn_sign_in,
-            onClick = { openMainScreen(email, password) }
-        )
+        Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            CustomButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = R.string.btn_sign_in,
+                onClick = {
+                    isEmailError = authData.email.isBlank() || !authData.email.contains("@")
+                    isPasswordError = authData.password.length < 6
+
+                    if (!isEmailError && !isPasswordError) {
+                        openMainScreen(authData.email, authData.password)
+                    }
+                }
+            )
+            if (hasError) {
+                Text(
+                    text = "Неправильный пароль или email!",
+                    color = Colors.red,
+                    style = MatuleTypography.bodySmall,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                )
+            }
+        }
     }
 }
 

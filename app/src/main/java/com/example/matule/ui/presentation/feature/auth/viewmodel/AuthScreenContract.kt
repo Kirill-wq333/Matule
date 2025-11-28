@@ -14,8 +14,7 @@ object AuthScreenContract {
     }
 
     sealed interface State : ViewState {
-        data object Idle : State
-        data object Loading : State
+        data object Auth: State
         data class Success(val user: User) : State
         data class Error(val message: String) : State
     }

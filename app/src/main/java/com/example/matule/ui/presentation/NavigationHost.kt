@@ -1,5 +1,11 @@
 package com.example.matule.ui.presentation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -40,7 +46,11 @@ fun NavigationHost(
             )
         },
         bottomBar = {
-            if (shouldShowBottomBar) {
+            AnimatedVisibility(
+                visible = shouldShowBottomBar,
+                enter =  slideInVertically(tween(700)) { it } + fadeIn(tween(700)),
+                exit = slideOutVertically(tween(700)){ it } + fadeOut(tween(700))
+            ) {
                 BottomBarNavigation(
                     navController = navController,
                     openCartScreen = { navController.navigate(AppRouts.CART) }

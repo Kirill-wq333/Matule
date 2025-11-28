@@ -7,8 +7,8 @@
     <string name="auth_under_heading">Заполните Свои данные или продолжите через социальные медиа</string>
     <string name="new_user">Вы впервые?</string>
     <string name="create_account">Создать пользователя</string>
-    <string name="auth_error_email">Неверный пароль!</string>
-    <string name="auth_error_password">Неверный пароль!</string>
+    <string name="auth_incorrect_email">Неверный email!</string>
+    <string name="auth_incorrect_password">Неверный пароль!</string>
 
     <!--  Popup  -->
     <string name="popup_heading">Проверьте Ваш Email</string>
@@ -33,6 +33,11 @@
     <string name="register_account">Регистрация</string>
     <string name="your_name">Ваше имя</string>
     <string name="already_have_account">Есть аккаунт?</string>
+    <string name="register_enter_email">Введите email!</string>
+    <string name="empty_text"></string>
+    <string name="register_enter_name">Введите Имя!</string>
+    <string name="register_enter_password">Введите пароль!</string>
+    <string name="register_error_email">Такой email уже зарегестрирован!</string>
     <string name="log_in">Войти</string>
     <string name="checkbox_agree">Даю согласие на обработку персональных данных</string>
 
@@ -92,6 +97,7 @@
     <string name="search">Поиск</string>
     <string name="see_all">Все</string>
     <string name="subtotal">Сумма</string>
+    <string name="phone">Телефон</string>
     <string name="delivery">Доставка</string>
     <string name="total_cost">Доставка</string>
     <string name="contact_info">Контактная информация</string>
