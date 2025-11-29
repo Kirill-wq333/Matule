@@ -133,7 +133,7 @@ private fun Content(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Column() {
+        Column {
             HeadingAndUnderHeadingAuth(
                 heading = R.string.auth_hello_heading,
                 underHeading = R.string.auth_under_heading
@@ -226,6 +226,7 @@ private fun AuthContent(
         horizontalAlignment = Alignment.End
     ) {
         CustomTextField(
+            modifier = Modifier.fillMaxWidth(),
             query = authData.email,
             onTextChange = {
                 onEmailChange(it)

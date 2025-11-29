@@ -79,16 +79,13 @@ private fun Content(
 
     Column(
         modifier = Modifier
-            .verticalScroll(rememberScrollState())
             .fillMaxSize()
             .background(Colors.block)
             .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 50.dp),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Column {
             HeadingAndUnderHeadingAuth(
                 heading = R.string.register_account,
                 underHeading = R.string.auth_under_heading
@@ -179,45 +176,59 @@ fun RegisterContent(
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            CustomTextField(
-                query = firstName,
-                onTextChange = onFirstNameChange,
-                label = R.string.name,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                textError = R.string.register_enter_name,
-                placeholder = "Иван"
-            )
-            CustomTextField(
-                query = lastName,
-                onTextChange = onLastNameChange,
-                label = R.string.last_name,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                textError = null,
-                placeholder = "Иванов"
-            )
-            CustomTextField(
-                query = email,
-                onTextChange = onEmailChange,
-                label = R.string.email,
-                isError = isEmailError,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                textError = R.string.register_enter_email,
-                placeholder = "example@gmail.com"
-            )
-            CustomTextField(
-                query = phone,
-                onTextChange = {
-                    onPhoneChange(it)
-                },
-                label = R.string.phone,
-                visualTransformation = rememberMaskVisualTransformation("+#(###)###-##-##"),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Phone,
-                    imeAction = ImeAction.Next
-                ),
-                textError = null,
-                placeholder = "+7 (999) 999-00-00"
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                CustomTextField(
+                    modifier = Modifier.weight(0.5f),
+                    query = firstName,
+                    onTextChange = onFirstNameChange,
+                    label = R.string.name,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                    textError = R.string.register_enter_name,
+                    placeholder = "Иван"
+                )
+                CustomTextField(
+                    modifier = Modifier.weight(0.5f),
+                    query = lastName,
+                    onTextChange = onLastNameChange,
+                    label = R.string.last_name,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                    textError = null,
+                    placeholder = "Иванов"
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                CustomTextField(
+                    modifier = Modifier.weight(0.5f),
+                    query = email,
+                    onTextChange = onEmailChange,
+                    label = R.string.email,
+                    isError = isEmailError,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    textError = R.string.register_enter_email,
+                    placeholder = "example@gmail.com"
+                )
+                CustomTextField(
+                    modifier = Modifier.weight(0.5f),
+                    query = phone,
+                    onTextChange = {
+                        onPhoneChange(it)
+                    },
+                    label = R.string.phone,
+                    visualTransformation = rememberMaskVisualTransformation("+#(###)###-##-##"),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Phone,
+                        imeAction = ImeAction.Next
+                    ),
+                    textError = null,
+                    placeholder = "+7 (999) 999-00-00"
+                )
+            }
             PasswordTextField(
                 password = password,
                 onPasswordChange = onPasswordChange,

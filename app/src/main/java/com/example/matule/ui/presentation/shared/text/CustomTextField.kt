@@ -25,6 +25,7 @@ import com.example.matule.ui.presentation.theme.MatuleTypography
 
 @Composable
 fun CustomTextField(
+    modifier: Modifier = Modifier,
     query: String,
     textError: Int? = null,
     label: Int,
@@ -36,7 +37,7 @@ fun CustomTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
