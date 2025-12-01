@@ -11,7 +11,6 @@ import javax.inject.Inject
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
     private val registerInteractor: RegisterInteractor,
-    private val tokenProvider: TokenProvider
 ) : BaseViewModel<RegisterContract.Event, RegisterContract.State, Nothing>() {
 
     override fun setInitialState(): RegisterContract.State = RegisterContract.State.Loaded
@@ -33,7 +32,6 @@ class RegisterViewModel @Inject constructor(
             when {
                 registerUser.isSuccess -> {
                     registerUser.getOrNull()!!
-                    tokenProvider.getToken()
                     setState(RegisterContract.State.Loaded)
                 }
                 registerUser.isFailure ->{

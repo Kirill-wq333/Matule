@@ -105,7 +105,7 @@ class DomainModule {
     fun provideNotificationInteractor(
         notificationRepository: NotificationRepository
     ): NotificationInteractor{
-        return NotificationInteractor()
+        return NotificationInteractor(notificationRepository)
     }
 
     @Provides

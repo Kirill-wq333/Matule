@@ -77,6 +77,7 @@
     <string name="last_name">Last name</string>
 
     <!--  Notification  -->
+    <string name="empty_notification">You don\'t have any notifications yet.</string>
     <string name="notifications">Notifications</string>
 
     <!--  More details  -->

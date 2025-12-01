@@ -1,6 +1,8 @@
 package com.example.data.ui.presentation.feature.favorite
 
 import com.example.data.ui.presentation.feature.favorite.datasource.FavoriteApiService
+import com.example.data.ui.presentation.feature.favorite.dto.FavoriteDto.Companion.toFavorite
+import com.example.domain.ui.presentation.feature.favorite.model.Favorite
 import com.example.domain.ui.presentation.feature.favorite.model.FavoriteResult
 import com.example.domain.ui.presentation.feature.favorite.repository.FavoriteRepository
 import javax.inject.Inject
@@ -8,6 +10,17 @@ import javax.inject.Inject
 class FavoriteRepositoryImpl @Inject constructor(
     private val apiService: FavoriteApiService
 ): FavoriteRepository {
+
+    override suspend fun getFavorite(): Result<List<Favorite>> {
+        return try {
+            val response = apiService.getFavorites()
+
+            val favorite = response.map { it.toFavorite() }
+            Result.success(favorite)
+        }catch (e: Exception){
+            Result.failure(e)
+        }
+    }
 
     override suspend fun addToFavorites(productId: Long): Result<FavoriteResult> {
         return try {

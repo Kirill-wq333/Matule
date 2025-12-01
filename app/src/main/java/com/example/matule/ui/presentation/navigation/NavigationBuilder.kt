@@ -22,9 +22,13 @@ import com.example.matule.ui.presentation.feature.arrivals.ui.ArrivalsScreen
 import com.example.matule.ui.presentation.feature.arrivals.viewmodel.ArrivalsScreenViewModel
 import com.example.matule.ui.presentation.feature.register.ui.RegisterScreen
 import com.example.matule.ui.presentation.feature.auth.viewmodel.AuthScreenViewModel
+import com.example.matule.ui.presentation.feature.favorite.ui.FavoriteScreen
+import com.example.matule.ui.presentation.feature.favorite.viewmodel.FavoriteScreenViewModel
 import com.example.matule.ui.presentation.feature.popular.ui.PopularScreen
 import com.example.matule.ui.presentation.feature.sidemenu.ui.SideMenuScreen
 import com.example.matule.ui.presentation.feature.main.viewmodel.MainViewModel
+import com.example.matule.ui.presentation.feature.notification.ui.NotificationScreen
+import com.example.matule.ui.presentation.feature.notification.viewmodel.NotificationScreenViewModel
 import com.example.matule.ui.presentation.feature.onboarding.ui.OnboardingScreen
 import com.example.matule.ui.presentation.feature.onboarding.viewmodel.OnboardingViewModel
 import com.example.matule.ui.presentation.feature.popular.viewmodel.PopularScreenViewModel
@@ -181,7 +185,12 @@ fun NavigationBuilder(
         }
 
         composable(AppRouts.FAVOURITE) {
-
+            val vmFavorite = hiltViewModel<FavoriteScreenViewModel>()
+            FavoriteScreen(
+                vm = vmFavorite,
+                onBack = { navController.popBackStack() },
+                navController = navController
+            )
         }
 
         composable(AppRouts.DETAILS) {
@@ -204,7 +213,12 @@ fun NavigationBuilder(
         }
 
         composable(AppRouts.NOTIFICATION) {
+            val vmNotification = hiltViewModel<NotificationScreenViewModel>()
 
+            NotificationScreen(
+                vm = vmNotification,
+                openSideMenu = { navController.navigate(AppRouts.SIDE_MENU) }
+            )
         }
     }
 }

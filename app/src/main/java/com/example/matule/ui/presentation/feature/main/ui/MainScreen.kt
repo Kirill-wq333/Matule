@@ -192,7 +192,7 @@ private fun Content(
         modifier = Modifier
             .fillMaxSize()
             .background(color = Colors.background)
-            .padding(horizontal = 20.dp, vertical = 20.dp)
+            .padding(horizontal = 20.dp)
     ) {
         AnimatedVisibility(
             visible = catalogScreen,

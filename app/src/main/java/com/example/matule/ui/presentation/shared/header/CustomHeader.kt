@@ -18,7 +18,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.matule.R
 import com.example.matule.ui.presentation.shared.buttons.CustomIconButton
@@ -74,19 +76,27 @@ fun CustomHeaderMain(
     text: Int,
     endIcon: Int = R.drawable.ic_cart,
     cardItem: Int = 0,
+    padding: Dp = 10.dp,
+    backColor: Color = Colors.block,
+    style: TextStyle = MatuleTypography.headlineLarge,
+    visibleCosmeticIcon: Boolean = true,
+    visibleEndIcon: Boolean = true,
 ) {
     Box(
         modifier = Modifier
+            .padding(top = 20.dp)
             .fillMaxWidth()
     ) {
-        Icon(
-            imageVector = ImageVector.vectorResource(R.drawable.highlight_05),
-            contentDescription = null,
-            tint = Colors.text,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .offset(x = -(65).dp)
-        )
+        if (visibleCosmeticIcon) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.highlight_05),
+                contentDescription = null,
+                tint = Colors.text,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .offset(x = -(65).dp)
+            )
+        }
         CustomIconButton(
             icon = R.drawable.ic_hamburger,
             onClick = openSideMenu,
@@ -97,15 +107,19 @@ fun CustomHeaderMain(
         Text(
             text = stringResource(text),
             color = Colors.text,
-            style = MatuleTypography.headlineLarge,
+            style = style,
             modifier = Modifier.align(Alignment.Center)
         )
-        CustomIconButton(
-            icon = endIcon,
-            onClick = openCartScreen,
-            cardItem = cardItem,
-            modifier = Modifier.align(Alignment.CenterEnd)
-        )
+        if (visibleEndIcon) {
+            CustomIconButton(
+                icon = endIcon,
+                onClick = openCartScreen,
+                cardItem = cardItem,
+                backColor = backColor,
+                padding = padding,
+                modifier = Modifier.align(Alignment.CenterEnd)
+            )
+        }
     }
 }
 
@@ -115,6 +129,7 @@ fun CustomHeader(
     openScreen: () -> Unit = {},
     text: Int,
     cardItem: Int = 0,
+    tint: Color = Color.Unspecified,
     endIcon: Int = R.drawable.ic_cart,
     visibleEndIcon: Boolean = false,
     visibleNameScreen: Boolean = false
@@ -140,6 +155,7 @@ fun CustomHeader(
         if (visibleEndIcon) {
             CustomIconButton(
                 icon = endIcon,
+                tint = tint,
                 onClick = openScreen,
                 cardItem = cardItem,
                 modifier = Modifier.align(Alignment.CenterEnd)

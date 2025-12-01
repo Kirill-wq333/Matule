@@ -79,6 +79,7 @@
     <string name="last_name">Фамилия</string>
 
     <!--  Notification  -->
+    <string name="empty_notification">У вас пока что нету уведомлений</string>
     <string name="notifications">Уведомления</string>
 
     <!--  More details  -->

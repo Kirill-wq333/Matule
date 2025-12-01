@@ -110,7 +110,7 @@ private fun Content(
                     isEmailError = email.isBlank() || !email.contains("@")
                     isPasswordError = password.length < 6
 
-                    if (!isEmailError && !isPasswordError && privacyPolice) {
+                    if (!isEmailError && !isPasswordError && !privacyPolice) {
                         event(
                             RegisterContract.Event.Register(
                                 email,

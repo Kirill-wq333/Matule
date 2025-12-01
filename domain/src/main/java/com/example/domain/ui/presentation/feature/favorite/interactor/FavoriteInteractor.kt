@@ -1,5 +1,6 @@
 package com.example.domain.ui.presentation.feature.favorite.interactor
 
+import com.example.domain.ui.presentation.feature.favorite.model.Favorite
 import com.example.domain.ui.presentation.feature.favorite.model.FavoriteResult
 import com.example.domain.ui.presentation.feature.favorite.repository.FavoriteRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -33,6 +34,10 @@ class FavoriteInteractor(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    suspend fun getFavorite(): Result<List<Favorite>>{
+        return favoriteRepository.getFavorite()
     }
 
 }

@@ -2,6 +2,8 @@ package com.example.data.ui.presentation.network.di
 
 import com.example.data.ui.presentation.network.interceptor.AuthTokenInterceptor
 import com.example.data.ui.presentation.storage.tokenprovider.TokenProvider
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -79,6 +81,14 @@ class NetworkModule {
                 .body(ResponseBody.create(responseBody?.contentType(), responseBodyString ?: ""))
                 .build()
         }
+    }
+
+    @Provides
+    @Singleton
+    fun provideGson(): Gson {
+        return GsonBuilder()
+            .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+            .create()
     }
 
     @Provides

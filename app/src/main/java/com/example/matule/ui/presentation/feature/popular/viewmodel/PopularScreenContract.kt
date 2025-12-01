@@ -26,6 +26,7 @@ object PopularScreenContract {
             val cartItems: Set<Long> = emptySet()
         ): State
         data object Loading: State
+        data object Empty: State
         data class Error(val message: String) : State
     }
 

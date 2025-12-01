@@ -4,21 +4,23 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.domain.ui.presentation.feature.popular.model.Product
@@ -30,6 +32,7 @@ import com.example.matule.ui.presentation.shared.header.CustomHeader
 import com.example.matule.ui.presentation.shared.main.CardItem
 import com.example.matule.ui.presentation.shared.screen.LoadingScreen
 import com.example.matule.ui.presentation.theme.Colors
+import com.example.matule.ui.presentation.theme.MatuleTypography
 
 interface PopularScreenCallback{
     fun openDetailScreen(id: Long) {}
@@ -48,9 +51,9 @@ fun PopularScreen(
 
     val state by vm.state.collectAsState()
 
-    val callback = object : PopularScreenCallback{
+    val callback = object : PopularScreenCallback {
         override fun addedInFavorite(id: Long, isFavorite: Boolean) {
-            vm.handleEvent(PopularScreenContract.Event.ToggleProductFavorite(id,isFavorite))
+            vm.handleEvent(PopularScreenContract.Event.ToggleProductFavorite(id, isFavorite))
         }
 
         override fun openCartScreen() {
@@ -70,39 +73,28 @@ fun PopularScreen(
         }
     }
 
-    when (val currentState = state) {
-        is PopularScreenContract.State.Loading -> {
-            LoadingScreen()
-        }
-
-        is PopularScreenContract.State.Loaded -> {
-            PopularContent(
-                onLike = callback::openFavoriteScreen,
-                populars = currentState.popularProducts,
-                openCartScreen = callback::openCartScreen,
-                onBack = onBack,
-                openDetailScreen = {
-                    callback.openDetailScreen(it)
-                },
-                addedInCart = {
-                    callback.addedInCart(it)
-                },
-                addedInFavorite = { id, isFavorite ->
-                    callback.addedInFavorite(id, isFavorite)
-                },
-                cartItems = currentState.cartItems
-            )
-        }
-        else -> {}
-    }
+    PopularContent(
+        onLike = callback::openFavoriteScreen,
+        openCartScreen = callback::openCartScreen,
+        onBack = onBack,
+        openDetailScreen = {
+            callback.openDetailScreen(it)
+        },
+        addedInCart = {
+            callback.addedInCart(it)
+        },
+        addedInFavorite = { id, isFavorite ->
+            callback.addedInFavorite(id, isFavorite)
+        },
+        state = state
+    )
 }
 
 @Composable
 private fun PopularContent(
     addedInCart: (Long) -> Unit,
-    populars: List<Product>,
+    state: PopularScreenContract.State,
     onLike: () -> Unit,
-    cartItems: Set<Long>,
     onBack: () -> Unit,
     addedInFavorite: (Long, Boolean) -> Unit,
     openCartScreen: () -> Unit,
@@ -123,14 +115,46 @@ private fun PopularContent(
             visibleNameScreen = true,
             visibleEndIcon = true
         )
-        Content(
-            addedInCart = addedInCart,
-            openDetailScreen = openDetailScreen,
-            populars = populars,
-            cartItems = cartItems,
-            openCartScreen = openCartScreen,
-            addedInFavorite = addedInFavorite
-        )
+        when(state) {
+            is PopularScreenContract.State.Loading -> {
+                LoadingScreen()
+            }
+            is PopularScreenContract.State.Loaded -> {
+                Content(
+                    addedInCart = addedInCart,
+                    openDetailScreen = openDetailScreen,
+                    populars = state.popularProducts,
+                    cartItems = state.cartItems,
+                    openCartScreen = openCartScreen,
+                    addedInFavorite = addedInFavorite
+                )
+            }
+            is PopularScreenContract.State.Empty -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(20.dp)
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_notification),
+                            contentDescription = null,
+                            tint = Colors.text,
+                            modifier = Modifier.size(96.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.empty_notification),
+                            color = Colors.text,
+                            style = MatuleTypography.headlineSmall
+                        )
+                    }
+                }
+            }
+            else -> {}
+        }
     }
 }
 
