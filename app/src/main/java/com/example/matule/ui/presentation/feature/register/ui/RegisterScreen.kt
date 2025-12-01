@@ -81,7 +81,7 @@ private fun Content(
         modifier = Modifier
             .fillMaxSize()
             .background(Colors.block)
-            .padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 50.dp),
+            .padding(start = 20.dp, end = 20.dp, top = 78.dp, bottom = 50.dp),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
