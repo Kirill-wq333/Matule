@@ -7,6 +7,12 @@ import kotlinx.coroutines.runBlocking
 class AuthInteractor(
     private val authRepository: AuthRepository,
 ) {
+    fun getCurrentUserId(): Long? {
+        return runBlocking {
+            authRepository.getCurrentUser()?.id
+        }
+    }
+
     suspend fun login(email: String, password: String): Result<User> {
         return authRepository.login(email, password)
     }

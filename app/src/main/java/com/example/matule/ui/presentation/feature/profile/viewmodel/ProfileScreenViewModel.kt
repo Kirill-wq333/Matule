@@ -53,7 +53,6 @@ class ProfileScreenViewModel @Inject constructor(
                     }
                 }
             } else {
-                val error = result.exceptionOrNull()!!
                 setState ( ProfileScreenContract.State.Error("Ошибка загрузки профиля") )
                 setEffect { ProfileScreenContract.Effect.ShowError("Ошибка загрузки профиля") }
             }

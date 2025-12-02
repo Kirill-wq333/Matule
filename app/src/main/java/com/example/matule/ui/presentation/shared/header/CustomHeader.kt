@@ -80,6 +80,7 @@ fun CustomHeaderMain(
     backColor: Color = Colors.block,
     style: TextStyle = MatuleTypography.headlineLarge,
     visibleCosmeticIcon: Boolean = true,
+    size: Dp = 24.dp,
     visibleEndIcon: Boolean = true,
 ) {
     Box(
@@ -115,6 +116,7 @@ fun CustomHeaderMain(
                 icon = endIcon,
                 onClick = openCartScreen,
                 cardItem = cardItem,
+                size = size,
                 backColor = backColor,
                 padding = padding,
                 modifier = Modifier.align(Alignment.CenterEnd)

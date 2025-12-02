@@ -143,9 +143,9 @@ private fun FavoriteContent(
                         verticalArrangement = Arrangement.spacedBy(20.dp)
                     ) {
                         Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_notification),
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_favorite_fill),
                             contentDescription = null,
-                            tint = Colors.text,
+                            tint = Colors.red,
                             modifier = Modifier.size(96.dp)
                         )
                         Text(
@@ -172,6 +172,8 @@ private fun Content(
 ) {
     val lazyVerticalGridState = rememberLazyGridState()
 
+    val favoriteProduct = favorites.map { it.product }
+
     LazyVerticalGrid(
         modifier = Modifier.fillMaxWidth(),
         state = lazyVerticalGridState,
@@ -180,28 +182,28 @@ private fun Content(
         verticalArrangement = Arrangement.spacedBy(15.dp)
     ) {
         items(
-            items = favorites,
+            items = favoriteProduct,
             key = { it.id }
         ) { favorite ->
 
-            val isInCart = cartItems.contains(favorite.product.id)
+            val isInCart = cartItems.contains(favorite.id)
 
             CardItem(
-                cardName = favorite.product.name,
-                cardImage = favorite.product.images.first(),
-                money = favorite.product.price,
+                cardName = favorite.name,
+                cardImage = favorite.images.first(),
+                money = favorite.price,
                 addedInCart = {
-                    addedInCart(favorite.product.id)
+                    addedInCart(favorite.id)
                 },
                 cartIcon = isInCart,
-                liked = favorite.product.isFavorite,
+                liked = favorite.isFavorite,
 
                 addedInFavorite = {
-                    addedInFavorite(favorite.product.id,favorite.product.isFavorite)
+                    addedInFavorite(favorite.id,favorite.isFavorite)
                 },
                 openCartScreen = openCartScreen,
                 openDetailScreen = {
-                    openDetailScreen(favorite.product.id)
+                    openDetailScreen(favorite.id)
                 }
             )
         }

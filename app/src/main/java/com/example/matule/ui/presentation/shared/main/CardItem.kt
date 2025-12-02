@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -225,6 +226,7 @@ private fun CardContent(
             AsyncImage(
                 model = cardImage,
                 contentDescription = null,
+                placeholder = painterResource(R.drawable.image_placeholder),
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)

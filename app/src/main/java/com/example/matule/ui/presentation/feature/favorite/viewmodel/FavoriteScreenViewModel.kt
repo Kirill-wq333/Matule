@@ -43,10 +43,14 @@ class FavoriteScreenViewModel @Inject constructor(
             if (result.isSuccess){
                 val favorite = result.getOrNull()!!
 
+                val cartItems = cartInteractor.getLocalCartItems()
                 if (favorite.isEmpty()) {
                     setState(FavoriteScreenContract.State.Empty)
                 } else {
-                    setState(FavoriteScreenContract.State.Loaded(favorite))
+                    setState(FavoriteScreenContract.State.Loaded(
+                        favorite = favorite,
+                        cartItems = cartItems
+                    ))
                 }
             } else {
                 val error = result.exceptionOrNull()!!
@@ -137,6 +141,13 @@ class FavoriteScreenViewModel @Inject constructor(
         updateCartIconState(productId, true)
         incrementCartCountOptimistic(quantity)
 
+        val userId = authInteractor.getCurrentUserId()
+
+        if (userId == null) {
+            updateCartIconState(productId, false)
+            decrementCartCountOptimistic(quantity)
+            return
+        }
         val result = cartInteractor.addToCartSimple(productId, quantity)
 
         if (result.isSuccess && result.getOrNull() == true) {

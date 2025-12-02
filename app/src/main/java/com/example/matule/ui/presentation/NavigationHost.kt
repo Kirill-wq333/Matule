@@ -7,8 +7,16 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.exclude
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.matule.ui.presentation.approuts.AppRouts
@@ -42,32 +50,19 @@ fun NavigationHost(
             NavigationBuilder(
                 navController = navController,
                 paddingValues = paddingValues,
-                startDestination = startDestination
+                startDestination = startDestination,
+                shouldShowBottomBar = shouldShowBottomBar
             )
-        },
-        bottomBar = {
-            AnimatedVisibility(
-                visible = shouldShowBottomBar,
-                enter =  slideInVertically(tween(700)) { it } + fadeIn(tween(700)),
-                exit = slideOutVertically(tween(700)){ it } + fadeOut(tween(700))
-            ) {
-                BottomBarNavigation(
-                    navController = navController,
-                    openCartScreen = { navController.navigate(AppRouts.CART) }
-                )
-            }
         }
+
     )
 }
 
 @Composable
 private fun HostScaffold(
     content: @Composable (PaddingValues) -> Unit,
-    bottomBar: @Composable () -> Unit
 ) {
     Scaffold(
-        content = content,
-        bottomBar = bottomBar
+        content = content
     )
-
 }

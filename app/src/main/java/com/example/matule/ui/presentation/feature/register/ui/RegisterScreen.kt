@@ -32,6 +32,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -251,6 +252,7 @@ fun RegisterContent(
                     text = stringResource(R.string.checkbox_agree),
                     color = Colors.hint,
                     fontSize = 16.sp,
+                    textDecoration = TextDecoration.Underline,
                     fontFamily = FontFamily(Font(R.font.new_peninim_mt_inclined_2)),
                     fontWeight = FontWeight.Normal,
                     textAlign = TextAlign.Start

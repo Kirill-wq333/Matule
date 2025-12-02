@@ -8,8 +8,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -20,8 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -46,14 +44,15 @@ private fun Prev() {
     val navController = rememberNavController()
 
     Box(modifier = Modifier.fillMaxWidth().background(Colors.background)) {
-        BottomBarNavigation(navController = navController) {}
+        BottomBarNavigation(navController = navController, openCartScreen = {})
     }
 }
 
 @Composable
 fun BottomBarNavigation(
     navController: NavHostController,
-    openCartScreen: () -> Unit
+    openCartScreen: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
 
     val firstButtons = listOf(
@@ -83,22 +82,9 @@ fun BottomBarNavigation(
         ?.destination
         ?.route
 
-    val targetColor = when (currentRoute) {
-        AppRouts.MAIN -> Colors.background
-        AppRouts.FAVOURITE -> Colors.background
-        AppRouts.NOTIFICATION -> Colors.block
-        AppRouts.PROFILE -> Colors.block
-        else -> Colors.background
-    }
-
-    val backgroundColor by animateColorAsState(
-        targetValue = targetColor,
-        animationSpec = tween(durationMillis = 700)
-    )
-
 
     BottomContent(
-        backColor = backgroundColor,
+        modifier = modifier,
         navController = navController,
         firstButtons = firstButtons,
         secondButtons = secondButtons,
@@ -109,33 +95,35 @@ fun BottomBarNavigation(
 
 @Composable
 fun BottomContent(
+    modifier: Modifier = Modifier,
     currentRoute: String?,
-    backColor: Color,
     navController: NavHostController,
     firstButtons: List<BottomBarNavigationItem>,
     secondButtons: List<BottomBarNavigationItem>,
     openCartScreen: () -> Unit
 ) {
+
+
     Box(
-        modifier = Modifier
-            .background(backColor)
+        modifier = modifier
             .fillMaxWidth()
             .heightIn(max = 105.dp)
     ) {
-
         Image(
             painter = painterResource(R.drawable.bottombar),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
         )
+
         FloatingActionButton(
             onClick = openCartScreen,
             shape = CircleShape,
             containerColor = Colors.accent,
             contentColor = Colors.block,
-            modifier = Modifier.align(Alignment.TopCenter)
+            modifier = Modifier
+                .align(Alignment.TopCenter)
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_cart),
@@ -152,7 +140,7 @@ fun BottomContent(
 }
 
 @Composable
-fun BoxScope.Actions(
+private fun BoxScope.Actions(
     currentRoute: String?,
     navController: NavHostController,
     firstButtons: List<BottomBarNavigationItem>,

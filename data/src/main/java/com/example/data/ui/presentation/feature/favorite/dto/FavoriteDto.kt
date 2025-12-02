@@ -8,7 +8,7 @@ import com.example.domain.ui.presentation.feature.popular.model.Product
 data class FavoriteDto(
     val id: Long,
     val userId: Long,
-    val productId: Int,
+    val productId: Long,
     val createdAt: String,
     val product: ProductDto
 ){
