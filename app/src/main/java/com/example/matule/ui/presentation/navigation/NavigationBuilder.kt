@@ -223,7 +223,8 @@ fun NavigationBuilder(
             ) {
                 val vmProfile = hiltViewModel<ProfileScreenViewModel>()
                 ProfileScreen(
-                    vm = vmProfile
+                    vm = vmProfile,
+                    navController = navController
                 )
             }
 
