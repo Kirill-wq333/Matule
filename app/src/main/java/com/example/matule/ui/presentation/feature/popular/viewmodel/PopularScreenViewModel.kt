@@ -6,12 +6,8 @@ import com.example.domain.ui.presentation.feature.cart.interactor.CartInteractor
 import com.example.domain.ui.presentation.feature.favorite.interactor.FavoriteInteractor
 import com.example.domain.ui.presentation.feature.favorite.model.FavoriteResult
 import com.example.domain.ui.presentation.feature.popular.interactor.PopularInteractor
-import com.example.domain.ui.presentation.feature.popular.model.Product
 import com.example.matule.ui.core.viewmodel.BaseViewModel
-import com.example.matule.ui.presentation.feature.main.viewmodel.MainScreenContract
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.max
@@ -95,8 +91,7 @@ class PopularScreenViewModel @Inject constructor(
             val result = favoriteInteractor.toggleFavorite(productId, currentlyFavorite)
 
             if (result.isSuccess) {
-                val favoriteResult = result.getOrNull()!!
-                when (favoriteResult) {
+                when (val favoriteResult = result.getOrNull()!!) {
                     is FavoriteResult.Success -> {
                         setEffect { PopularScreenContract.Effect.FavoriteStatusUpdated(favoriteResult) }
                         updateProductFavoriteStatus(favoriteResult.productId, favoriteResult.isFavorite)

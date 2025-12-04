@@ -23,7 +23,9 @@ fun LoadingScreen() {
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            CircularProgressIndicator()
+            CircularProgressIndicator(
+                color = Colors.accent
+            )
             Spacer(modifier = Modifier.height(16.dp))
             Text("Загрузка товаров...")
         }
@@ -36,6 +38,8 @@ fun MainLoadingScreen() {
         Modifier.fillMaxSize().background(Colors.background),
         contentAlignment = Alignment.Center
     ) {
-        CircularProgressIndicator()
+        CircularProgressIndicator(
+            color = Colors.accent
+        )
     }
 }

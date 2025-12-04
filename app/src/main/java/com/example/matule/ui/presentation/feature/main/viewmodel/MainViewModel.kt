@@ -4,8 +4,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.domain.ui.presentation.feature.auth.interactor.AuthInteractor
 import com.example.domain.ui.presentation.feature.cart.interactor.CartInteractor
 import com.example.domain.ui.presentation.feature.favorite.interactor.FavoriteInteractor
-import com.example.domain.ui.presentation.feature.main.interactor.MainInteractor
 import com.example.domain.ui.presentation.feature.favorite.model.FavoriteResult
+import com.example.domain.ui.presentation.feature.main.interactor.MainInteractor
 import com.example.domain.ui.presentation.feature.popular.interactor.PopularInteractor
 import com.example.domain.ui.presentation.feature.popular.model.Product
 import com.example.matule.ui.core.viewmodel.BaseViewModel

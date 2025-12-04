@@ -1,23 +1,18 @@
 package com.example.data.ui.presentation.feature.auth
 
-import android.content.Context
 import android.content.SharedPreferences
 import com.example.data.ui.presentation.feature.auth.datasource.AuthApiService
-import com.example.data.ui.presentation.feature.auth.dto.request.ForgotPasswordRequest
 import com.example.data.ui.presentation.feature.auth.dto.request.LoginRequest
-import com.example.data.ui.presentation.feature.auth.dto.request.RegisterRequest
 import com.example.data.ui.presentation.storage.preferences.AppPreferencesImpl
 import com.example.data.ui.presentation.storage.tokenprovider.TokenProvider
 import com.example.domain.ui.presentation.feature.auth.model.User
 import com.example.domain.ui.presentation.feature.auth.repository.AuthRepository
-import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
     private val apiService: AuthApiService,
     private val tokenProvider: TokenProvider,
     private val sharedPreferences: SharedPreferences,
-    @ApplicationContext private val context: Context,
     private val appPreferences: AppPreferencesImpl
 ) : AuthRepository {
 

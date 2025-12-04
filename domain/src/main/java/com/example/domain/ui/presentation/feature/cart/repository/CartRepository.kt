@@ -8,7 +8,6 @@ interface CartRepository {
     suspend fun addToCart(productId: Long, quantity: Int = 1): Result<CartResult>
     suspend fun updateCartItem(cartItemId: Long, quantity: Int): Result<CartResult>
     suspend fun removeFromCart(cartItemId: Long): Result<CartResult>
-
     suspend fun getLocalCartItems(): Set<Long>
     suspend fun saveLocalCartItems(productIds: Set<Long>)
     suspend fun syncCartWithServer(): Result<Boolean>

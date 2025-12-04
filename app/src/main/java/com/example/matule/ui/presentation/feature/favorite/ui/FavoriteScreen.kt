@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -23,15 +22,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.domain.ui.presentation.feature.favorite.model.Favorite
-import com.example.domain.ui.presentation.feature.popular.model.Product
 import com.example.matule.R
 import com.example.matule.ui.presentation.approuts.AppRouts
 import com.example.matule.ui.presentation.feature.favorite.viewmodel.FavoriteScreenContract
 import com.example.matule.ui.presentation.feature.favorite.viewmodel.FavoriteScreenViewModel
-import com.example.matule.ui.presentation.feature.popular.viewmodel.PopularScreenContract
 import com.example.matule.ui.presentation.shared.header.CustomHeader
 import com.example.matule.ui.presentation.shared.main.CardItem
 import com.example.matule.ui.presentation.shared.screen.LoadingScreen
@@ -43,7 +41,7 @@ interface FavoriteScreenCallback{
     fun addedInCart(id: Long) {}
     fun openFavoriteScreen() {}
     fun openCartScreen() {}
-    fun addedInFavorite(id: Long, isFavorite: Boolean) {}
+    fun removeFromFavorite(id: Long) {}
 }
 
 
@@ -56,8 +54,8 @@ fun FavoriteScreen(
     val state by vm.state.collectAsState()
 
     val callback = object : FavoriteScreenCallback {
-        override fun addedInFavorite(id: Long, isFavorite: Boolean) {
-            vm.handleEvent(FavoriteScreenContract.Event.ToggleProductFavorite(id, isFavorite))
+        override fun removeFromFavorite(id: Long) {
+            vm.handleEvent(FavoriteScreenContract.Event.ToggleProductFavorite(id))
         }
 
         override fun openCartScreen() {
@@ -78,8 +76,8 @@ fun FavoriteScreen(
     }
 
     FavoriteContent(
-        addedInFavorite = { id, isFavorite ->
-            callback.addedInFavorite(id, isFavorite)
+        removeFromFavorite = { id ->
+            callback.removeFromFavorite(id)
         },
         openDetailScreen = {
             callback.openDetailScreen(it)
@@ -98,7 +96,7 @@ private fun FavoriteContent(
     state: FavoriteScreenContract.State,
     onLike: () -> Unit,
     onBack: () -> Unit,
-    addedInFavorite: (Long, Boolean) -> Unit,
+    removeFromFavorite: (Long) -> Unit,
     openCartScreen: () -> Unit,
     openDetailScreen: (Long) -> Unit
 ) {
@@ -129,7 +127,7 @@ private fun FavoriteContent(
                     favorites = state.favorite,
                     cartItems = state.cartItems,
                     openCartScreen = openCartScreen,
-                    addedInFavorite = addedInFavorite
+                    removeFromFavorite = removeFromFavorite
                 )
             }
             is FavoriteScreenContract.State.Empty -> {
@@ -149,9 +147,10 @@ private fun FavoriteContent(
                             modifier = Modifier.size(96.dp)
                         )
                         Text(
-                            text = stringResource(R.string.empty_notification),
+                            text = stringResource(R.string.empty_favorite),
                             color = Colors.text,
-                            style = MatuleTypography.headlineSmall
+                            style = MatuleTypography.headlineSmall,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
@@ -168,14 +167,14 @@ private fun Content(
     cartItems: Set<Long>,
     openDetailScreen: (Long) -> Unit,
     openCartScreen: () -> Unit,
-    addedInFavorite: (Long, Boolean) -> Unit
+    removeFromFavorite: (Long) -> Unit
 ) {
     val lazyVerticalGridState = rememberLazyGridState()
 
     val favoriteProduct = favorites.map { it.product }
 
     LazyVerticalGrid(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxSize(),
         state = lazyVerticalGridState,
         columns = GridCells.Fixed(2),
         horizontalArrangement = Arrangement.spacedBy(15.dp),
@@ -196,10 +195,10 @@ private fun Content(
                     addedInCart(favorite.id)
                 },
                 cartIcon = isInCart,
-                liked = favorite.isFavorite,
+                liked = true,
 
                 addedInFavorite = {
-                    addedInFavorite(favorite.id,favorite.isFavorite)
+                    removeFromFavorite(favorite.id)
                 },
                 openCartScreen = openCartScreen,
                 openDetailScreen = {

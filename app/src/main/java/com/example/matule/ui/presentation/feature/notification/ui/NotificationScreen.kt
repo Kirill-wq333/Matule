@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.domain.ui.presentation.feature.notification.model.Notifications
 import com.example.matule.R
@@ -97,7 +98,8 @@ private fun Content(
                         Text(
                             text = stringResource(R.string.empty_notification),
                             color = Colors.text,
-                            style = MatuleTypography.headlineSmall
+                            style = MatuleTypography.headlineSmall,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }

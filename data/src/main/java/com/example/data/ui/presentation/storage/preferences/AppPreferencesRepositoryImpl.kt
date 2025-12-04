@@ -78,7 +78,7 @@ class AppPreferencesImpl @Inject constructor(
         dataStore.edit { preferences ->
             preferences[IS_ONBOARDING_COMPLETED] = completed
         }
-        val saved = dataStore.data.first()[IS_ONBOARDING_COMPLETED]
+        dataStore.data.first()[IS_ONBOARDING_COMPLETED]
     }
 
     suspend fun setUserLoggedIn(loggedIn: Boolean) {

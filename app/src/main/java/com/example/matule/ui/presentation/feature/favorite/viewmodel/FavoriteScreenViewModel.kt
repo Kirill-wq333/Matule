@@ -1,10 +1,13 @@
 package com.example.matule.ui.presentation.feature.favorite.viewmodel
 
 import androidx.lifecycle.viewModelScope
+import com.bumptech.glide.load.engine.Resource
 import com.example.domain.ui.presentation.feature.auth.interactor.AuthInteractor
 import com.example.domain.ui.presentation.feature.cart.interactor.CartInteractor
+import com.example.domain.ui.presentation.feature.cart.model.CartResult
 import com.example.domain.ui.presentation.feature.favorite.interactor.FavoriteInteractor
 import com.example.domain.ui.presentation.feature.favorite.model.FavoriteResult
+import com.example.domain.ui.presentation.feature.favorite.repository.FavoriteRepository
 import com.example.matule.ui.core.viewmodel.BaseViewModel
 import com.example.matule.ui.presentation.feature.notification.viewmodel.NotificationScreenContract
 import com.example.matule.ui.presentation.feature.popular.viewmodel.PopularScreenContract
@@ -17,6 +20,7 @@ import kotlin.math.max
 class FavoriteScreenViewModel @Inject constructor(
     private val favoriteInteractor: FavoriteInteractor,
     private val authInteractor: AuthInteractor,
+    private val favoriteRepository: FavoriteRepository,
     private val cartInteractor: CartInteractor
 )  : BaseViewModel<FavoriteScreenContract.Event, FavoriteScreenContract.State, FavoriteScreenContract.Effect>(){
 
@@ -25,7 +29,7 @@ class FavoriteScreenViewModel @Inject constructor(
     override fun handleEvent(event: FavoriteScreenContract.Event) = when(event) {
         is FavoriteScreenContract.Event.RefreshContent -> refreshFavorite()
         is FavoriteScreenContract.Event.LoadedContent -> loadFavorite()
-        is FavoriteScreenContract.Event.ToggleProductFavorite -> toggleProductFavorite(event.productId,event.currentlyFavorite)
+        is FavoriteScreenContract.Event.ToggleProductFavorite -> toggleFavorite(event.productId)
         is FavoriteScreenContract.Event.AddToCart -> addToCart(event.productId,event.quantity)
     }
 
@@ -33,6 +37,57 @@ class FavoriteScreenViewModel @Inject constructor(
         handleEvent(FavoriteScreenContract.Event.LoadedContent)
     }
 
+    private fun toggleFavorite(productId: Long) {
+        viewModelScope.launch {
+            val currentState = currentState
+            if (currentState is FavoriteScreenContract.State.Loaded) {
+                val updatedFavorites = currentState.favorite.filter {
+                    it.product.id != productId
+                }
+
+                if (updatedFavorites.isEmpty()) {
+                    setState(FavoriteScreenContract.State.Empty)
+                } else {
+                    setState(
+                        currentState.copy(favorite = updatedFavorites)
+                    )
+                }
+            }
+
+            val result = favoriteRepository.removeFromFavorites(productId)
+
+            if (result.isSuccess) {
+                when (val favoriteResult = result.getOrNull()) {
+                    is FavoriteResult.Success -> {
+                        if (!favoriteResult.isFavorite) {
+                            setEffect {
+                                FavoriteScreenContract.Effect.FavoriteStatusUpdated(
+                                    result = favoriteResult.copy(
+                                        productId = favoriteResult.productId,
+                                        isFavorite = false
+                                    ),
+                                )
+                            }
+                        }
+                    }
+                    is FavoriteResult.Error -> {
+                        setEffect {
+                            FavoriteScreenContract.Effect.ShowError(favoriteResult.message)
+                        }
+                        loadFavorite()
+                    }
+                    else -> {}
+                }
+            } else {
+                setEffect {
+                    FavoriteScreenContract.Effect.ShowError(
+                        result.exceptionOrNull()?.message ?: "Ошибка сети"
+                    )
+                }
+                loadFavorite()
+            }
+        }
+    }
     private fun loadFavorite(){
         viewModelScope.launch {
             setState(FavoriteScreenContract.State.Loading)
@@ -63,63 +118,7 @@ class FavoriteScreenViewModel @Inject constructor(
         }
     }
 
-    private fun toggleProductFavorite(productId: Long, currentlyFavorite: Boolean) {
-        viewModelScope.launch {
 
-            updateProductFavoriteStatusOptimistic(productId, !currentlyFavorite)
-
-            val result = favoriteInteractor.toggleFavorite(productId, currentlyFavorite)
-
-            if (result.isSuccess) {
-                when (val favoriteResult = result.getOrNull()!!) {
-                    is FavoriteResult.Success -> {
-                        setEffect { FavoriteScreenContract.Effect.FavoriteStatusUpdated(favoriteResult) }
-                        updateProductFavoriteStatus(favoriteResult.productId, favoriteResult.isFavorite)
-                    }
-                    is FavoriteResult.Error -> {
-                        updateProductFavoriteStatus(productId, currentlyFavorite)
-                        setEffect { FavoriteScreenContract.Effect.ShowError(favoriteResult.message) }
-                    }
-                }
-            } else {
-                updateProductFavoriteStatus(productId, currentlyFavorite)
-                setEffect { FavoriteScreenContract.Effect.ShowError("Ошибка обновления избранного") }
-            }
-        }
-    }
-
-    private fun updateProductFavoriteStatusOptimistic(productId: Long, isFavorite: Boolean) {
-        val currentState = currentState
-        if (currentState is FavoriteScreenContract.State.Loaded) {
-            setState(
-                currentState.copy(
-                    favorite = currentState.favorite.map { favoriteItem ->
-                        if (favoriteItem.product.id == productId) {
-                            favoriteItem.copy(product = favoriteItem.product.copy(isFavorite = isFavorite))
-                        } else {
-                            favoriteItem
-                        }
-                    }
-                )
-            )
-        }
-    }
-    private fun updateProductFavoriteStatus(productId: Long, isFavorite: Boolean) {
-        val currentState = currentState
-        if (currentState is FavoriteScreenContract.State.Loaded) {
-            setState(
-                currentState.copy(
-                    favorite = currentState.favorite.map { favoriteItem ->
-                        if (favoriteItem.product.id == productId) {
-                            favoriteItem.copy(product = favoriteItem.product.copy(isFavorite = isFavorite))
-                        } else {
-                            favoriteItem
-                        }
-                    }
-                )
-            )
-        }
-    }
 
     private fun addToCart(productId: Long, quantity: Int = 1) {
         viewModelScope.launch {

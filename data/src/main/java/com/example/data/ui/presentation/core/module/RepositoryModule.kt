@@ -5,7 +5,6 @@ import com.example.data.ui.presentation.feature.auth.AuthRepositoryImpl
 import com.example.data.ui.presentation.feature.auth.datasource.AuthApiService
 import com.example.data.ui.presentation.storage.tokenprovider.TokenProvider
 import com.example.domain.ui.presentation.feature.auth.repository.AuthRepository
-import android.content.Context
 import com.example.data.ui.presentation.feature.arrivals.ArrivalsRepositoryImpl
 import com.example.data.ui.presentation.feature.arrivals.datasource.ArrivalsApiService
 import com.example.data.ui.presentation.feature.cart.CartRepositoryImpl
@@ -70,10 +69,10 @@ class RepositoryModule {
     fun provideAuthRepository(
         apiService: AuthApiService,
         sharedPreferences: SharedPreferences,
-        @ApplicationContext context: Context,
+        cartRepository: CartRepository,
         tokenProvider: TokenProvider,
         appPreferencesImpl: AppPreferencesImpl
-    ): AuthRepository = AuthRepositoryImpl(apiService,tokenProvider,sharedPreferences,context,appPreferencesImpl)
+    ): AuthRepository = AuthRepositoryImpl(apiService,tokenProvider,sharedPreferences,appPreferencesImpl)
 
     @Provides
     @Singleton
@@ -82,7 +81,7 @@ class RepositoryModule {
         apiService: CartApiService,
         tokenProvider: TokenProvider,
         appPreferences: AppPreferencesImpl
-    ): CartRepository = CartRepositoryImpl(popularRepository, apiService, tokenProvider,appPreferences)
+    ): CartRepository = CartRepositoryImpl(popularRepository, apiService, tokenProvider, appPreferences)
 
     @Provides
     @Singleton
@@ -129,6 +128,7 @@ class RepositoryModule {
     @Provides
     @Singleton
     fun provideSideMenuRepository(
-        apiService: SideMenuApiService
+        apiService: SideMenuApiService,
+        appPreferences: AppPreferencesImpl
     ): SideMenuRepository = SideMenuRepositoryImpl(apiService)
 }

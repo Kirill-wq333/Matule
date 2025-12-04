@@ -61,6 +61,7 @@
 
     <!--  Favourite  -->
     <string name="favourite">Favourite</string>
+    <string name="empty_favorite">You don\'t have any selected products yet. Add a product to your favorites.</string>
 
     <!--  Cart  -->
     <string name="cart">Cart</string>
@@ -97,6 +98,7 @@
     <string name="see_all">See all</string>
     <string name="subtotal">Subtotal</string>
     <string name="phone">Phone</string>
+    <string name="date_of_birth">Date of birthday</string>
     <string name="delivery">Delivery</string>
     <string name="total_cost">Total Cost</string>
     <string name="contact_info">Contact Information</string>

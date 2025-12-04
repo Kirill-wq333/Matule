@@ -63,6 +63,7 @@
 
     <!--  Favourite  -->
     <string name="favourite">Избранное</string>
+    <string name="empty_favorite">У вас пока что нету избранных товаров. Добавьте товар в избранное.</string>
 
     <!--  Cart  -->
     <string name="cart">Корзина</string>
@@ -99,6 +100,7 @@
     <string name="see_all">Все</string>
     <string name="subtotal">Сумма</string>
     <string name="phone">Телефон</string>
+    <string name="date_of_birth">День рождение</string>
     <string name="delivery">Доставка</string>
     <string name="total_cost">Доставка</string>
     <string name="contact_info">Контактная информация</string>

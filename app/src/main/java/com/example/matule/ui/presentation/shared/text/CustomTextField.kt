@@ -31,7 +31,8 @@ fun CustomTextField(
     label: Int,
     onTextChange: (String) -> Unit,
     isError: Boolean = false,
-    placeholder: String,
+    placeholder: String = "",
+    readOnly: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     trailingIcon:@Composable () -> Unit = {},
     visualTransformation: VisualTransformation = VisualTransformation.None
@@ -51,6 +52,7 @@ fun CustomTextField(
             query = query,
             onTextChange = onTextChange,
             isError = isError,
+            readOnly = readOnly,
             placeholder = placeholder,
             keyboardOptions = keyboardOptions,
             visualTransformation = visualTransformation,
@@ -73,6 +75,7 @@ fun TextFieldWithTrailingIcon(
     onTextChange: (String) -> Unit,
     isError: Boolean = false,
     placeholder: String,
+    readOnly: Boolean = false,
     errorText: @Composable () -> Unit = {},
     trailingIcon: @Composable () -> Unit = {},
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
@@ -91,6 +94,7 @@ fun TextFieldWithTrailingIcon(
             textStyle = MatuleTypography.bodyMedium,
             visualTransformation = visualTransformation,
             keyboardOptions = keyboardOptions,
+            readOnly = readOnly,
             colors = TextFieldDefaults.colors(
                 cursorColor = Colors.text,
                 focusedContainerColor = Colors.background,

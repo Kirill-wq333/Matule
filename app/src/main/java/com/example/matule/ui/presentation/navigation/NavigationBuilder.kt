@@ -67,7 +67,8 @@ fun NavigationBuilder(
 
             composable(
                 AppRouts.MAIN,
-                enterTransition = { fadeIn(tween(1500)) }
+                enterTransition = { fadeIn(tween(1500)) },
+                exitTransition = { fadeOut(tween(700)) }
             ) {
                 val vmMain = hiltViewModel<MainViewModel>()
                 MainScreen(
@@ -160,14 +161,15 @@ fun NavigationBuilder(
 
                 SideMenuScreen(
                     vm = vmSideMenu,
-                    onBack = { navController.navigate(AppRouts.MAIN) },
+                    onBack = { navController.popBackStack() },
                     navController = navController
                 )
             }
 
             composable(
                 AppRouts.AUTH,
-                enterTransition = { fadeIn(tween(1500)) }
+                enterTransition = { fadeIn(tween(1500)) },
+                exitTransition = { fadeOut(tween(700)) }
             ) {
                 val vmAuth = hiltViewModel<AuthScreenViewModel>()
 
@@ -177,7 +179,14 @@ fun NavigationBuilder(
                 )
             }
 
-            composable(AppRouts.ONBOARDING) {
+            composable(
+                route = AppRouts.ONBOARDING,
+                enterTransition = { fadeIn(tween(1500)) },
+                exitTransition = {
+                    fadeOut(tween(1500)) +
+                            slideOutHorizontally(tween(700)) { -it }
+                }
+            ) {
                 val vmOnboarding = hiltViewModel<OnboardingViewModel>()
                 OnboardingScreen(
                     vm = vmOnboarding,
@@ -199,7 +208,8 @@ fun NavigationBuilder(
 
             composable(
                 route = AppRouts.FAVOURITE,
-                enterTransition = { fadeIn(tween(1500)) }
+                enterTransition = { fadeIn(tween(1500)) },
+                exitTransition = { fadeOut(tween(700)) }
             ) {
                 val vmFavorite = hiltViewModel<FavoriteScreenViewModel>()
                 FavoriteScreen(
@@ -219,7 +229,8 @@ fun NavigationBuilder(
 
             composable(
                 route = AppRouts.PROFILE,
-                enterTransition = { fadeIn(tween(1500)) }
+                enterTransition = { fadeIn(tween(1500)) },
+                exitTransition = { fadeOut(tween(700)) }
             ) {
                 val vmProfile = hiltViewModel<ProfileScreenViewModel>()
                 ProfileScreen(
@@ -234,7 +245,8 @@ fun NavigationBuilder(
 
             composable(
                 route = AppRouts.NOTIFICATION,
-                enterTransition = { fadeIn(tween(1500)) }
+                enterTransition = { fadeIn(tween(1500)) },
+                exitTransition = { fadeOut(tween(700)) }
             ) {
                 val vmNotification = hiltViewModel<NotificationScreenViewModel>()
 
@@ -248,8 +260,8 @@ fun NavigationBuilder(
             visible = shouldShowBottomBar,
             modifier = Modifier
                 .align(Alignment.BottomCenter),
-            enter =  slideInVertically(tween(700)) { it } + fadeIn(tween(700)),
-            exit = slideOutVertically(tween(700)){ it } + fadeOut(tween(700))
+            enter = slideInVertically(tween(700)) { it } + fadeIn(tween(700)),
+            exit = slideOutVertically(tween(700)) { it } + fadeOut(tween(700))
         ) {
             BottomBarNavigation(
                 navController = navController,

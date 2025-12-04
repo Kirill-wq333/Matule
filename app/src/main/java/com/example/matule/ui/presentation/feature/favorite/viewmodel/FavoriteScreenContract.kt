@@ -11,7 +11,7 @@ import com.example.matule.ui.presentation.feature.popular.viewmodel.PopularScree
 object FavoriteScreenContract {
 
     sealed interface Event : ViewEvent{
-        data class ToggleProductFavorite(val productId: Long, val currentlyFavorite: Boolean) : Event
+        data class ToggleProductFavorite(val productId: Long) : Event
         data object LoadedContent : Event
         data object RefreshContent : Event
 

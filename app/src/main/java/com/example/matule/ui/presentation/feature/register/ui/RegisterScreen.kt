@@ -1,6 +1,7 @@
 package com.example.matule.ui.presentation.feature.register.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -70,8 +71,6 @@ private fun Content(
     var password by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("7") }
 
     var privacyPolice by remember { mutableStateOf(false) }
 
@@ -95,15 +94,11 @@ private fun Content(
             RegisterContent(
                 isEmailError = isEmailError,
                 isPasswordError = isPasswordError,
-                phone = phone,
                 email = email,
                 firstName = firstName,
-                lastName = lastName,
                 password = password,
-                onPhoneChange = { phone = it },
                 onEmailChange = { email = it },
                 onPasswordChange = { password = it },
-                onLastNameChange = { lastName = it },
                 onFirstNameChange = { firstName = it },
                 privacyPolice = privacyPolice,
                 onCheckBox = { privacyPolice = !privacyPolice },
@@ -117,8 +112,6 @@ private fun Content(
                                 email,
                                 password,
                                 firstName,
-                                lastName,
-                                phone
                             )
                         )
                         navController.navigate(AppRouts.AUTH)
@@ -138,15 +131,11 @@ private fun Content(
 fun RegisterContent(
     isEmailError: Boolean,
     isPasswordError: Boolean,
-    phone: String,
     email: String,
     firstName: String,
-    lastName: String,
     password: String,
-    onPhoneChange: (String) -> Unit,
     onEmailChange:  (String) -> Unit,
     onPasswordChange:  (String) -> Unit,
-    onLastNameChange:  (String) -> Unit,
     privacyPolice: Boolean,
     onCheckBox: () -> Unit,
     onFirstNameChange:  (String) -> Unit,
@@ -177,59 +166,27 @@ fun RegisterContent(
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(
+            CustomTextField(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                CustomTextField(
-                    modifier = Modifier.weight(0.5f),
-                    query = firstName,
-                    onTextChange = onFirstNameChange,
-                    label = R.string.name,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                    textError = R.string.register_enter_name,
-                    placeholder = "Иван"
-                )
-                CustomTextField(
-                    modifier = Modifier.weight(0.5f),
-                    query = lastName,
-                    onTextChange = onLastNameChange,
-                    label = R.string.last_name,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                    textError = null,
-                    placeholder = "Иванов"
-                )
-            }
-            Row(
+                query = firstName,
+                onTextChange = onFirstNameChange,
+                label = R.string.name,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                textError = R.string.register_enter_name,
+                placeholder = "Иван"
+            )
+
+            CustomTextField(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                CustomTextField(
-                    modifier = Modifier.weight(0.5f),
-                    query = email,
-                    onTextChange = onEmailChange,
-                    label = R.string.email,
-                    isError = isEmailError,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    textError = R.string.register_enter_email,
-                    placeholder = "example@gmail.com"
-                )
-                CustomTextField(
-                    modifier = Modifier.weight(0.5f),
-                    query = phone,
-                    onTextChange = {
-                        onPhoneChange(it)
-                    },
-                    label = R.string.phone,
-                    visualTransformation = rememberMaskVisualTransformation("+#(###)###-##-##"),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Phone,
-                        imeAction = ImeAction.Next
-                    ),
-                    textError = null,
-                    placeholder = "+7 (999) 999-00-00"
-                )
-            }
+                query = email,
+                onTextChange = onEmailChange,
+                label = R.string.email,
+                isError = isEmailError,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                textError = R.string.register_enter_email,
+                placeholder = "example@gmail.com"
+            )
+
             PasswordTextField(
                 password = password,
                 onPasswordChange = onPasswordChange,
@@ -240,13 +197,14 @@ fun RegisterContent(
                 textError = R.string.register_enter_password
             )
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .clickable(onClick = onCheckBox)
+                    .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 CheckboxPrivacyPolice(
                     isSelected = privacyPolice,
-                    onClick = onCheckBox
                 )
                 Text(
                     text = stringResource(R.string.checkbox_agree),

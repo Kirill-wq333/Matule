@@ -1,8 +1,10 @@
 package com.example.data.ui.presentation.feature.favorite.dto
 
+import com.example.data.ui.presentation.feature.favorite.dto.FavoriteProductDto.Companion.toFavorite
 import com.example.data.ui.presentation.feature.popular.dto.ProductDto
 import com.example.data.ui.presentation.feature.popular.dto.ProductDto.Companion.toProductDto
 import com.example.domain.ui.presentation.feature.favorite.model.Favorite
+import com.example.domain.ui.presentation.feature.favorite.model.FavoriteProduct
 import com.example.domain.ui.presentation.feature.popular.model.Product
 
 data class FavoriteDto(
@@ -10,7 +12,7 @@ data class FavoriteDto(
     val userId: Long,
     val productId: Long,
     val createdAt: String,
-    val product: ProductDto
+    val product: FavoriteProductDto
 ){
 
     companion object{
@@ -20,8 +22,25 @@ data class FavoriteDto(
                 userId = userId,
                 productId = productId,
                 createdAt = createdAt,
-                product = product.toProductDto()
+                product = product.toFavorite()
             )
     }
 
+}
+
+data class FavoriteProductDto(
+    val id : Long,
+    val name: String,
+    val images: List<String>,
+    val price: Double
+){
+    companion object{
+        fun FavoriteProductDto.toFavorite(): FavoriteProduct =
+            FavoriteProduct(
+                id = id,
+                name = name,
+                images = images,
+                price = price
+            )
+    }
 }

@@ -9,12 +9,13 @@ data class Favorite(
     val userId: Long,
     val productId: Long,
     val createdAt: String,
-    val product: Product
+    val product: FavoriteProduct
 )
-//
-//data class FavoriteProduct(
-//    val id : Long,
-//    val name: String,
-//    val images: String,
-//    val price: Double
-//)
+
+
+data class FavoriteProduct(
+    val id : Long,
+    val name: String,
+    val images: List<String>,
+    val price: Double
+)
