@@ -40,7 +40,7 @@ class ProfileScreenViewModel @Inject constructor(
     }
 
     private fun loadProfile() {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             setState ( ProfileScreenContract.State.Loading )
 
             val result = profileInteractor.getProfile()
@@ -74,7 +74,7 @@ class ProfileScreenViewModel @Inject constructor(
         postalCode: String?,
         dateOfBirth: String?
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
 
             setState (
                 when (val currentState = currentState) {
@@ -129,7 +129,7 @@ class ProfileScreenViewModel @Inject constructor(
     }
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             loadProfile()
             tokenProvider.getToken()
         }

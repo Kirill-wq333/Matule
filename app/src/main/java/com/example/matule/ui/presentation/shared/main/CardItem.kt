@@ -243,7 +243,7 @@ private fun CardContent(
                 style = MatuleTypography.bodySmall
             )
             Text(
-                text = cardName,
+                text = if (cardName.length > 16) "${cardName.take(16)}..." else cardName,
                 color = Colors.hint,
                 style = MatuleTypography.bodyLarge
             )

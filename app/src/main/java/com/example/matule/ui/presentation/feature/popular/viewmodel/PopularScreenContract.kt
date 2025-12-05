@@ -23,7 +23,7 @@ object PopularScreenContract {
         data class Loaded(
             val popularProducts: List<Product> = emptyList(),
             val cartState: CartState = CartState(),
-            val cartItems: Set<Long> = emptySet()
+            val isEnableDot: Set<Long> = emptySet()
         ): State
         data object Loading: State
         data object Empty: State

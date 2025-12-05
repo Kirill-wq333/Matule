@@ -43,6 +43,10 @@ fun NotificationScreen(
 ) {
     val state by vm.state.collectAsState()
 
+    LaunchedEffect(Unit) {
+        vm.handleEvent(NotificationScreenContract.Event.LoadNotifications)
+    }
+
     Content(
         state = state,
         openSideMenu = openSideMenu

@@ -31,13 +31,13 @@ class AuthScreenViewModel @Inject constructor(
     }
 
     private fun checkExistingToken() {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             authInteractor.getToken()
         }
     }
 
     private fun login(email: String, password: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
 
             val result = authInteractor.login(email, password)
 
@@ -67,7 +67,7 @@ class AuthScreenViewModel @Inject constructor(
     }
 
     private fun checkAuthStatus() {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
 
             val isLoggedIn = authInteractor.isUserLoggedIn()
             if (isLoggedIn) {

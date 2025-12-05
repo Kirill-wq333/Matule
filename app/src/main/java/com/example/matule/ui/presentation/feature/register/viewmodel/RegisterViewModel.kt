@@ -26,7 +26,7 @@ class RegisterViewModel @Inject constructor(
         lastName: String? = null,
         phone: String? = null
     ){
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             val registerUser = registerInteractor.register(email,password,firstName,lastName,phone)
 
             when {

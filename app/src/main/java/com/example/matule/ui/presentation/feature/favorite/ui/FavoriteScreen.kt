@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -52,6 +53,10 @@ fun FavoriteScreen(
     navController: NavHostController
 ) {
     val state by vm.state.collectAsState()
+
+    LaunchedEffect(Unit) {
+        vm.handleEvent(FavoriteScreenContract.Event.LoadedContent)
+    }
 
     val callback = object : FavoriteScreenCallback {
         override fun removeFromFavorite(id: Long) {

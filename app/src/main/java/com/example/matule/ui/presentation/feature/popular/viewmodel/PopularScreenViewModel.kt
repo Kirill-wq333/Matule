@@ -30,7 +30,7 @@ class PopularScreenViewModel @Inject constructor(
     }
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             favoriteInteractor.favoriteUpdates.collect { (productId, isFavorite) ->
                 updateProductFavoriteStatus(productId, isFavorite)
             }
@@ -40,7 +40,7 @@ class PopularScreenViewModel @Inject constructor(
     }
 
     private fun checkAuthAndLoadContent() {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             val isLoggedIn = authInteractor.isUserLoggedIn()
 
             if (isLoggedIn) {
@@ -55,7 +55,7 @@ class PopularScreenViewModel @Inject constructor(
     }
 
     private fun loadPopular(){
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             setState(PopularScreenContract.State.Loading)
 
             val result = popularInteractor.loadAllProducts()
@@ -67,7 +67,7 @@ class PopularScreenViewModel @Inject constructor(
                 setState(
                     PopularScreenContract.State.Loaded(
                         popularProducts = content,
-                        cartItems = cart
+                        isEnableDot = cart
                     )
                 )
             } else {
@@ -84,7 +84,7 @@ class PopularScreenViewModel @Inject constructor(
     }
 
     private fun toggleProductFavorite(productId: Long, currentlyFavorite: Boolean) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
 
             updateProductFavoriteStatusOptimistic(productId, !currentlyFavorite)
 
@@ -169,14 +169,14 @@ class PopularScreenViewModel @Inject constructor(
         val currentState = currentState
         if (currentState is PopularScreenContract.State.Loaded) {
             val updatedCartItems = if (inCart) {
-                currentState.cartItems + productId
+                currentState.isEnableDot + productId
             } else {
-                currentState.cartItems - productId
+                currentState.isEnableDot - productId
             }
 
             setState(
                 currentState.copy(
-                    cartItems = updatedCartItems
+                    isEnableDot = updatedCartItems
                 )
             )
         }

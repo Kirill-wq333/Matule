@@ -134,7 +134,7 @@ private fun Content(
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Column {
-            HeadingAndUnderHeadingAuth(
+            TitleAndSubTitleAuth(
                 heading = R.string.auth_hello_heading,
                 underHeading = R.string.auth_under_heading
             )
@@ -158,7 +158,7 @@ private fun Content(
 }
 
 @Composable
-fun HeadingAndUnderHeadingAuth(
+fun TitleAndSubTitleAuth(
     heading: Int,
     underHeading: Int
 ) {

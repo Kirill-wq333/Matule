@@ -11,7 +11,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -30,6 +32,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -37,6 +40,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -55,6 +59,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -66,6 +72,7 @@ import com.example.matule.ui.presentation.feature.profile.viewmodel.ProfileScree
 import com.example.matule.ui.presentation.feature.profile.viewmodel.ProfileScreenViewModel
 import com.example.matule.ui.presentation.shared.buttons.CustomButton
 import com.example.matule.ui.presentation.shared.header.CustomHeaderMain
+import com.example.matule.ui.presentation.shared.mask.rememberMaskVisualTransformation
 import com.example.matule.ui.presentation.shared.screen.MainLoadingScreen
 import com.example.matule.ui.presentation.shared.text.CustomTextField
 import com.example.matule.ui.presentation.theme.Colors
@@ -78,6 +85,10 @@ fun ProfileScreen(
 ) {
     val state by vm.state.collectAsState()
     val profile by vm.profile.collectAsState()
+
+    LaunchedEffect(Unit) {
+        vm.handleEvent(ProfileScreenContract.Event.LoadProfile)
+    }
 
     ProfileContent(
         openSideMenu = { navController.navigate(AppRouts.SIDE_MENU) },
@@ -95,15 +106,30 @@ fun ProfileContent(
     openSideMenu: () -> Unit
 ) {
 
-    var firstName by mutableStateOf(profile.firstName)
-    var lastName by mutableStateOf(profile.lastName)
-    var phone by mutableStateOf(profile.phone)
-    var country by mutableStateOf(profile.country)
-    var city by mutableStateOf(profile.city)
-    var address by mutableStateOf(profile.address)
-    var postalCode by mutableStateOf(profile.postalCode)
-    var dateOfBirth by mutableStateOf(profile.dateOfBirth)
-    var email by mutableStateOf(profile.email)
+    var firstName by remember(profile) {
+        mutableStateOf(profile.firstName)
+    }
+    var lastName by remember(profile) {
+        mutableStateOf(profile.lastName)
+    }
+    var phone by remember(profile) {
+        mutableStateOf(profile.phone)
+    }
+    var country by remember(profile) {
+        mutableStateOf(profile.country)
+    }
+    var city by remember(profile) {
+        mutableStateOf(profile.city)
+    }
+    var address by remember(profile) {
+        mutableStateOf(profile.address)
+    }
+    var postalCode by remember(profile) {
+        mutableStateOf(profile.postalCode)
+    }
+    var email by remember(profile) {
+        mutableStateOf(profile.email)
+    }
 
 
     val hasChanges by remember(
@@ -115,7 +141,6 @@ fun ProfileContent(
         city,
         address,
         postalCode,
-        dateOfBirth,
         email
     ) {
         derivedStateOf {
@@ -127,7 +152,6 @@ fun ProfileContent(
                     city != profile.city ||
                     address != profile.address ||
                     postalCode != profile.postalCode ||
-                    dateOfBirth != profile.dateOfBirth ||
                     email != profile.email
         }
     }
@@ -170,8 +194,8 @@ fun ProfileContent(
 
         AnimatedVisibility(
             visible = visibleEditingScreen && hasChanges,
-            enter = fadeIn(tween(1700)) + slideInHorizontally( tween(700)) { -it },
-            exit = fadeOut(tween(700)) + slideOutHorizontally(tween(700)) { -it }
+            enter = fadeIn(tween(1700)) + slideInVertically( tween(700)) { -it },
+            exit = fadeOut(tween(700)) + slideOutVertically(tween(700)) { -it }
         ) {
             Column {
                 Spacer(modifier = Modifier.height(20.dp))
@@ -188,9 +212,9 @@ fun ProfileContent(
                                 city = city,
                                 address = address,
                                 postalCode = postalCode,
-                                dateOfBirth = dateOfBirth
                             )
                         )
+                        visibleEditingScreen = false
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -210,7 +234,6 @@ fun ProfileContent(
                     city = city,
                     address = address,
                     postalCode = postalCode,
-                    dateOfBirth = dateOfBirth,
                     email = email,
                     visibleEditingScreen = visibleEditingScreen,
                     openQrCodeScreen = { qrCode = true },
@@ -219,7 +242,6 @@ fun ProfileContent(
                     onLastNameChange = { lastName = it },
                     onPhoneChange = { phone = it },
                     onAddressChange = { address = it },
-                    onDateOfBirthChange = { dateOfBirth = it },
                     onCityChange = { city = it },
                     onCountryChange = { country = it },
                     onPostalCodeChange = { postalCode = it }
@@ -254,7 +276,6 @@ private fun Content(
     openQrCodeScreen: () -> Unit,
     address: String?,
     postalCode: String?,
-    dateOfBirth: String?,
     email: String,
     onEmailChange: (String) -> Unit,
     onFirstNameChange: (String) -> Unit,
@@ -264,7 +285,6 @@ private fun Content(
     onCityChange: (String) -> Unit,
     onPhoneChange: (String) -> Unit,
     onAddressChange: (String) -> Unit,
-    onDateOfBirthChange: (String) -> Unit,
 ) {
 
     Column(
@@ -359,34 +379,29 @@ private fun Content(
                     label = R.string.postal_code,
                 )
             } else {
-                // Показываем объединенный адрес при просмотре
                 CustomTextField(
                     modifier = Modifier.fillMaxWidth(),
                     readOnly = true,
                     query = "${country ?: ""}, ${city ?: ""}, ${address ?: ""}, ${postalCode ?: ""}",
                     onTextChange = {},
                     label = R.string.address,
-                    placeholder = "Область, город, адрес, номер дома",
+                    placeholder = "",
                 )
             }
             CustomTextField(
                 modifier = Modifier.fillMaxWidth(),
                 readOnly = !visibleEditingScreen,
                 query = phone ?: "",
+                visualTransformation = rememberMaskVisualTransformation("+#(###)###-##-##"),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Phone,
+                    imeAction = ImeAction.Next
+                ),
                 onTextChange = {
                     onPhoneChange(it)
                 },
+                placeholder = "+7 (999) 999-00-00",
                 label = R.string.phone
-            )
-            CustomTextField(
-                modifier = Modifier.fillMaxWidth(),
-                readOnly = !visibleEditingScreen,
-                query = dateOfBirth ?: "",
-                onTextChange = {
-                    onDateOfBirthChange(it)
-                },
-                label = R.string.date_of_birth,
-                placeholder = "День рождение"
             )
             CustomTextField(
                 modifier = Modifier.fillMaxWidth(),

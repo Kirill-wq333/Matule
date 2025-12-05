@@ -27,14 +27,14 @@ class SideMenuScreenViewModel @Inject constructor(
     }
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             loadProfile()
             tokenProvider.getToken()
         }
     }
 
     private fun loadProfile() {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             setState (SideMenuScreenContract.State.Loading )
 
             val result = profileInteractor.getProfile()
@@ -60,7 +60,7 @@ class SideMenuScreenViewModel @Inject constructor(
     }
 
     private fun logout() {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
 
             val result = sideMenuInteractor.logout()
 

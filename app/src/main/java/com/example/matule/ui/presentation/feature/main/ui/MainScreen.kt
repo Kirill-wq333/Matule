@@ -12,10 +12,10 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.with
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,10 +23,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -51,9 +51,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.example.domain.ui.presentation.feature.arrivals.model.Promotion
 import com.example.domain.ui.presentation.feature.catalog.model.Category
 import com.example.domain.ui.presentation.feature.popular.model.Product
-import com.example.domain.ui.presentation.feature.arrivals.model.Promotion
 import com.example.matule.R
 import com.example.matule.ui.presentation.approuts.AppRouts
 import com.example.matule.ui.presentation.feature.main.viewmodel.MainScreenContract
@@ -85,6 +85,10 @@ fun MainScreen(
 ) {
 
     val state by vm.state.collectAsState()
+
+    LaunchedEffect(Unit) {
+        vm.handleEvent(MainScreenContract.Event.LoadContent)
+    }
 
     val callback = object : MainScreenCallback {
 
@@ -192,7 +196,7 @@ private fun Content(
         modifier = Modifier
             .fillMaxSize()
             .background(color = Colors.background)
-            .padding(horizontal = 20.dp)
+            .padding(start = 20.dp, end = 20.dp, bottom = 50.dp)
     ) {
         AnimatedVisibility(
             visible = catalogScreen,
@@ -213,17 +217,14 @@ private fun Content(
             enter = slideInHorizontally(animationSpec = tween(1700)) { it } + fadeIn(animationSpec = tween(700)),
             exit = slideOutHorizontally(animationSpec = tween(700)) { it } + fadeOut(animationSpec = tween(700))
         ) {
-            Column {
-                CustomHeader(
-                    text = R.string.search,
-                    onBack = {
-                        searchScreen = false
-                        onSearchChange(search)
-                    },
-                    visibleNameScreen = true
-                )
-                Spacer(modifier = Modifier.height(26.dp))
-            }
+            CustomHeader(
+                text = R.string.search,
+                onBack = {
+                    searchScreen = false
+                    onSearchChange(search)
+                },
+                visibleNameScreen = true
+            )
         }
 
         AnimatedVisibility(
@@ -231,15 +232,12 @@ private fun Content(
             enter = slideInHorizontally(animationSpec = tween(1700)) { -it } + fadeIn(animationSpec = tween(700)),
             exit = slideOutHorizontally(animationSpec = tween(700)) { -it } + fadeOut(animationSpec = tween(700))
         ) {
-            Column {
-                CustomHeaderMain(
-                    text = R.string.main,
-                    cardItem = state.cartItems.size,
-                    openSideMenu = openSideMenu,
-                    openCartScreen = openCartScreen
-                )
-                Spacer(modifier = Modifier.height(21.dp))
-            }
+            CustomHeaderMain(
+                text = R.string.main,
+                cardItem = state.isEnableDot.size,
+                openSideMenu = openSideMenu,
+                openCartScreen = openCartScreen
+            )
         }
 
         AnimatedVisibility(
@@ -247,42 +245,62 @@ private fun Content(
             enter = slideInHorizontally(animationSpec = tween(1700)) { -it } + fadeIn(animationSpec = tween(700)),
             exit = slideOutHorizontally(animationSpec = tween(700)) { -it } + fadeOut(animationSpec = tween(700))
         ) {
-            SearchAndFeature(
-                query = search,
-                searchScreen = searchScreen,
-                onTextChange = { newText ->
-                    onSearchChange(newText)
-                    if (newText.isNotEmpty()) {
-                        searchScreen = true
-                    } else {
-                        searchScreen = false
+            Column {
+                Spacer(modifier = Modifier.height(if (catalogScreen) 26.dp else 21.dp))
+                SearchAndFeature(
+                    query = search,
+                    searchScreen = searchScreen,
+                    onTextChange = { newText ->
+                        onSearchChange(newText)
+                        if (newText.isNotEmpty()) {
+                            searchScreen = true
+                        } else {
+                            searchScreen = false
+                        }
                     }
-                }
-            )
+                )
+                Spacer(modifier = Modifier.height(if (catalogScreen) 28.dp else 0.dp))
+            }
         }
 
-        Spacer(modifier = Modifier.height(22.dp))
-        CatalogCard(
-            openCatalogScreen = {
-                catalogScreen = true
-            },
-            categories = state.categories
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        PopularCard(
-            openPopularScreen = openPopularScreen,
-            addedInCart = addedInCart,
-            openCartScreen = openCartScreen,
-            openDetailScreen = openDetailScreen,
-            popularProducts = popularProduct,
-            addedInFavorite = addedInFavorite,
-            cartItems = state.cartItems
-        )
-        Spacer(modifier = Modifier.height(29.dp))
-        ArrivalsCard(
-            openArrivalsScreen = openArrivalsScreen,
-            promotions = state.promotions
-        )
+        AnimatedVisibility(
+            visible = !showSearchHeader,
+            enter = slideInHorizontally(animationSpec = tween(1700)) { -it } + fadeIn(animationSpec = tween(700)),
+            exit = slideOutHorizontally(animationSpec = tween(700)) { -it } + fadeOut(animationSpec = tween(700))
+        ) {
+            Column {
+                Spacer(modifier = Modifier.height(if (showSearchHeader) 16.dp else 22.dp))
+                CatalogCard(
+                    openCatalogScreen = {
+                        catalogScreen = true
+                    },
+                    categories = state.categories
+                )
+                Spacer(modifier = Modifier.height(if (showSearchHeader) 20.dp else 24.dp))
+            }
+        }
+        AnimatedVisibility(
+            visible = !catalogScreen && !showSearchHeader,
+            enter = slideInHorizontally(animationSpec = tween(1700)) { -it } + fadeIn(animationSpec = tween(700)),
+            exit = slideOutHorizontally(animationSpec = tween(700)) { -it } + fadeOut(animationSpec = tween(700))
+        ) {
+            Column() {
+                PopularCard(
+                    openPopularScreen = openPopularScreen,
+                    addedInCart = addedInCart,
+                    openCartScreen = openCartScreen,
+                    openDetailScreen = openDetailScreen,
+                    popularProducts = popularProduct,
+                    addedInFavorite = addedInFavorite,
+                    cartItems = state.isEnableDot
+                )
+                Spacer(modifier = Modifier.height(29.dp))
+                ArrivalsCard(
+                    openArrivalsScreen = openArrivalsScreen,
+                    promotions = state.promotions
+                )
+            }
+        }
     }
 }
 
@@ -416,11 +434,12 @@ fun CatalogCard(
             style = MatuleTypography.titleMedium
         )
 
-        Row(
-            modifier = Modifier.horizontalScroll(rememberScrollState()),
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 5.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            categoriesList.forEach { category ->
+
+            items(categoriesList) { category ->
                 Item(
                     text = category,
                     onClick = openCatalogScreen
@@ -469,7 +488,7 @@ private fun ArrivalsCard(
                 ) { promotion ->
                     Arrivals(
                         arrivalsImage = promotion.image,
-                        modifier = Modifier.padding(horizontal = 10.dp)
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                     )
                 }
             }

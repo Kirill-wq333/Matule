@@ -83,6 +83,10 @@ fun SideMenuScreen(
 
     val state by vm.state.collectAsState()
 
+    LaunchedEffect(Unit) {
+        vm.handleEvent(SideMenuScreenContract.Event.LoadUserProfile)
+    }
+
     val sideMenu = listOf(
         SideMenu(
             route = AppRouts.PROFILE,

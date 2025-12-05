@@ -28,7 +28,7 @@ object MainScreenContract {
             val promotions: List<Promotion> = emptyList(),
             val selectedCategoryId: Long? = null,
             val cartState: CartState = CartState(),
-            val cartItems: Set<Long> = emptySet()
+            val isEnableDot: Set<Long> = emptySet()
         ) : State
         data class Error(val message: String) : State
 

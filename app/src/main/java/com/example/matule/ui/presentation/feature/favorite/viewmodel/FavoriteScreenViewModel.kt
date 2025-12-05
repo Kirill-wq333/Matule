@@ -38,7 +38,7 @@ class FavoriteScreenViewModel @Inject constructor(
     }
 
     private fun toggleFavorite(productId: Long) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             val currentState = currentState
             if (currentState is FavoriteScreenContract.State.Loaded) {
                 val updatedFavorites = currentState.favorite.filter {
@@ -89,7 +89,7 @@ class FavoriteScreenViewModel @Inject constructor(
         }
     }
     private fun loadFavorite(){
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             setState(FavoriteScreenContract.State.Loading)
 
             val result = favoriteInteractor.getFavorite()
@@ -121,7 +121,7 @@ class FavoriteScreenViewModel @Inject constructor(
 
 
     private fun addToCart(productId: Long, quantity: Int = 1) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
 
             val isLoggedIn = authInteractor.isUserLoggedIn()
             val token = authInteractor.getToken()

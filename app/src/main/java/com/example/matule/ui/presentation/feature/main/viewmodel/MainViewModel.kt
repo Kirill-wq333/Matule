@@ -36,7 +36,7 @@ class MainViewModel @Inject constructor(
 
     init {
 
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             favoriteInteractor.favoriteUpdates.collect { (productId, isFavorite) ->
                 updateProductFavoriteStatus(productId, isFavorite)
             }
@@ -46,7 +46,7 @@ class MainViewModel @Inject constructor(
     }
 
     private fun checkAuthAndLoadContent() {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             val isLoggedIn = authInteractor.isUserLoggedIn()
 
             if (isLoggedIn) {
@@ -57,7 +57,7 @@ class MainViewModel @Inject constructor(
 
 
     private fun loadHomeContent() {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             setState ( MainScreenContract.State.Loading )
 
             val result = mainInteractor.loadHomeContent()
@@ -69,7 +69,7 @@ class MainViewModel @Inject constructor(
                 setState (
                     MainScreenContract.State.Loaded(
                         categories = content.categories,
-                        cartItems = cart,
+                        isEnableDot = cart,
                         popularProducts = content.popularProducts,
                         promotions = content.promotions
                     )
@@ -83,7 +83,7 @@ class MainViewModel @Inject constructor(
     }
 
     private fun toggleProductFavorite(productId: Long, currentlyFavorite: Boolean) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
 
             updateProductFavoriteStatusOptimistic(productId, !currentlyFavorite)
 
@@ -108,7 +108,7 @@ class MainViewModel @Inject constructor(
     }
 
     private fun loadProductsByCategory(category: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             setState ( MainScreenContract.State.Loading )
 
             val result = popularInteractor.loadProductsByCategory(category)
@@ -176,7 +176,7 @@ class MainViewModel @Inject constructor(
     }
 
     private fun addToCart(productId: Long, quantity: Int = 1) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
 
             val isLoggedIn = authInteractor.isUserLoggedIn()
             val token = authInteractor.getToken()
@@ -210,14 +210,14 @@ class MainViewModel @Inject constructor(
         val currentState = currentState
         if (currentState is MainScreenContract.State.Loaded) {
             val updatedCartItems = if (inCart) {
-                currentState.cartItems + productId
+                currentState.isEnableDot + productId
             } else {
-                currentState.cartItems - productId
+                currentState.isEnableDot - productId
             }
 
             setState(
                 currentState.copy(
-                    cartItems = updatedCartItems
+                    isEnableDot = updatedCartItems
                 )
             )
         }

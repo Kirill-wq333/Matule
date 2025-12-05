@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -50,6 +51,10 @@ fun PopularScreen(
 ) {
 
     val state by vm.state.collectAsState()
+
+    LaunchedEffect(Unit) {
+        vm.handleEvent(PopularScreenContract.Event.LoadedContent)
+    }
 
     val callback = object : PopularScreenCallback {
         override fun addedInFavorite(id: Long, isFavorite: Boolean) {
@@ -124,7 +129,7 @@ private fun PopularContent(
                     addedInCart = addedInCart,
                     openDetailScreen = openDetailScreen,
                     populars = state.popularProducts,
-                    cartItems = state.cartItems,
+                    cartItems = state.isEnableDot,
                     openCartScreen = openCartScreen,
                     addedInFavorite = addedInFavorite
                 )

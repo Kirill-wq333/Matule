@@ -27,7 +27,7 @@ class NotificationScreenViewModel @Inject constructor(
     }
 
     private fun loadNotifications() {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             setState(NotificationScreenContract.State.Loading)
 
             val result = notificationInteractor.getNotifications()

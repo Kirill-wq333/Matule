@@ -30,7 +30,7 @@ class ArrivalsScreenViewModel @Inject constructor(
     }
 
     private fun checkAuthAndLoadContent() {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             val isLoggedIn = authInteractor.isUserLoggedIn()
 
             if (isLoggedIn) {
@@ -42,7 +42,7 @@ class ArrivalsScreenViewModel @Inject constructor(
 
 
     private fun loadArrivals() {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher) {
             setState(ArrivalsScreenContract.State.Loading)
 
             val result = arrivalsInteractor.loadPromotions()
