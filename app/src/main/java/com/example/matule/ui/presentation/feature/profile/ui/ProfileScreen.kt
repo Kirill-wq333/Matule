@@ -1,8 +1,22 @@
 package com.example.matule.ui.presentation.feature.profile.ui
 
+import android.app.Activity
+import android.view.Window
+import android.view.WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
+import android.view.WindowManager.LayoutParams.SCREEN_BRIGHTNESS_CHANGED
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,7 +36,9 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,7 +47,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
@@ -41,10 +59,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.example.domain.ui.presentation.feature.profile.model.UserProfile
 import com.example.matule.R
 import com.example.matule.ui.presentation.approuts.AppRouts
 import com.example.matule.ui.presentation.feature.profile.viewmodel.ProfileScreenContract
 import com.example.matule.ui.presentation.feature.profile.viewmodel.ProfileScreenViewModel
+import com.example.matule.ui.presentation.shared.buttons.CustomButton
 import com.example.matule.ui.presentation.shared.header.CustomHeaderMain
 import com.example.matule.ui.presentation.shared.screen.MainLoadingScreen
 import com.example.matule.ui.presentation.shared.text.CustomTextField
@@ -57,19 +77,63 @@ fun ProfileScreen(
     navController: NavHostController
 ) {
     val state by vm.state.collectAsState()
+    val profile by vm.profile.collectAsState()
 
     ProfileContent(
         openSideMenu = { navController.navigate(AppRouts.SIDE_MENU) },
-        state = state
+        state = state,
+        vm = vm,
+        profile = profile
     )
 }
 
 @Composable
 fun ProfileContent(
+    profile: UserProfile,
+    vm: ProfileScreenViewModel,
     state: ProfileScreenContract.State,
     openSideMenu: () -> Unit
 ) {
+
+    var firstName by mutableStateOf(profile.firstName)
+    var lastName by mutableStateOf(profile.lastName)
+    var phone by mutableStateOf(profile.phone)
+    var country by mutableStateOf(profile.country)
+    var city by mutableStateOf(profile.city)
+    var address by mutableStateOf(profile.address)
+    var postalCode by mutableStateOf(profile.postalCode)
+    var dateOfBirth by mutableStateOf(profile.dateOfBirth)
+    var email by mutableStateOf(profile.email)
+
+
+    val hasChanges by remember(
+        profile,
+        firstName,
+        lastName,
+        phone,
+        country,
+        city,
+        address,
+        postalCode,
+        dateOfBirth,
+        email
+    ) {
+        derivedStateOf {
+
+            firstName != profile.firstName ||
+                    lastName != profile.lastName ||
+                    phone != profile.phone ||
+                    country != profile.country ||
+                    city != profile.city ||
+                    address != profile.address ||
+                    postalCode != profile.postalCode ||
+                    dateOfBirth != profile.dateOfBirth ||
+                    email != profile.email
+        }
+    }
+
     var visibleEditingScreen by remember { mutableStateOf(false) }
+    var qrCode by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -80,35 +144,85 @@ fun ProfileContent(
             )
             .verticalScroll(rememberScrollState())
     ) {
-        CustomHeaderMain(
-            text = R.string.profile,
-            endIcon = R.drawable.ic_edit,
-            openSideMenu = openSideMenu,
-            tintEndIcon = Colors.block,
-            openCartScreen = {
-                visibleEditingScreen = true
-            },
-            padding = 8.5.dp,
-            visibleCosmeticIcon = false,
-            style = MatuleTypography.bodyLarge,
-            size = 15.dp,
-            backColor = Colors.accent
-        )
-        Spacer(modifier = Modifier.height(45.dp))
+        AnimatedVisibility(
+            visible = !visibleEditingScreen,
+            enter = fadeIn(tween(1700)) + slideInHorizontally( tween(700)) { it },
+            exit = fadeOut(tween(700)) + slideOutHorizontally(tween(700)) { it }
+        ) {
+            Column {
+                CustomHeaderMain(
+                    text = R.string.profile,
+                    endIcon = R.drawable.ic_edit,
+                    openSideMenu = openSideMenu,
+                    tintEndIcon = Colors.block,
+                    openCartScreen = {
+                        visibleEditingScreen = true
+                    },
+                    padding = 8.5.dp,
+                    visibleCosmeticIcon = false,
+                    style = MatuleTypography.bodyLarge,
+                    size = 15.dp,
+                    backColor = Colors.accent
+                )
+                Spacer(modifier = Modifier.height(45.dp))
+            }
+        }
+
+        AnimatedVisibility(
+            visible = visibleEditingScreen && hasChanges,
+            enter = fadeIn(tween(1700)) + slideInHorizontally( tween(700)) { -it },
+            exit = fadeOut(tween(700)) + slideOutHorizontally(tween(700)) { -it }
+        ) {
+            Column {
+                Spacer(modifier = Modifier.height(20.dp))
+                CustomButton(
+                    text = R.string.btn_save,
+                    onClick = {
+                        vm.handleEvent(
+                            ProfileScreenContract.Event.UpdateProfileFields(
+                                email = email,
+                                firstName = firstName,
+                                lastName = lastName,
+                                phone = phone,
+                                country = country,
+                                city = city,
+                                address = address,
+                                postalCode = postalCode,
+                                dateOfBirth = dateOfBirth
+                            )
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 68.dp, end = 59.dp),
+                )
+                Spacer(modifier = Modifier.height(43.dp))
+            }
+        }
         when(state) {
             is ProfileScreenContract.State.ProfileLoaded -> {
                 Content(
-                    photo = state.profile.avatar,
-                    firstName = state.profile.firstName,
-                    lastName = state.profile.lastName,
-                    phone = state.profile.phone,
-                    country = state.profile.country,
-                    city = state.profile.city,
-                    address = state.profile.address,
-                    postalCode = state.profile.postalCode,
-                    dateOfBirth = state.profile.dateOfBirth,
-                    email = state.profile.email,
-                    visibleEditingScreen = visibleEditingScreen
+                    photo = profile.avatar ?: "",
+                    firstName = firstName,
+                    lastName = lastName,
+                    phone = phone,
+                    country = country,
+                    city = city,
+                    address = address,
+                    postalCode = postalCode,
+                    dateOfBirth = dateOfBirth,
+                    email = email,
+                    visibleEditingScreen = visibleEditingScreen,
+                    openQrCodeScreen = { qrCode = true },
+                    onEmailChange = { email = it },
+                    onFirstNameChange = { firstName = it },
+                    onLastNameChange = { lastName = it },
+                    onPhoneChange = { phone = it },
+                    onAddressChange = { address = it },
+                    onDateOfBirthChange = { dateOfBirth = it },
+                    onCityChange = { city = it },
+                    onCountryChange = { country = it },
+                    onPostalCodeChange = { postalCode = it }
                 )
             }
             is ProfileScreenContract.State.Loading -> {
@@ -116,6 +230,15 @@ fun ProfileContent(
             }
             else -> {}
         }
+    }
+    AnimatedVisibility(
+        visible = qrCode,
+        enter = fadeIn() + scaleIn(tween(150)),
+        exit = fadeOut() + scaleOut(tween(150))
+    ) {
+        QrCodeScreen(
+            onClose = { qrCode = false }
+        )
     }
 }
 
@@ -128,20 +251,21 @@ private fun Content(
     country: String?,
     city: String?,
     visibleEditingScreen: Boolean,
+    openQrCodeScreen: () -> Unit,
     address: String?,
     postalCode: String?,
     dateOfBirth: String?,
-    email: String
+    email: String,
+    onEmailChange: (String) -> Unit,
+    onFirstNameChange: (String) -> Unit,
+    onLastNameChange: (String) -> Unit,
+    onPostalCodeChange: (String) -> Unit,
+    onCountryChange: (String) -> Unit,
+    onCityChange: (String) -> Unit,
+    onPhoneChange: (String) -> Unit,
+    onAddressChange: (String) -> Unit,
+    onDateOfBirthChange: (String) -> Unit,
 ) {
-    var firstNameTextField by remember { mutableStateOf(firstName) }
-    var lastNameTextField by remember { mutableStateOf(lastName) }
-    var phoneTextField by remember { mutableStateOf(phone) }
-    var countryTextField by remember { mutableStateOf(country) }
-    var cityTextField by remember { mutableStateOf(city) }
-    var addressTextField by remember { mutableStateOf(address) }
-    var postalCodeTextField by remember { mutableStateOf(postalCode) }
-    var dateOfBirthTextField by remember { mutableStateOf(dateOfBirth) }
-    var emailTextField by remember { mutableStateOf(email) }
 
     Column(
         modifier = Modifier
@@ -154,9 +278,37 @@ private fun Content(
             firstName = firstName,
             lastName = lastName
         )
-        Spacer(modifier = Modifier.height(38.dp))
-        QrCode()
-        Spacer(modifier = Modifier.height(19.dp))
+
+        AnimatedVisibility(
+            visible = visibleEditingScreen,
+            enter = fadeIn(tween(700)),
+            exit = fadeOut(tween(700))
+        ) {
+            Column {
+                Spacer(modifier = Modifier.height(11.dp))
+                Text(
+                    text = stringResource(R.string.change_your_profile_photo),
+                    color = Colors.accent,
+                    style = MatuleTypography.bodySmall
+                )
+                Spacer(modifier = Modifier.height(21.dp))
+            }
+        }
+
+        AnimatedVisibility(
+            visible = !visibleEditingScreen,
+            enter = fadeIn(tween(700)),
+            exit = fadeOut(tween(700))
+        ) {
+            Column {
+                Spacer(modifier = Modifier.height(38.dp))
+                QrCode(
+                    openQrCodeScreen = openQrCodeScreen
+                )
+                Spacer(modifier = Modifier.height(19.dp))
+            }
+        }
+
         Column(
             modifier = Modifier
                 .padding(start = 4.dp),
@@ -165,53 +317,73 @@ private fun Content(
             CustomTextField(
                 modifier = Modifier.fillMaxWidth(),
                 readOnly = !visibleEditingScreen,
-                query = firstNameTextField,
+                query = firstName,
                 onTextChange = {
-                    firstNameTextField = it
+                    onFirstNameChange(it)
                 },
                 label = R.string.name,
             )
             CustomTextField(
                 modifier = Modifier.fillMaxWidth(),
                 readOnly = !visibleEditingScreen,
-                query = lastNameTextField ?: "",
+                query = lastName ?: "",
                 onTextChange = {
-                    lastNameTextField = it
+                    onLastNameChange(it)
                 },
                 label = R.string.last_name,
                 placeholder = stringResource(R.string.last_name)
             )
+            if (visibleEditingScreen) {
+                CustomTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    query = country ?: "",
+                    onTextChange = onCountryChange,
+                    label = R.string.country,
+                )
+                CustomTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    query = city ?: "",
+                    onTextChange = onCityChange,
+                    label = R.string.city,
+                )
+                CustomTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    query = address ?: "",
+                    onTextChange = onAddressChange,
+                    label = R.string.address,
+                )
+                CustomTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    query = postalCode ?: "",
+                    onTextChange = onPostalCodeChange,
+                    label = R.string.postal_code,
+                )
+            } else {
+                // Показываем объединенный адрес при просмотре
+                CustomTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    readOnly = true,
+                    query = "${country ?: ""}, ${city ?: ""}, ${address ?: ""}, ${postalCode ?: ""}",
+                    onTextChange = {},
+                    label = R.string.address,
+                    placeholder = "Область, город, адрес, номер дома",
+                )
+            }
             CustomTextField(
                 modifier = Modifier.fillMaxWidth(),
                 readOnly = !visibleEditingScreen,
-                query = "$countryTextField, $cityTextField, $addressTextField, $postalCodeTextField",
+                query = phone ?: "",
                 onTextChange = {
-//                    if (cityTextField!!.isNotEmpty() ||
-//                        countryTextField!!.isNotEmpty() ||
-//                        addressTextField!!.isNotEmpty() ||
-//                        postalCodeTextField!!.isNotEmpty()
-//                    ) {
-//
-//                    }
-                },
-                label = R.string.address,
-                placeholder = "Область, город, адрес, номер дома"
-            )
-            CustomTextField(
-                modifier = Modifier.fillMaxWidth(),
-                readOnly = !visibleEditingScreen,
-                query = phoneTextField ?: "",
-                onTextChange = {
-                    phoneTextField = it
+                    onPhoneChange(it)
                 },
                 label = R.string.phone
             )
             CustomTextField(
                 modifier = Modifier.fillMaxWidth(),
                 readOnly = !visibleEditingScreen,
-                query = dateOfBirthTextField ?: "",
+                query = dateOfBirth ?: "",
                 onTextChange = {
-                    dateOfBirthTextField = it
+                    onDateOfBirthChange(it)
                 },
                 label = R.string.date_of_birth,
                 placeholder = "День рождение"
@@ -219,9 +391,9 @@ private fun Content(
             CustomTextField(
                 modifier = Modifier.fillMaxWidth(),
                 readOnly = !visibleEditingScreen,
-                query = emailTextField,
+                query = email,
                 onTextChange = {
-                    emailTextField = it
+                    onEmailChange(it)
                 },
                 label = R.string.email
             )
@@ -230,11 +402,13 @@ private fun Content(
 }
 
 @Composable
-fun QrCode() {
+fun QrCode(
+    openQrCodeScreen: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = {})
+            .clickable(onClick = openQrCodeScreen)
             .background(
                 color = Colors.background,
                 shape = RoundedCornerShape(16.dp)
@@ -313,5 +487,56 @@ private fun AvatarWithNameUser(
             fontWeight = FontWeight.Normal,
             fontFamily = FontFamily(Font(R.font.new_peninim_mt_inclined_2))
         )
+    }
+}
+
+
+@Composable
+fun QrCodeScreen(
+    onClose: () -> Unit
+) {
+
+    val context = LocalContext.current
+
+    DisposableEffect(Unit) {
+        val window = (context as Activity).window
+        val initialBrightness = window.attributes.screenBrightness
+        window.setBrightness(BRIGHTNESS_OVERRIDE_FULL)
+
+        onDispose {
+            window.setBrightness(initialBrightness)
+        }
+    }
+
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures {}
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+                .fillMaxWidth()
+                .border(width = 1.dp, color = Colors.text, shape = RoundedCornerShape(16.dp))
+                .clickable(onClick = onClose)
+        ) {
+            Image(
+                painter = painterResource(R.drawable.qr_code),
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds
+            )
+        }
+    }
+
+}
+
+private fun Window.setBrightness(value: Float) {
+    this.apply {
+        attributes.screenBrightness = value
+        addFlags(SCREEN_BRIGHTNESS_CHANGED)
     }
 }

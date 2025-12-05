@@ -1,11 +1,15 @@
 package com.example.matule.ui.presentation.feature.profile.viewmodel
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.data.ui.presentation.storage.tokenprovider.TokenProvider
 import com.example.domain.ui.presentation.feature.profile.interactor.ProfileInteractor
 import com.example.domain.ui.presentation.feature.profile.model.ProfileResult
+import com.example.domain.ui.presentation.feature.profile.model.UserProfile
 import com.example.matule.ui.core.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -14,6 +18,9 @@ class ProfileScreenViewModel @Inject constructor(
     private val profileInteractor: ProfileInteractor,
     private val tokenProvider: TokenProvider
 ) : BaseViewModel<ProfileScreenContract.Event, ProfileScreenContract.State, ProfileScreenContract.Effect>() {
+
+    private val _profile: MutableStateFlow<UserProfile> = MutableStateFlow(UserProfile())
+    val profile = _profile.asStateFlow()
 
     override fun setInitialState(): ProfileScreenContract.State = ProfileScreenContract.State.Loading
 
@@ -41,11 +48,8 @@ class ProfileScreenViewModel @Inject constructor(
                 val profileResult = result.getOrNull()!!
                 when (profileResult) {
                     is ProfileResult.Success -> {
-                        setState (
-                            ProfileScreenContract.State.ProfileLoaded(
-                                profile = profileResult.profile
-                            )
-                        )
+                        _profile.emit(profileResult.profile)
+                        setState (ProfileScreenContract.State.ProfileLoaded())
                     }
                     is ProfileResult.Error -> {
                         setState ( ProfileScreenContract.State.Error(profileResult.message) )
@@ -98,11 +102,8 @@ class ProfileScreenViewModel @Inject constructor(
                 val profileResult = result.getOrNull()!!
                 when (profileResult) {
                     is ProfileResult.Success -> {
-                        setState(
-                            ProfileScreenContract.State.ProfileLoaded(
-                                profile = profileResult.profile
-                            )
-                        )
+                        _profile.emit(profileResult.profile)
+                        setState (ProfileScreenContract.State.ProfileLoaded())
                         setEffect { ProfileScreenContract.Effect.ProfileUpdated(profileResult.profile) }
                     }
 

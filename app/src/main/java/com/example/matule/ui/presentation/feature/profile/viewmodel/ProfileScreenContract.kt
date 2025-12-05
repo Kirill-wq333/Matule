@@ -25,7 +25,6 @@ object ProfileScreenContract {
     sealed interface State : ViewState {
         data object Loading : State
         data class ProfileLoaded(
-            val profile: UserProfile,
             val isLoading: Boolean = false,
             val error: String? = null
         ) : State
