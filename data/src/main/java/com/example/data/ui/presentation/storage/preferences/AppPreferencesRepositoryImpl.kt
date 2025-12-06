@@ -108,6 +108,7 @@ class AppPreferencesImpl @Inject constructor(
             preferences[IS_LOGGED_IN] = false
             preferences.remove(USER_TOKEN)
             preferences.remove(USER_ID)
+            preferences.remove(CART_ITEMS)
         }
     }
 }

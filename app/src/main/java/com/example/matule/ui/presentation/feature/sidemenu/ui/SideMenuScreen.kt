@@ -121,6 +121,8 @@ fun SideMenuScreen(
         )
     )
 
+    var navigation by remember { mutableStateOf(false) }
+
     var visibleCard by remember { mutableStateOf(false) }
     var visibleCard2 by remember { mutableStateOf(false) }
     val offsetX1 by animateDpAsState(
@@ -183,13 +185,13 @@ private fun Content(
     ) {
         AnimatedVisibility(
             visible = visibleCard,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .offset(x = offsetX1)
+                .padding(start = 20.dp, top = 20.dp),
             enter = fadeIn() + slideInHorizontally(initialOffsetX = { -it })
         ) {
             SideMenuContent(
-                modifier = Modifier
-                    .offset(x = offsetX1)
-                    .align(Alignment.TopStart)
-                    .padding(start = 20.dp, top = 20.dp),
                 onEvent = onEvent,
                 sideMenu = sideMenu,
                 navController = navController,
@@ -197,27 +199,29 @@ private fun Content(
             )
         }
         AnimatedVisibility(
+            modifier = Modifier
+                .align(Alignment.CenterEnd),
             visible = visibleCard2,
             enter = fadeIn() + slideInHorizontally(initialOffsetX = { it })
-        ) { }
-        Box(
-            modifier = Modifier
-                .size(278.dp, 602.dp)
-                .offset(x = offsetX2)
-                .rotate(-3.43f)
-                .shadow(
-                    elevation = 21.dp,
-                    clip = false,
-                    shape = RoundedCornerShape(25.dp)
-                )
-                .clip(RoundedCornerShape(25.dp))
-                .align(Alignment.CenterEnd)
         ) {
-            Image(
-                painter = painterResource(R.drawable.home_screen),
-                contentDescription = null,
-                contentScale = ContentScale.FillBounds
-            )
+            Box(
+                modifier = Modifier
+                    .size(278.dp, 602.dp)
+                    .offset(x = offsetX2)
+                    .rotate(-3.43f)
+                    .shadow(
+                        elevation = 21.dp,
+                        clip = false,
+                        shape = RoundedCornerShape(25.dp)
+                    )
+                    .clip(RoundedCornerShape(25.dp))
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.home_screen),
+                    contentDescription = null,
+                    contentScale = ContentScale.FillBounds
+                )
+            }
         }
     }
 }

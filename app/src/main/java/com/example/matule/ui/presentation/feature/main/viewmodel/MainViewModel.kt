@@ -145,9 +145,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private fun refreshContent() {
-        setState(MainScreenContract.State.Loading)
-    }
+    private fun refreshContent() = setState(MainScreenContract.State.Loading)
 
     private fun updateProductFavoriteStatusOptimistic(productId: Long, isFavorite: Boolean) {
         val currentState = currentState

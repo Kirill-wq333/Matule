@@ -196,7 +196,7 @@ private fun Content(
         modifier = Modifier
             .fillMaxSize()
             .background(color = Colors.background)
-            .padding(start = 20.dp, end = 20.dp, bottom = 50.dp)
+            .padding(bottom = 50.dp)
     ) {
         AnimatedVisibility(
             visible = catalogScreen,
@@ -317,7 +317,9 @@ fun SearchAndFeature(
     )
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -390,7 +392,9 @@ private fun PopularCard(
         spacer = 30.dp,
         content = {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 products.forEach { product ->
@@ -431,11 +435,12 @@ fun CatalogCard(
         Text(
             text = stringResource(R.string.category),
             color = Colors.text,
-            style = MatuleTypography.titleMedium
+            style = MatuleTypography.titleMedium,
+            modifier = Modifier.padding(start = 20.dp)
         )
 
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 5.dp),
+            contentPadding = PaddingValues(horizontal = 20.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
@@ -536,7 +541,9 @@ private fun Card(
         verticalArrangement = Arrangement.spacedBy(spacer)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {

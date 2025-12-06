@@ -86,7 +86,7 @@ fun CustomHeaderMain(
 ) {
     Box(
         modifier = Modifier
-            .padding(top = 20.dp)
+            .padding(top = 20.dp , start = 20.dp, end = 20.dp)
             .fillMaxWidth()
     ) {
         if (visibleCosmeticIcon) {

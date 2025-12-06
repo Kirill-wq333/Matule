@@ -359,33 +359,43 @@ private fun Content(
                     query = country ?: "",
                     onTextChange = onCountryChange,
                     label = R.string.country,
+                    placeholder = stringResource(R.string.country)
                 )
                 CustomTextField(
                     modifier = Modifier.fillMaxWidth(),
                     query = city ?: "",
                     onTextChange = onCityChange,
                     label = R.string.city,
+                    placeholder = stringResource(R.string.city)
                 )
                 CustomTextField(
                     modifier = Modifier.fillMaxWidth(),
                     query = address ?: "",
                     onTextChange = onAddressChange,
                     label = R.string.address,
+                    placeholder = stringResource(R.string.address)
                 )
                 CustomTextField(
                     modifier = Modifier.fillMaxWidth(),
                     query = postalCode ?: "",
                     onTextChange = onPostalCodeChange,
                     label = R.string.postal_code,
+                    placeholder = stringResource(R.string.postal_code)
                 )
             } else {
                 CustomTextField(
                     modifier = Modifier.fillMaxWidth(),
                     readOnly = true,
-                    query = "${country ?: ""}, ${city ?: ""}, ${address ?: ""}, ${postalCode ?: ""}",
+                    query = if (
+                        country.isNullOrEmpty() ||
+                        city.isNullOrEmpty() ||
+                        address.isNullOrEmpty() ||
+                        postalCode.isNullOrEmpty()
+                        ) ""
+                    else "$country, $city, $address, $postalCode",
                     onTextChange = {},
                     label = R.string.address,
-                    placeholder = "",
+                    placeholder = "Область, город, адрес, почтовый индекс",
                 )
             }
             CustomTextField(
@@ -527,9 +537,8 @@ fun QrCodeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .pointerInput(Unit) {
-                detectTapGestures {}
-            },
+            .background(color = Colors.background.copy(0.8f))
+            .clickable(onClick = onClose),
         contentAlignment = Alignment.Center
     ) {
         Box(
@@ -537,7 +546,6 @@ fun QrCodeScreen(
                 .padding(horizontal = 20.dp)
                 .fillMaxWidth()
                 .border(width = 1.dp, color = Colors.text, shape = RoundedCornerShape(16.dp))
-                .clickable(onClick = onClose)
         ) {
             Image(
                 painter = painterResource(R.drawable.qr_code),

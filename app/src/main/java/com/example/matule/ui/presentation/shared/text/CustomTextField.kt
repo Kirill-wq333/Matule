@@ -91,6 +91,7 @@ fun TextFieldWithTrailingIcon(
             value = query,
             onValueChange = { onTextChange(it) },
             maxLines = 1,
+            singleLine = true,
             textStyle = MatuleTypography.bodyMedium,
             visualTransformation = visualTransformation,
             keyboardOptions = keyboardOptions,
