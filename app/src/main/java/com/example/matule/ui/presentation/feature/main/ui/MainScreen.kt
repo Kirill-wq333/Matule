@@ -204,6 +204,8 @@ private fun Content(
             exit = slideOutHorizontally(animationSpec = tween(700)) { it } + fadeOut(animationSpec = tween(700))
         ) {
             CustomHeader(
+                modifier = Modifier
+                    .padding(horizontal = 20.dp),
                 text = R.string.category,
                 onBack = {
                     catalogScreen = false
@@ -218,6 +220,8 @@ private fun Content(
             exit = slideOutHorizontally(animationSpec = tween(700)) { it } + fadeOut(animationSpec = tween(700))
         ) {
             CustomHeader(
+                modifier = Modifier
+                    .padding(horizontal = 20.dp),
                 text = R.string.search,
                 onBack = {
                     searchScreen = false
@@ -233,6 +237,8 @@ private fun Content(
             exit = slideOutHorizontally(animationSpec = tween(700)) { -it } + fadeOut(animationSpec = tween(700))
         ) {
             CustomHeaderMain(
+                modifier = Modifier
+                    .padding(start = 20.dp, end = 20.dp),
                 text = R.string.main,
                 cardItem = state.isEnableDot.size,
                 openSideMenu = openSideMenu,

@@ -1,6 +1,7 @@
 package com.example.matule.ui.presentation.feature.sidemenu.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -10,17 +11,20 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -35,6 +39,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,6 +70,7 @@ import com.example.matule.ui.presentation.shared.buttons.CustomIconButton
 import com.example.matule.ui.presentation.theme.Colors
 import com.example.matule.ui.presentation.theme.MatuleTypography
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Preview
 @Composable
@@ -121,7 +127,9 @@ fun SideMenuScreen(
         )
     )
 
-    var navigation by remember { mutableStateOf(false) }
+    val menuWidth = 300.dp
+    val offsetX = remember { Animatable(0f) }
+    val scope = rememberCoroutineScope()
 
     var visibleCard by remember { mutableStateOf(false) }
     var visibleCard2 by remember { mutableStateOf(false) }
@@ -136,6 +144,7 @@ fun SideMenuScreen(
     )
 
     LaunchedEffect(Unit) {
+        offsetX.animateTo(0f, animationSpec = tween(300))
         visibleCard = true
         delay(200)
         visibleCard2 = true
@@ -143,11 +152,18 @@ fun SideMenuScreen(
 
     Box(
         modifier = modifier
-            .fillMaxSize()
+            .fillMaxHeight()
+            .width(menuWidth)
+            .offset(x = offsetX.value.dp)
             .pointerInput(Unit) {
-                detectHorizontalDragGestures { _, dragAmount ->
+                detectHorizontalDragGestures { change, dragAmount ->
+                    change.consume()
+
                     if (dragAmount < -30f) {
-                        onBack()
+                        scope.launch {
+                            offsetX.animateTo(-menuWidth.value, animationSpec = tween(500))
+                            onBack()
+                        }
                     }
                 }
             }

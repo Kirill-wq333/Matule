@@ -71,6 +71,7 @@ private fun PrevHeader() {
 
 @Composable
 fun CustomHeaderMain(
+    modifier: Modifier = Modifier,
     openSideMenu: () -> Unit = {},
     openCartScreen: () -> Unit = {},
     text: Int,
@@ -85,8 +86,8 @@ fun CustomHeaderMain(
     visibleEndIcon: Boolean = true,
 ) {
     Box(
-        modifier = Modifier
-            .padding(top = 20.dp , start = 20.dp, end = 20.dp)
+        modifier = modifier
+            .padding(top = 20.dp)
             .fillMaxWidth()
     ) {
         if (visibleCosmeticIcon) {
@@ -129,6 +130,7 @@ fun CustomHeaderMain(
 
 @Composable
 fun CustomHeader(
+    modifier: Modifier =  Modifier,
     onBack: () -> Unit = {},
     openScreen: () -> Unit = {},
     text: Int,
@@ -139,7 +141,7 @@ fun CustomHeader(
     visibleNameScreen: Boolean = false
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .padding(top = 20.dp)
             .fillMaxWidth()
     ) {

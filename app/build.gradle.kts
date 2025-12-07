@@ -48,6 +48,8 @@ dependencies {
 
     implementation (libs.mytracker.sdk)
 
+    implementation(libs.androidx.foundation)
+
     // Hilt Core
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
