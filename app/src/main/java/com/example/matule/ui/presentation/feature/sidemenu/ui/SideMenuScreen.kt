@@ -89,6 +89,8 @@ fun SideMenuScreen(
 
     val state by vm.state.collectAsState()
 
+    val unreadNotificationCount by vm.notifications.collectAsState()
+
     LaunchedEffect(Unit) {
         vm.handleEvent(SideMenuScreenContract.Event.LoadUserProfile)
     }
@@ -118,7 +120,7 @@ fun SideMenuScreen(
             route = AppRouts.NOTIFICATION,
             label = R.string.notifications,
             icon = R.drawable.ic_notification,
-            notificationItem = 1
+            notificationItem = unreadNotificationCount.count{ it.isRead }
         ),
         SideMenu(
             route = "",

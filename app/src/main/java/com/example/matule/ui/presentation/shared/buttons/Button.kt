@@ -48,7 +48,7 @@ private fun ColumnCustomButtons() {
 fun CustomButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
-    color: Color = Colors.background,
+    color: Color = Colors.block,
     backgroundColor: Color = Colors.accent,
     text: Int
 ) {

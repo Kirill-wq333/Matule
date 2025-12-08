@@ -228,7 +228,7 @@ private fun CardContent(
                 model = cardImage,
                 contentDescription = null,
                 placeholder = painterResource(R.drawable.image_placeholder),
-                contentScale = ContentScale.Fit,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .padding(horizontal = 12.dp)
                     .size(height = 70.dp, width = 118.dp),

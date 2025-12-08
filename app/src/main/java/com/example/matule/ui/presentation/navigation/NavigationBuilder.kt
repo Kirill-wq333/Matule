@@ -28,6 +28,8 @@ import com.example.matule.ui.presentation.feature.arrivals.ui.ArrivalsScreen
 import com.example.matule.ui.presentation.feature.arrivals.viewmodel.ArrivalsScreenViewModel
 import com.example.matule.ui.presentation.feature.register.ui.RegisterScreen
 import com.example.matule.ui.presentation.feature.auth.viewmodel.AuthScreenViewModel
+import com.example.matule.ui.presentation.feature.cart.ui.CartScreen
+import com.example.matule.ui.presentation.feature.cart.viewmodel.CartScreenViewModel
 import com.example.matule.ui.presentation.feature.favorite.ui.FavoriteScreen
 import com.example.matule.ui.presentation.feature.favorite.viewmodel.FavoriteScreenViewModel
 import com.example.matule.ui.presentation.feature.popular.ui.PopularScreen
@@ -223,8 +225,16 @@ fun NavigationBuilder(
 
             }
 
-            composable(AppRouts.CART) {
-
+            composable(
+                route = AppRouts.CART,
+                enterTransition = { fadeIn(tween(1500)) },
+                exitTransition = { fadeOut(tween(700)) }
+            ) {
+                val vmCart = hiltViewModel<CartScreenViewModel>()
+                CartScreen(
+                    vm = vmCart,
+                    navController = navController
+                )
             }
 
             composable(

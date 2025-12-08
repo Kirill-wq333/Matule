@@ -52,6 +52,7 @@
     <string name="orders">Заказы</string>
     <string name="min_ago">%1$s мин назад</string>
     <string name="recent">Недавний</string>
+    <string name="number_orders">№ %1$s</string>
     <string name="yesterday">Вчера</string>
 
     <!--  Checkout  -->
@@ -103,7 +104,7 @@
     <string name="phone">Телефон</string>
     <string name="date_of_birth">День рождение</string>
     <string name="delivery">Доставка</string>
-    <string name="total_cost">Доставка</string>
+    <string name="total_cost">Итого</string>
     <string name="contact_info">Контактная информация</string>
     <string name="address">Адрес</string>
     <string name="country">Cтрана</string>

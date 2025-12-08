@@ -1,5 +1,6 @@
 package com.example.matule.ui.presentation.feature.sidemenu.viewmodel
 
+import com.example.domain.ui.presentation.feature.notification.model.Notifications
 import com.example.domain.ui.presentation.feature.profile.model.UserProfile
 import com.example.matule.ui.core.viewmodel.ViewEffect
 import com.example.matule.ui.core.viewmodel.ViewEvent
@@ -17,6 +18,7 @@ object SideMenuScreenContract {
         data object Loading: State
         data class ProfileLoaded(
             val profile: UserProfile,
+            val notification: List<Notifications>
         ) : State
         data class Error(val message: String) : State
     }

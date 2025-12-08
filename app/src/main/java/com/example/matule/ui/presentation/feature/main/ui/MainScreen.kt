@@ -2,11 +2,17 @@ package com.example.matule.ui.presentation.feature.main.ui
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.with
@@ -44,6 +50,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
@@ -189,8 +197,15 @@ private fun Content(
     var searchScreen by remember { mutableStateOf(false) }
 
     val popularProduct = state.popularProducts.filter { it.isPopular }
-
     val showSearchHeader = searchScreen || search.isNotEmpty()
+
+    val screenState = remember(catalogScreen, showSearchHeader) {
+        when {
+            catalogScreen -> ScreenState.CATALOG
+            showSearchHeader -> ScreenState.SEARCH
+            else -> ScreenState.MAIN
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -198,99 +213,106 @@ private fun Content(
             .background(color = Colors.background)
             .padding(bottom = 50.dp)
     ) {
-        AnimatedVisibility(
-            visible = catalogScreen,
-            enter = slideInHorizontally(animationSpec = tween(1700)) { it } + fadeIn(animationSpec = tween(700)),
-            exit = slideOutHorizontally(animationSpec = tween(700)) { it } + fadeOut(animationSpec = tween(700))
-        ) {
-            CustomHeader(
-                modifier = Modifier
-                    .padding(horizontal = 20.dp),
-                text = R.string.category,
-                onBack = {
-                    catalogScreen = false
-                },
-                visibleNameScreen = true
-            )
+        // 1. Единый анимированный заголовок
+        Crossfade(
+            targetState = screenState,
+            modifier = Modifier,
+            animationSpec = tween(durationMillis = 700)
+        ) { stateScreen ->
+            when (stateScreen) {
+                ScreenState.CATALOG -> {
+                    CustomHeader(
+                        modifier = Modifier.padding(horizontal = 20.dp),
+                        text = R.string.category,
+                        onBack = { catalogScreen = false },
+                        visibleNameScreen = true
+                    )
+                }
+                ScreenState.SEARCH -> {
+                    CustomHeader(
+                        modifier = Modifier.padding(horizontal = 20.dp),
+                        text = R.string.search,
+                        onBack = {
+                            searchScreen = false
+                            onSearchChange("")
+                        },
+                        visibleNameScreen = true
+                    )
+                }
+                ScreenState.MAIN -> {
+                    CustomHeaderMain(
+                        modifier = Modifier.padding(horizontal = 20.dp),
+                        text = R.string.main,
+                        cardItem = state.isEnableDot.size,
+                        openSideMenu = openSideMenu,
+                        openCartScreen = openCartScreen
+                    )
+                }
+            }
         }
 
-        AnimatedVisibility(
-            visible = showSearchHeader && !catalogScreen,
-            enter = slideInHorizontally(animationSpec = tween(1700)) { it } + fadeIn(animationSpec = tween(700)),
-            exit = slideOutHorizontally(animationSpec = tween(700)) { it } + fadeOut(animationSpec = tween(700))
-        ) {
-            CustomHeader(
-                modifier = Modifier
-                    .padding(horizontal = 20.dp),
-                text = R.string.search,
-                onBack = {
-                    searchScreen = false
-                    onSearchChange(search)
-                },
-                visibleNameScreen = true
-            )
-        }
-
-        AnimatedVisibility(
-            visible = !catalogScreen && !showSearchHeader,
-            enter = slideInHorizontally(animationSpec = tween(1700)) { -it } + fadeIn(animationSpec = tween(700)),
-            exit = slideOutHorizontally(animationSpec = tween(700)) { -it } + fadeOut(animationSpec = tween(700))
-        ) {
-            CustomHeaderMain(
-                modifier = Modifier
-                    .padding(start = 20.dp, end = 20.dp),
-                text = R.string.main,
-                cardItem = state.isEnableDot.size,
-                openSideMenu = openSideMenu,
-                openCartScreen = openCartScreen
-            )
-        }
+        Spacer(modifier = Modifier.height(16.dp))
 
         AnimatedVisibility(
             visible = !catalogScreen,
-            enter = slideInHorizontally(animationSpec = tween(1700)) { -it } + fadeIn(animationSpec = tween(700)),
-            exit = slideOutHorizontally(animationSpec = tween(700)) { -it } + fadeOut(animationSpec = tween(700))
+            enter = expandVertically(
+                animationSpec = tween(700),
+                expandFrom = Alignment.Top
+            ) + fadeIn(animationSpec = tween(700)),
+            exit = shrinkVertically(
+                animationSpec = tween(700),
+                shrinkTowards = Alignment.Top
+            ) + fadeOut(animationSpec = tween(700))
         ) {
             Column {
-                Spacer(modifier = Modifier.height(if (catalogScreen) 26.dp else 21.dp))
                 SearchAndFeature(
                     query = search,
                     searchScreen = searchScreen,
                     onTextChange = { newText ->
                         onSearchChange(newText)
-                        if (newText.isNotEmpty()) {
-                            searchScreen = true
-                        } else {
-                            searchScreen = false
-                        }
-                    }
+                        searchScreen = newText.isNotEmpty()
+                    },
                 )
-                Spacer(modifier = Modifier.height(if (catalogScreen) 28.dp else 0.dp))
+
+                Spacer(modifier = Modifier.height(if (catalogScreen) 28.dp else 22.dp))
             }
         }
 
         AnimatedVisibility(
             visible = !showSearchHeader,
-            enter = slideInHorizontally(animationSpec = tween(1700)) { -it } + fadeIn(animationSpec = tween(700)),
-            exit = slideOutHorizontally(animationSpec = tween(700)) { -it } + fadeOut(animationSpec = tween(700))
+            enter = expandVertically(
+                animationSpec = tween(700),
+                expandFrom = Alignment.Top
+            ) + fadeIn(animationSpec = tween(700)),
+            exit = shrinkVertically(
+                animationSpec = tween(700),
+                shrinkTowards = Alignment.Top
+            ) + fadeOut(animationSpec = tween(700))
         ) {
             Column {
-                Spacer(modifier = Modifier.height(if (showSearchHeader) 16.dp else 22.dp))
                 CatalogCard(
-                    openCatalogScreen = {
-                        catalogScreen = true
-                    },
-                    categories = state.categories
+                    openCatalogScreen = { catalogScreen = true },
+                    categories = state.categories,
                 )
                 Spacer(modifier = Modifier.height(if (showSearchHeader) 20.dp else 24.dp))
             }
         }
+
         AnimatedVisibility(
             visible = !catalogScreen && !showSearchHeader,
-            enter = slideInHorizontally(animationSpec = tween(1700)) { -it } + fadeIn(animationSpec = tween(700)),
-            exit = slideOutHorizontally(animationSpec = tween(700)) { -it } + fadeOut(animationSpec = tween(700))
+            enter = expandVertically(
+                animationSpec = tween(700),
+                expandFrom = Alignment.Top
+            ) + fadeIn(animationSpec = tween(700)),
+            exit = shrinkVertically(
+                animationSpec = tween(700),
+                shrinkTowards = Alignment.Top
+            ) + fadeOut(animationSpec = tween(700))
         ) {
-            Column() {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
                 PopularCard(
                     openPopularScreen = openPopularScreen,
                     addedInCart = addedInCart,
@@ -308,6 +330,9 @@ private fun Content(
             }
         }
     }
+}
+enum class ScreenState {
+    MAIN, CATALOG, SEARCH
 }
 
 @Composable
@@ -392,6 +417,16 @@ private fun PopularCard(
     openDetailScreen: (Long) -> Unit = {}
 ) {
     val products = popularProducts.take(2)
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val density = LocalDensity.current
+
+    val hasEnoughSpace = remember(products.size, screenWidth) {
+        with(density) {
+            val itemWidth = 160.dp.toPx() * products.size
+            val totalWidth = screenWidth.toPx() - (40.dp.toPx()) 
+            totalWidth - itemWidth > 15.dp.toPx() * (products.size - 1)
+        }
+    }
 
     Card(
         text = R.string.popular,
@@ -401,7 +436,11 @@ private fun PopularCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = if (hasEnoughSpace) {
+                    Arrangement.SpaceBetween
+                } else {
+                    Arrangement.spacedBy(15.dp)
+                }
             ) {
                 products.forEach { product ->
 

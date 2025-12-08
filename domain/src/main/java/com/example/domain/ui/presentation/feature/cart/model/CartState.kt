@@ -4,8 +4,11 @@ data class CartState(
     val items: List<CartItem> = emptyList(),
     val totalItems: Int = 0,
     val totalPrice: Double = 0.0,
+    val subtotal: Double = 0.0,
+    val delivery: Double = 0.0,
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val selectedItems: Set<Long> = emptySet()
 )
 
 sealed class CartResult {

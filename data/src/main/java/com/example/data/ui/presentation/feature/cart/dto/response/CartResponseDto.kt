@@ -1,11 +1,19 @@
 package com.example.data.ui.presentation.feature.cart.dto.response
 
+import android.os.Message
 import com.example.data.ui.presentation.feature.cart.dto.CartItemDto
+import com.example.domain.ui.presentation.feature.cart.model.CartItem
 import com.google.gson.annotations.SerializedName
 
 data class CartResponseDto(
-     val success: Boolean,
-     val message: String? = null,
-     val cartItem: CartItemDto? = null,
-     val cartItems: List<CartItemDto>? = null
+    val success: Boolean,
+    val message: String? = null,
+    val items: List<CartItemDto>? = null,
+    val summary: CartSummaryDto? = null
+)
+data class CartSummaryDto(
+    val subtotal: Double,
+    val delivery: Double,
+    val total: Double,
+    val itemsCount: Int
 )

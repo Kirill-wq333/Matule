@@ -1,7 +1,16 @@
 package com.example.matule.ui.presentation.shared.cart
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,27 +32,39 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.matule.R
 import com.example.matule.ui.presentation.theme.Colors
-import com.example.matule.ui.presentation.theme.MatuleTypography
 
 @Preview
 @Composable
 private fun PreviewCartItem() {
     CartItem(
         quantity = 1,
-        timeAgo = 5
+        timeAgo = 5,
+        visibleCartComponents = false,
+        nameProduct = "Nike Air Max 270 Essential",
+        delivery = 364.0,
+        price = 125.0,
+        openDetailScreen = {},
+        numberOrders = 35252,
+        orders = false
     )
 }
 
@@ -52,92 +73,271 @@ fun CartItem(
     quantity: Int = 1,
     photoProduct: String? = "",
     timeAgo: Int,
+    nameProduct: String,
+    price: Double,
+    numberOrders: Long = 0,
+    openDetailScreen: () -> Unit,
+    delivery: Double = 0.0,
+    onDelete: () -> Unit = {},
+    orders: Boolean = false,
+    onPlusQuantity: () -> Unit = {},
+    onMinusQuantity: () -> Unit = {},
+    visibleCartComponents: Boolean = true
 ) {
-    Row(
+
+    var visibleOrders by remember { mutableStateOf(orders) }
+    var isShiftedLeft by remember { mutableStateOf(false) }
+    var isShiftedRight by remember { mutableStateOf(false) }
+
+    val widthFraction = if (isShiftedLeft || isShiftedRight) 0.84f else 1f
+    var dragOffset by remember { mutableStateOf(0f) }
+    val alignment = when {
+        isShiftedLeft -> Alignment.CenterEnd
+        isShiftedRight -> Alignment.CenterStart
+        else -> Alignment.Center
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        QuantityItem(quantity = quantity)
-        CartContent(
-            photoProduct = photoProduct,
-            timeAgo = timeAgo
-        )
-        Box(
+
+        AnimatedVisibility(
+            visible = isShiftedLeft,
             modifier = Modifier
-                .background(color = Colors.red, shape = RoundedCornerShape(8.dp)),
-            contentAlignment = Alignment.Center
+                .align(Alignment.CenterStart),
+            enter = fadeIn() + slideInHorizontally { -it },
+            exit = fadeOut() + slideOutHorizontally { -it }
         ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.ic_trash),
-                contentDescription = null,
-                tint = Colors.block,
+            if (visibleCartComponents) {
+                QuantityItem(
+                    quantity = quantity,
+                    onPlusQuantity = onPlusQuantity,
+                    onMinusQuantity = onMinusQuantity
+                )
+            } else {
+                BoxIcon(
+                    icon = R.drawable.ic_reload,
+                    backColor = Colors.accent,
+                    verticalPadding = 36.dp,
+                    horizontalPadding = 13.dp,
+                    width = 32.dp,
+                    height = 32.dp,
+                    onClick = {},
+                )
+            }
+        }
+
+        AnimatedVisibility(
+            visible = isShiftedRight,
+            modifier = Modifier
+                .align(Alignment.CenterEnd),
+            enter = fadeIn() + slideInHorizontally { it },
+            exit = fadeOut() + slideOutHorizontally { it }
+        ) {
+            if (visibleCartComponents) {
+                BoxIcon(
+                    icon = R.drawable.ic_trash,
+                    backColor = Colors.red,
+                    onClick = onDelete
+                )
+            } else {
+                BoxIcon(
+                    icon = R.drawable.ic_cancel,
+                    backColor = Colors.red,
+                    verticalPadding = 36.dp,
+                    horizontalPadding = 13.dp,
+                    width = 32.dp,
+                    height = 32.dp,
+                    onClick = {},
+                )
+            }
+        }
+        CartContent(
+            modifier = Modifier
+                .fillMaxWidth(widthFraction)
+                .align(alignment)
+                .draggable(
+                    state = rememberDraggableState { delta ->
+                        dragOffset += delta
+                    },
+                    onDragStopped = {
+                        if (it > 0) {
+                            if (dragOffset > 80f && !isShiftedLeft && !isShiftedRight) {
+                                isShiftedLeft = true
+                                visibleOrders = false
+                                isShiftedRight = false
+                            } else {
+                                isShiftedLeft = false
+                                visibleOrders = true
+                                isShiftedRight = false
+                            }
+                        } else {
+                            if (dragOffset < -80f && !isShiftedLeft && !isShiftedRight) {
+                                isShiftedLeft = false
+                                visibleOrders = false
+                                isShiftedRight = true
+                            } else {
+                                isShiftedLeft = false
+                                visibleOrders = true
+                                isShiftedRight = false
+                            }
+                        }
+                    },
+                    orientation = Orientation.Horizontal,
+                ),
+            photoProduct = photoProduct,
+            timeAgo = timeAgo,
+            nameProduct = nameProduct,
+            price = price,
+            delivery = delivery,
+            visibleOrders = visibleOrders,
+            numberOrders = numberOrders,
+            openDetailScreen = openDetailScreen,
+            visibleCartComponents = visibleCartComponents
+        )
+    }
+}
+
+@Composable
+fun BoxIcon(
+    modifier: Modifier = Modifier,
+    icon: Int,
+    backColor: Color,
+    verticalPadding: Dp = 42.dp,
+    horizontalPadding: Dp = 20.dp,
+    onClick: () -> Unit,
+    width: Dp = 18.dp,
+    height: Dp = 20.dp,
+) {
+    Box(
+        modifier = modifier
+            .clickable(onClick = onClick)
+            .background(color = backColor, shape = RoundedCornerShape(8.dp)),
+    ) {
+        Icon(
+            imageVector = ImageVector.vectorResource(icon),
+            contentDescription = null,
+            tint = Colors.block,
+            modifier = Modifier
+                .padding(horizontal = horizontalPadding, vertical = verticalPadding)
+                .size(width, height)
+        )
+    }
+}
+
+@Composable
+private fun CartContent(
+    modifier: Modifier = Modifier,
+    photoProduct: String?,
+    timeAgo: Int,
+    nameProduct: String,
+    price: Double,
+    numberOrders: Long,
+    delivery: Double,
+    visibleCartComponents: Boolean,
+    openDetailScreen: () -> Unit,
+    visibleOrders: Boolean
+) {
+    val timeAgoText = remember(timeAgo) {
+        formatTimeAgo(timeAgo)
+    }
+
+    Box(
+        modifier = modifier
+            .background(color = Colors.block, shape = RoundedCornerShape(8.dp))
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(start = 9.dp, top = 9.dp, end = 33.dp, bottom = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
                 modifier = Modifier
-                    .padding(horizontal = 20.dp, vertical = 42.dp)
-                    .size(18.dp, 20.dp)
+                    .size(87.dp, 85.dp)
+                    .background(color = Colors.background, shape = RoundedCornerShape(16.dp))
+            ) {
+                AsyncImage(
+                    model = photoProduct,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(R.drawable.image_placeholder),
+                    modifier = Modifier
+                        .padding(top = 12.dp, bottom = 18.dp)
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .clickable(onClick = openDetailScreen),
+                verticalArrangement = Arrangement.spacedBy(9.dp)
+            ) {
+                if (visibleOrders && !visibleCartComponents) {
+                    Text(
+                        text = stringResource(R.string.number_orders, numberOrders),
+                        color = Colors.accent,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Normal,
+                        fontFamily = FontFamily(Font(R.font.new_peninim_mt_inclined_2))
+                    )
+                }
+                Text(
+                    text = nameProduct,
+                    color = Colors.text,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Normal,
+                    fontFamily = FontFamily(Font(R.font.new_peninim_mt_inclined_2))
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(39.dp)
+                ) {
+                    Text(
+                        text = "$price",
+                        color = Colors.text,
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Normal,
+                        fontFamily = FontFamily(Font(R.font.new_peninim_mt_inclined_2))
+                    )
+                    if (visibleOrders && !visibleCartComponents) {
+                        Text(
+                            text = "$delivery",
+                            color = Colors.hint,
+                            fontSize = 14.sp,
+                            lineHeight = 20.sp,
+                            fontWeight = FontWeight.Normal,
+                            fontFamily = FontFamily(Font(R.font.new_peninim_mt_inclined_2))
+                        )
+                    }
+                }
+            }
+        }
+        if (visibleOrders && !visibleCartComponents) {
+            Text(
+                text = timeAgoText,
+                color = Colors.hint,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
+                fontFamily = FontFamily(Font(R.font.new_peninim_mt_inclined_2)),
+                lineHeight = 20.sp,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 10.dp, end = 10.dp)
             )
         }
     }
 }
 
 @Composable
-private fun CartContent(
-    photoProduct: String?,
-    timeAgo: Int
-) {
-    Box(
-        modifier = Modifier
-            .background(color = Colors.block, shape = RoundedCornerShape(8.dp))
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(start = 9.dp, top = 9.dp, end = 33.dp, bottom = 10.dp)
-        ) {
-            Box(
-                modifier = Modifier.size(87.dp, 85.dp)
-            ) {
-                AsyncImage(
-                    model = photoProduct,
-                    contentDescription = null,
-                    contentScale = ContentScale.FillBounds,
-                    placeholder = painterResource(R.drawable.image_placeholder)
-                )
-            }
-            Column() {
-//                Text()
-//                Text()
-//                Row() {
-//                    Text(
-//                        text =
-//                    )
-//                    Text(
-//                        text =
-//                    )
-//                }
-            }
-        }
-        Text(
-            text = "$timeAgo",
-            color = Colors.hint,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Normal,
-            fontFamily = FontFamily(Font(R.font.new_peninim_mt_inclined_2)),
-            lineHeight = 20.sp,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(top = 10.dp, end = 10.dp)
-        )
-    }
-}
-
-@Composable
 fun QuantityItem(
-    quantity: Int = 1
+    modifier: Modifier = Modifier,
+    quantity: Int = 1,
+    onPlusQuantity: () -> Unit,
+    onMinusQuantity: () -> Unit
 ) {
-    var quantity by remember { mutableStateOf(quantity) }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .background(color = Colors.accent, shape = RoundedCornerShape(8.dp))
             .padding(horizontal = 22.dp, vertical = 14.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -147,7 +347,7 @@ fun QuantityItem(
             contentDescription = null,
             tint = Colors.block,
             modifier = Modifier
-                .clickable(onClick = { quantity += 1 })
+                .clickable(onClick = onPlusQuantity)
                 .size(14.dp)
         )
         Spacer(modifier = Modifier.height(23.dp))
@@ -161,10 +361,23 @@ fun QuantityItem(
         Spacer(modifier = Modifier.height(24.dp))
         HorizontalDivider(
             modifier = Modifier
-                .clickable(onClick = { quantity -= 1 })
+                .clickable(onClick = onMinusQuantity)
                 .width(14.dp),
             thickness = 1.dp,
             color = Colors.block
         )
+    }
+}
+
+fun formatTimeAgo(minutes: Int): String {
+    return when {
+        minutes <= 0 -> "Только что"
+        minutes < 60 -> "минут назад".format(minutes)
+        else -> {
+            // Если больше 59 минут, показываем время в формате ЧЧ:ММ
+            val hours = minutes / 60
+            val remainingMinutes = minutes % 60
+            String.format("%02d:%02d", hours, remainingMinutes)
+        }
     }
 }

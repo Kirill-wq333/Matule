@@ -2,12 +2,16 @@ package com.example.matule.ui.presentation.feature.sidemenu.viewmodel
 
 import androidx.lifecycle.viewModelScope
 import com.example.data.ui.presentation.storage.tokenprovider.TokenProvider
+import com.example.domain.ui.presentation.feature.notification.interactor.NotificationInteractor
+import com.example.domain.ui.presentation.feature.notification.model.Notifications
 import com.example.domain.ui.presentation.feature.profile.interactor.ProfileInteractor
 import com.example.domain.ui.presentation.feature.profile.model.ProfileResult
 import com.example.domain.ui.presentation.feature.sidemenu.interactor.SideMenuInteractor
 import com.example.matule.ui.core.viewmodel.BaseViewModel
 import com.example.matule.ui.presentation.feature.profile.viewmodel.ProfileScreenContract
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -15,8 +19,12 @@ import javax.inject.Inject
 class SideMenuScreenViewModel @Inject constructor(
     private val sideMenuInteractor: SideMenuInteractor,
     private val profileInteractor: ProfileInteractor,
-    private val tokenProvider: TokenProvider
+    private val tokenProvider: TokenProvider,
+    private val notificationInteractor: NotificationInteractor
 ) : BaseViewModel<SideMenuScreenContract.Event, SideMenuScreenContract.State, SideMenuScreenContract.Effect>() {
+
+    private val _notifications: MutableStateFlow<List<Notifications>> = MutableStateFlow(emptyList())
+    val notifications = _notifications.asStateFlow()
 
     override fun setInitialState(): SideMenuScreenContract.State = SideMenuScreenContract.State.Loading
 
@@ -38,12 +46,14 @@ class SideMenuScreenViewModel @Inject constructor(
             setState (SideMenuScreenContract.State.Loading )
 
             val result = profileInteractor.getProfile()
-            if (result.isSuccess) {
+            val resultNotification = notificationInteractor.getNotifications()
+            if (result.isSuccess && resultNotification.isSuccess) {
                 when (val profileResult = result.getOrNull()!!) {
                     is ProfileResult.Success -> {
                         setState (
                             SideMenuScreenContract.State.ProfileLoaded(
-                                profile = profileResult.profile
+                                profile = profileResult.profile,
+                                notification = resultNotification.getOrNull()!!
                             )
                         )
                     }

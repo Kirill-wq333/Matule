@@ -8,16 +8,17 @@ class SideMenuRepositoryImpl @Inject constructor(
     private val apiService: SideMenuApiService
 ): SideMenuRepository {
 
-    override suspend fun logout(): Result<Boolean> {
-        return try {
+    override suspend fun logout(): Result<Boolean>  =
+        runCatching {
             val response = apiService.logout()
             if (response.success) {
                 Result.success(true)
             } else {
-                Result.failure(Exception(response.message ?: "Logout failed"))
+                Result.failure(Exception(response.message))
             }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
+        }.fold(
+            onSuccess = { it },
+            onFailure = { Result.failure(it) }
+        )
+
 }

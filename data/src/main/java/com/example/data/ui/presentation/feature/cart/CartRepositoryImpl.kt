@@ -2,6 +2,7 @@ package com.example.data.ui.presentation.feature.cart
 
 import com.example.data.ui.presentation.feature.cart.datasource.CartApiService
 import com.example.data.ui.presentation.feature.cart.dto.CartItemDto.Companion.toCartItem
+import com.example.data.ui.presentation.feature.cart.dto.ProductCartDto.Companion.toProductCart
 import com.example.data.ui.presentation.feature.cart.dto.request.AddToCartRequest
 import com.example.data.ui.presentation.feature.cart.dto.request.UpdateCartItemRequest
 import com.example.data.ui.presentation.storage.preferences.AppPreferencesImpl
@@ -9,7 +10,9 @@ import com.example.data.ui.presentation.storage.tokenprovider.TokenProvider
 import com.example.domain.ui.presentation.feature.cart.model.CartItem
 import com.example.domain.ui.presentation.feature.cart.model.CartResult
 import com.example.domain.ui.presentation.feature.cart.model.CartState
+import com.example.domain.ui.presentation.feature.cart.model.ProductCart
 import com.example.domain.ui.presentation.feature.cart.repository.CartRepository
+import com.example.domain.ui.presentation.feature.popular.model.Product
 import com.example.domain.ui.presentation.feature.popular.repository.PopularRepository
 import javax.inject.Inject
 
@@ -34,7 +37,6 @@ class CartRepositoryImpl @Inject constructor(
 
             localItems.forEach { productId ->
                 val result = addToCart(productId, 1)
-
             }
 
             Result.success(true)
@@ -44,108 +46,124 @@ class CartRepositoryImpl @Inject constructor(
     }
 
 
-    override suspend fun getCart(): Result<CartState> {
-        return try {
-            val response = apiService.getCart()
+    override suspend fun getCart(): Result<CartState> = runCatching {
+        val response = apiService.getCart()
 
-            if (response.success) {
-                val cartItemsDto = response.cartItems ?: emptyList()
-
-                val cartItems: List<CartItem> = cartItemsDto.map { it.toCartItem() }
-
-                val enrichedCartItems = enrichCartItemsWithProducts(cartItems)
-
-                val totalItems = enrichedCartItems.sumOf { it.quantity }
-                val totalPrice = enrichedCartItems.sumOf {
-                    it.product?.price?.times(it.quantity) ?: 0.0
-                }
-
-                val cartState = CartState(
-                    items = enrichedCartItems,
-                    totalItems = totalItems,
-                    totalPrice = totalPrice
+        if (response.success) {
+            val items = response.items?.map { itemDto ->
+                CartItem(
+                    id = itemDto.id,
+                    productId = itemDto.productId,
+                    quantity = itemDto.quantity,
+                    createdAt = itemDto.createdAt,
+                    product = itemDto.product?.toProductCart()
                 )
+            } ?: emptyList()
 
-                Result.success(cartState)
-            } else {
-                Result.failure(Exception(response.message ?: "Failed to load cart"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    private suspend fun enrichCartItemsWithProducts(cartItems: List<CartItem>): List<CartItem> {
-        return cartItems.map { cartItem ->
-            if (cartItem.product == null) {
-                try {
-                    val productResult = popularRepository.getProductById(cartItem.productId)
-                    if (productResult.isSuccess) {
-                        cartItem.copy(product = productResult.getOrNull())
-                    } else {
-                        cartItem
-                    }
-                } catch (e: Exception) {
-                    cartItem
-                }
-            } else {
-                cartItem
-            }
-        }
-    }
-
-    override suspend fun addToCart(productId: Long, quantity: Int): Result<CartResult> {
-        return try {
-
-            val token = tokenProvider.getToken()
-            if (token == null) {
-                return Result.failure(Exception("User not authenticated"))
-            }
-
-            val response = apiService.addToCart(
-                AddToCartRequest(productId, quantity)
+            val summary = response.summary
+            val cartState = CartState(
+                items = items,
+                totalItems = summary?.itemsCount ?: items.sumOf { it.quantity },
+                totalPrice = summary?.total ?: 0.0,
+                subtotal = summary?.subtotal ?: 0.0,
+                delivery = summary?.delivery ?: 0.0
             )
 
+            Result.success(cartState)
+        } else {
+            Result.failure(Exception("Failed to load cart: ${response.message}"))
+        }
+    }.fold(
+        onSuccess = { it },
+        onFailure = { Result.failure(it) }
+    )
+
+    override suspend fun addToCart(productId: Long, quantity: Int): Result<CartResult> =
+        runCatching {
+            val token = tokenProvider.getToken()
+                ?: return Result.failure(Exception("Пользователь не авторизован"))
+
+            val response = apiService.addToCart(AddToCartRequest(productId, quantity))
+
             if (response.success) {
-                val cartItem = response.cartItem?.toCartItem()
+                val cartItem = response.items?.firstOrNull { it.productId == productId }
+                    ?.let { itemDto ->
+                        CartItem(
+                            id = itemDto.id,
+                            productId = itemDto.productId,
+                            quantity = itemDto.quantity,
+                            createdAt = itemDto.createdAt,
+                            product = itemDto.product?.let { productDto ->
+                                ProductCart(
+                                    id = productDto.id,
+                                    name = productDto.name,
+                                    price = productDto.price,
+                                    images = productDto.images,
+                                    description = productDto.description,
+                                )
+                            }
+                        )
+                    }
+
                 Result.success(CartResult.Success(cartItem = cartItem))
             } else {
-                Result.success(CartResult.Error(response.message ?: "Failed to add to cart"))
+                Result.success(
+                    CartResult.Error(
+                        response.message ?: "Не удалось добавить в корзину"
+                    )
+                )
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Result.failure(e)
-        }
-    }
-    
-    override suspend fun updateCartItem(cartItemId: Long, quantity: Int): Result<CartResult> {
-        return try {
+        }.fold(
+            onSuccess = { it },
+            onFailure = { Result.failure(it) }
+        )
+
+    override suspend fun updateCartItem(cartItemId: Long, quantity: Int): Result<CartResult> =
+        runCatching {
             val response = apiService.updateCartItem(cartItemId, UpdateCartItemRequest(quantity))
-            
+
             if (response.success) {
-                val cartItem = response.cartItem?.toCartItem()
+                val cartItem = response.items?.firstOrNull { it.id == cartItemId }
+                    ?.let { itemDto ->
+                        CartItem(
+                            id = itemDto.id,
+                            productId = itemDto.productId,
+                            quantity = itemDto.quantity,
+                            createdAt = itemDto.createdAt,
+                            product = itemDto.product?.let { productDto ->
+                                ProductCart(
+                                    id = productDto.id,
+                                    name = productDto.name,
+                                    price = productDto.price,
+                                    images = productDto.images,
+                                    description = productDto.description
+                                )
+                            }
+                        )
+                    }
+
                 Result.success(CartResult.Success(cartItem = cartItem))
             } else {
-                Result.success(CartResult.Error(response.message ?: "Failed to update cart item"))
+                Result.success(CartResult.Error(response.message ?: "Не удалось обновить товар"))
             }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-    
-    override suspend fun removeFromCart(cartItemId: Long): Result<CartResult> {
-        return try {
+        }.fold(
+            onSuccess = { it },
+            onFailure = { Result.failure(it) }
+        )
+
+    override suspend fun removeFromCart(cartItemId: Long): Result<CartResult> =
+        runCatching {
             val response = apiService.removeFromCart(cartItemId)
-            
+
             if (response.success) {
                 Result.success(CartResult.Success())
             } else {
-                Result.success(CartResult.Error(response.message ?: "Failed to remove from cart"))
+                Result.success(CartResult.Error(response.message ?: "Не удалось удалить товар"))
             }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-    
+        }.fold(
+            onSuccess = { it },
+            onFailure = { Result.failure(it) }
+        )
+
 
 }
