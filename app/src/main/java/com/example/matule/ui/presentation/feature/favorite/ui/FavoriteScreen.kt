@@ -33,6 +33,7 @@ import com.example.matule.ui.presentation.feature.favorite.viewmodel.FavoriteScr
 import com.example.matule.ui.presentation.feature.favorite.viewmodel.FavoriteScreenViewModel
 import com.example.matule.ui.presentation.shared.header.CustomHeader
 import com.example.matule.ui.presentation.shared.main.CardItem
+import com.example.matule.ui.presentation.shared.screen.EmptyScreen
 import com.example.matule.ui.presentation.shared.screen.LoadingScreen
 import com.example.matule.ui.presentation.theme.Colors
 import com.example.matule.ui.presentation.theme.MatuleTypography
@@ -136,29 +137,11 @@ private fun FavoriteContent(
                 )
             }
             is FavoriteScreenContract.State.Empty -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(20.dp)
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_favorite_fill),
-                            contentDescription = null,
-                            tint = Colors.red,
-                            modifier = Modifier.size(96.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.empty_favorite),
-                            color = Colors.text,
-                            style = MatuleTypography.headlineSmall,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
+                EmptyScreen(
+                    icon = R.drawable.ic_favorite_fill,
+                    emptyText = R.string.empty_favorite,
+                    tint = Colors.red
+                )
             }
             else -> {}
         }

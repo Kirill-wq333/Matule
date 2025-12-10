@@ -156,7 +156,15 @@ class CartRepositoryImpl @Inject constructor(
             val response = apiService.removeFromCart(cartItemId)
 
             if (response.success) {
-                Result.success(CartResult.Success())
+                getCart().fold(
+                    onSuccess = { cartState ->
+                        val productIds = cartState.items.map { it.productId }.toSet()
+                        saveLocalCartItems(productIds)
+
+                        Result.success(CartResult.Success(items = cartState.items))
+                    },
+                    onFailure = { Result.failure(it) }
+                )
             } else {
                 Result.success(CartResult.Error(response.message ?: "Не удалось удалить товар"))
             }

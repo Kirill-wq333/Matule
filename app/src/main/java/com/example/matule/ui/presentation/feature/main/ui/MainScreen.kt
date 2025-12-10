@@ -1,38 +1,26 @@
 package com.example.matule.ui.presentation.feature.main.ui
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.with
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -40,28 +28,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import coil.compose.AsyncImage
-import com.example.domain.ui.presentation.feature.arrivals.model.Promotion
-import com.example.domain.ui.presentation.feature.catalog.model.Category
-import com.example.domain.ui.presentation.feature.popular.model.Product
 import com.example.matule.R
 import com.example.matule.ui.presentation.approuts.AppRouts
 import com.example.matule.ui.presentation.feature.main.viewmodel.MainScreenContract
@@ -69,12 +49,15 @@ import com.example.matule.ui.presentation.feature.main.viewmodel.MainViewModel
 import com.example.matule.ui.presentation.shared.buttons.CustomIconButton
 import com.example.matule.ui.presentation.shared.header.CustomHeader
 import com.example.matule.ui.presentation.shared.header.CustomHeaderMain
-import com.example.matule.ui.presentation.shared.main.CardItem
+import com.example.matule.ui.presentation.shared.main.ArrivalsCard
+import com.example.matule.ui.presentation.shared.main.CatalogCard
+import com.example.matule.ui.presentation.shared.main.CatalogProducts
+import com.example.matule.ui.presentation.shared.main.PopularCard
+import com.example.matule.ui.presentation.shared.main.SearchScreenContent
 import com.example.matule.ui.presentation.shared.screen.MainLoadingScreen
 import com.example.matule.ui.presentation.shared.text.TextFieldWithLeadingAndTrailingIcons
 import com.example.matule.ui.presentation.theme.Colors
 import com.example.matule.ui.presentation.theme.MatuleTypography
-import kotlinx.coroutines.delay
 
 private interface MainScreenCallback{
     fun addedInCart(productId: Long){}
@@ -128,6 +111,15 @@ fun MainScreen(
             navController.navigate(AppRouts.SIDE_MENU)
         }
     }
+
+    val onCategorySelected: (Long?) -> Unit = { categoryId ->
+        if (categoryId == null || categoryId == 0L) {
+            vm.handleEvent(MainScreenContract.Event.SelectCategory(0))
+        } else {
+            vm.handleEvent(MainScreenContract.Event.SelectCategory(categoryId))
+        }
+    }
+
     when (val currentState = state) {
         is MainScreenContract.State.Loaded -> {
             Main(
@@ -136,6 +128,7 @@ fun MainScreen(
                     vm.handleEvent(MainScreenContract.Event.AddToCart(productId))
                 },
                 state = currentState,
+                onCategorySelected = onCategorySelected,
                 addedInFavorite = { id, isFavorite ->
                     vm.handleEvent(
                         MainScreenContract.Event.ToggleProductFavorite(
@@ -161,7 +154,8 @@ private fun Main(
     callback: MainScreenCallback,
     state: MainScreenContract.State.Loaded,
     addedInCart: (Long) -> Unit,
-    addedInFavorite: (Long, Boolean) -> Unit
+    addedInFavorite: (Long, Boolean) -> Unit,
+    onCategorySelected: (Long?) -> Unit
 ) {
     var search by remember { mutableStateOf("") }
 
@@ -172,10 +166,13 @@ private fun Main(
         search = search,
         addedInCart = addedInCart,
         onSearchChange = { search = it },
-        openDetailScreen = callback::openDetailScreen,
+        openDetailScreen = {
+            callback.openDetailScreen(it)
+        },
         openSideMenu = callback::openSideMenu,
         state = state,
         addedInFavorite = addedInFavorite,
+        onCategorySelected = onCategorySelected
     )
 }
 
@@ -189,15 +186,65 @@ private fun Content(
     openDetailScreen: (Long) -> Unit = {},
     openPopularScreen: () -> Unit,
     openSideMenu: () -> Unit,
+    onCategorySelected: (Long?) -> Unit,
     addedInFavorite: (Long, Boolean) -> Unit,
     openArrivalsScreen: () -> Unit,
 ) {
 
     var catalogScreen by remember { mutableStateOf(false) }
     var searchScreen by remember { mutableStateOf(false) }
+    var isSearchPerformed by remember { mutableStateOf(false) }
 
     val popularProduct = state.popularProducts.filter { it.isPopular }
     val showSearchHeader = searchScreen || search.isNotEmpty()
+
+    val pagerState = rememberPagerState(
+        initialPage = calculateInitialPage(state),
+        pageCount = { state.categories.size + 1 }
+    )
+    val searchHistory = remember { mutableStateListOf<String>() }
+
+    val searchResults = remember(search, state.popularProducts) {
+        if (search.isNotEmpty()) {
+            state.popularProducts.filter { product ->
+                product.name.contains(search, ignoreCase = true) ||
+                        product.description.contains(search, ignoreCase = true)
+            }
+        } else {
+            emptyList()
+        }
+    }
+
+    LaunchedEffect(state.selectedCategoryId) {
+        val targetPage = when (state.selectedCategoryId) {
+            null, 0L -> 0
+            else -> {
+                val index = state.categories.indexOfFirst { it.id == state.selectedCategoryId }
+                if (index >= 0) index + 1 else 0
+            }
+        }
+
+        if (pagerState.currentPage != targetPage) {
+            pagerState.animateScrollToPage(targetPage)
+        }
+    }
+
+    LaunchedEffect(pagerState.currentPage) {
+        val newCategoryId = when (val currentPage = pagerState.currentPage) {
+            0 -> 0L
+            else -> state.categories.getOrNull(currentPage - 1)?.id ?: 0L
+        }
+
+        if (state.selectedCategoryId != newCategoryId) {
+            onCategorySelected(newCategoryId)
+        }
+    }
+
+    LaunchedEffect(search) {
+        if (search.isEmpty()) {
+            isSearchPerformed = false
+        }
+    }
 
     val screenState = remember(catalogScreen, showSearchHeader) {
         when {
@@ -213,7 +260,6 @@ private fun Content(
             .background(color = Colors.background)
             .padding(bottom = 50.dp)
     ) {
-        // 1. Единый анимированный заголовок
         Crossfade(
             targetState = screenState,
             modifier = Modifier,
@@ -228,6 +274,7 @@ private fun Content(
                         visibleNameScreen = true
                     )
                 }
+
                 ScreenState.SEARCH -> {
                     CustomHeader(
                         modifier = Modifier.padding(horizontal = 20.dp),
@@ -239,6 +286,7 @@ private fun Content(
                         visibleNameScreen = true
                     )
                 }
+
                 ScreenState.MAIN -> {
                     CustomHeaderMain(
                         modifier = Modifier.padding(horizontal = 20.dp),
@@ -271,11 +319,53 @@ private fun Content(
                     onTextChange = { newText ->
                         onSearchChange(newText)
                         searchScreen = newText.isNotEmpty()
+
+                        if (isSearchPerformed && newText != search) {
+                            isSearchPerformed = false
+                        }
                     },
+                    onSearch = {
+                        isSearchPerformed = true
+                        if (search.isNotEmpty() && !searchHistory.contains(search)) {
+                            searchHistory.add(0, search)
+                            if (searchHistory.size > 10) {
+                                searchHistory.removeLast()
+                            }
+                        }
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(if (catalogScreen) 28.dp else 22.dp))
             }
+        }
+
+        AnimatedVisibility(
+            visible = search.isNotEmpty(),
+            enter = expandVertically(
+                animationSpec = tween(700),
+                expandFrom = Alignment.Bottom
+            ) + fadeIn(animationSpec = tween(700)),
+            exit = shrinkVertically(
+                animationSpec = tween(700),
+                shrinkTowards = Alignment.Bottom
+            ) + fadeOut(animationSpec = tween(700))
+        ) {
+            SearchScreenContent(
+                searchQuery = search,
+                searchResults = searchResults,
+                searchHistory = searchHistory,
+                cartItems = state.isEnableDot,
+                addedInCart = addedInCart,
+                addedInFavorite = addedInFavorite,
+                openCartScreen = openCartScreen,
+                openDetailScreen = openDetailScreen,
+                onSearchItemClick = { searchItem ->
+                    onSearchChange(searchItem)
+                    searchScreen = true
+                    isSearchPerformed = true
+                },
+                isSearchPerformed = isSearchPerformed
+            )
         }
 
         AnimatedVisibility(
@@ -289,15 +379,62 @@ private fun Content(
                 shrinkTowards = Alignment.Top
             ) + fadeOut(animationSpec = tween(700))
         ) {
-            Column {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 CatalogCard(
-                    openCatalogScreen = { catalogScreen = true },
                     categories = state.categories,
+                    onCategorySelected = onCategorySelected,
+                    pagerState = pagerState,
                 )
+
                 Spacer(modifier = Modifier.height(if (showSearchHeader) 20.dp else 24.dp))
+
             }
         }
 
+        AnimatedVisibility(
+            visible = !showSearchHeader && state.selectedCategoryId != null,
+            enter = expandVertically(
+                animationSpec = tween(700),
+                expandFrom = Alignment.Top
+            ) + fadeIn(animationSpec = tween(700)),
+            exit = shrinkVertically(
+                animationSpec = tween(700),
+                shrinkTowards = Alignment.Top
+            ) + fadeOut(animationSpec = tween(700))
+        ) {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize(),
+            ) { page ->
+                val currentCategory =
+                    if (page == 0) null else state.categories.getOrNull(page - 1)
+
+
+                val productsForPage =
+                    remember(currentCategory, state.popularProducts, state.categories) {
+                        if (page == 0) {
+                            state.popularProducts
+                        } else {
+                            currentCategory?.let {
+                                state.popularProducts.filter { product ->
+                                    product.category == currentCategory.slug
+                                }
+                            } ?: emptyList()
+                        }
+                    }
+
+                CatalogProducts(
+                    addedInCart = addedInCart,
+                    openCartScreen = openCartScreen,
+                    openDetailScreen = openDetailScreen,
+                    addedInFavorite = addedInFavorite,
+                    cartItems = state.isEnableDot,
+                    products = productsForPage,
+                    categories = state.categories,
+                    categoryId = state.selectedCategoryId
+                )
+            }
+        }
         AnimatedVisibility(
             visible = !catalogScreen && !showSearchHeader,
             enter = expandVertically(
@@ -339,13 +476,9 @@ enum class ScreenState {
 fun SearchAndFeature(
     query: String,
     searchScreen: Boolean,
-    onTextChange: (String) -> Unit
+    onTextChange: (String) -> Unit,
+    onSearch: (() -> Unit)? = null
 ) {
-
-    val width by animateFloatAsState(
-        targetValue = if (searchScreen) 1f else 0.8f,
-        animationSpec = tween(700)
-    )
 
     Row(
         modifier = Modifier
@@ -355,32 +488,11 @@ fun SearchAndFeature(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         TextFieldWithLeadingAndTrailingIcons(
-            modifier = Modifier.fillMaxWidth(width),
             query = query,
             onTextChange = onTextChange,
             placeholder = stringResource(R.string.search),
-            trailingIcon = {
-                AnimatedVisibility(
-                    visible = width == 1f
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .height(24.dp)
-                            .padding(end = 14.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        VerticalDivider(
-                            thickness = 1.5.dp,
-                            color = Colors.subTextDark
-                        )
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_voice),
-                            contentDescription = null,
-                            tint = Colors.subTextDark
-                        )
-                    }
-                }
-            },
+            onSearch = onSearch,
+            searchScreen = searchScreen,
             leadingIcon = {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_search),
@@ -407,175 +519,7 @@ fun SearchAndFeature(
 }
 
 @Composable
-private fun PopularCard(
-    openPopularScreen: () -> Unit,
-    cartItems: Set<Long>,
-    popularProducts: List<Product>,
-    addedInCart: (Long) -> Unit,
-    addedInFavorite: (Long, Boolean) -> Unit,
-    openCartScreen: () -> Unit = {},
-    openDetailScreen: (Long) -> Unit = {}
-) {
-    val products = popularProducts.take(2)
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val density = LocalDensity.current
-
-    val hasEnoughSpace = remember(products.size, screenWidth) {
-        with(density) {
-            val itemWidth = 160.dp.toPx() * products.size
-            val totalWidth = screenWidth.toPx() - (40.dp.toPx()) 
-            totalWidth - itemWidth > 15.dp.toPx() * (products.size - 1)
-        }
-    }
-
-    Card(
-        text = R.string.popular,
-        spacer = 30.dp,
-        content = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                horizontalArrangement = if (hasEnoughSpace) {
-                    Arrangement.SpaceBetween
-                } else {
-                    Arrangement.spacedBy(15.dp)
-                }
-            ) {
-                products.forEach { product ->
-
-                    val isInCart = cartItems.contains(product.id)
-
-                    CardItem(
-                        cardName = product.name,
-                        cardImage = product.images.firstOrNull() ?: "",
-                        money = product.price,
-                        addedInCart = { addedInCart(product.id) },
-                        liked = product.isFavorite,
-                        cartIcon = isInCart,
-                        addedInFavorite = { addedInFavorite(product.id, product.isFavorite) },
-                        openCartScreen = openCartScreen,
-                        openDetailScreen = { openDetailScreen(product.id) }
-                    )
-                }
-            }
-        },
-        onClick = openPopularScreen
-    )
-}
-
-@Composable
-fun CatalogCard(
-    openCatalogScreen: () -> Unit,
-    categories: List<Category>
-) {
-
-    val categoriesList = remember(categories) {
-        listOf("Все") + categories.map { it.name }
-    }
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(19.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.category),
-            color = Colors.text,
-            style = MatuleTypography.titleMedium,
-            modifier = Modifier.padding(start = 20.dp)
-        )
-
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = 20.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-
-            items(categoriesList) { category ->
-                Item(
-                    text = category,
-                    onClick = openCatalogScreen
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-private fun ArrivalsCard(
-    openArrivalsScreen: () -> Unit,
-    promotions: List<Promotion>
-) {
-    var currentIndex by remember { mutableIntStateOf(0) }
-
-
-    LaunchedEffect(promotions) {
-        if (promotions.size > 1) {
-            while (true) {
-                delay(5000)
-                currentIndex = (currentIndex + 1) % promotions.size
-            }
-        }
-    }
-
-    Card(
-        text = R.string.new_arrivals,
-        spacer = 20.dp,
-        content = {
-            if (promotions.isNotEmpty()) {
-                val currentPromotion = promotions[currentIndex]
-
-                AnimatedContent(
-                    targetState = currentPromotion,
-                    transitionSpec = {
-                        slideInHorizontally(
-                            animationSpec = tween(1500),
-                            initialOffsetX = { fullWidth -> fullWidth }
-                        ) with slideOutHorizontally(
-                            animationSpec = tween(1500),
-                            targetOffsetX = { fullWidth -> -fullWidth }
-                        )
-                    }
-                ) { promotion ->
-                    Arrivals(
-                        arrivalsImage = promotion.image,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
-                    )
-                }
-            }
-        },
-        onClick = openArrivalsScreen
-    )
-}
-
-@Composable
-fun Arrivals(
-    modifier: Modifier = Modifier,
-    arrivalsImage: String
-) {
-    Box(
-        modifier = modifier
-            .shadow(
-                elevation = 4.dp,
-                shape = RoundedCornerShape(16.dp),
-                clip = false
-            )
-            .fillMaxWidth()
-            .background(color = Colors.block, shape = RoundedCornerShape(16.dp))
-            .height(95.dp)
-    ){
-        AsyncImage(
-            model = arrivalsImage,
-            contentDescription = null,
-            contentScale = ContentScale.FillBounds,
-            modifier = Modifier
-                .clip(RoundedCornerShape(16.dp))
-                .fillMaxWidth(1f)
-        )
-    }
-}
-
-@Composable
-private fun Card(
+fun Card(
     text: Int,
     content: @Composable () -> Unit,
     spacer: Dp,
@@ -608,29 +552,12 @@ private fun Card(
     }
 }
 
-@Composable
-private fun Item(
-    text: String,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .width(108.dp)
-            .shadow(
-                elevation = 2.dp,
-                shape = RoundedCornerShape(8.dp),
-                clip = false
-            )
-            .background(color = Colors.block, shape = RoundedCornerShape(8.dp)),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            color = Colors.text,
-            style = MatuleTypography.bodySmall,
-            modifier = Modifier
-                .clickable(onClick = onClick)
-                .padding(top = 11.dp, bottom = 17.dp)
-        )
+private fun calculateInitialPage(state: MainScreenContract.State.Loaded): Int {
+    return when (state.selectedCategoryId) {
+        null, 0L -> 0
+        else -> {
+            val index = state.categories.indexOfFirst { it.id == state.selectedCategoryId }
+            if (index >= 0) index + 1 else 0
+        }
     }
 }

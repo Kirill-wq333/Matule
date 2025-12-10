@@ -11,7 +11,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -82,7 +81,6 @@ private fun PreviewContent() {
 @Composable
 fun SideMenuScreen(
     vm: SideMenuScreenViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier,
     onBack: () -> Unit,
     navController: NavHostController = rememberNavController()
 ) {
@@ -153,7 +151,7 @@ fun SideMenuScreen(
     }
 
     Box(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxHeight()
             .width(menuWidth)
             .offset(x = offsetX.value.dp)
@@ -171,7 +169,7 @@ fun SideMenuScreen(
             }
     ) {
         Content(
-            modifier = modifier,
+            modifier = Modifier,
             visibleCard = visibleCard,
             visibleCard2 = visibleCard2,
             offsetX1 = offsetX1,

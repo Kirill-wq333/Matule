@@ -179,12 +179,12 @@ fun ProfileContent(
                     endIcon = R.drawable.ic_edit,
                     openSideMenu = openSideMenu,
                     tintEndIcon = Colors.block,
+                    style = MatuleTypography.bodyLarge,
                     openCartScreen = {
                         visibleEditingScreen = true
                     },
                     padding = 8.5.dp,
                     visibleCosmeticIcon = false,
-                    style = MatuleTypography.bodyLarge,
                     size = 15.dp,
                     backColor = Colors.accent
                 )

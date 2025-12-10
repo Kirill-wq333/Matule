@@ -22,7 +22,9 @@
     <!--  Main  -->
     <string name="main">Главная</string>
     <string name="category">Категории</string>
+    <string name="empty_search">По вашему запросу ничего не нашли</string>
     <string name="new_arrivals">Акции</string>
+    <string name="empty_arrivals">Акций пока что нету</string>
 
     <!--  Forgot Password  -->
     <string name="forgot_password">Forgot Password</string>
@@ -61,6 +63,7 @@
 
     <!--  Popular  -->
     <string name="popular">Популярное</string>
+    <string name="empty_popular">Пока что нету популярных товаров</string>
 
     <!--  Favourite  -->
     <string name="favourite">Избранное</string>
@@ -69,6 +72,7 @@
     <!--  Cart  -->
     <string name="cart">Корзина</string>
     <string name="cart_items">%1$s товара</string>
+    <string name="empty_cart">У вас пока что нету добавленных в корзину товаров. Добавьте товар.</string>
 
     <!--  Side menu  -->
     <string name="setting">Настройки</string>
@@ -93,9 +97,12 @@
     <string name="btn_sent">Отправить</string>
     <string name="btn_add_to_cart">В корзину</string>
     <string name="btn_back_to_shopping">Вернуться к покупкам</string>
+    <string name="btn_added">Добавлено</string>
     <string name="btn_save">Сохранить</string>
     <string name="btn_checkout">Оформить заказ</string>
     <string name="btn_next">Далее</string>
+    <string name="all">Все</string>
+    <string name="more_detailed">Подробнее</string>
     <string name="btn_start">Начать</string>
     <string name="recovery_password">Воcстановить</string>
     <string name="search">Поиск</string>

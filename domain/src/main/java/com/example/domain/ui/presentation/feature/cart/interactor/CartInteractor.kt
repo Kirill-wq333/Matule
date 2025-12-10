@@ -13,12 +13,17 @@ class CartInteractor @Inject constructor(
         return cartRepository.getCart()
     }
 
-    suspend fun getLocalCartItems(): Set<Long> {
-        return cartRepository.getLocalCartItems()
+    suspend fun getLocalCartItems(): Result<Set<Long>> {
+        return runCatching {
+            cartRepository.getLocalCartItems()
+        }
     }
 
-    suspend fun saveLocalCartItems(productIds: Set<Long>) {
-        cartRepository.saveLocalCartItems(productIds)
+    suspend fun saveLocalCartItems(productIds: Set<Long>): Result<Boolean> {
+        return runCatching {
+            cartRepository.saveLocalCartItems(productIds)
+            true
+        }
     }
 
     suspend fun syncCartWithServer(): Result<Boolean> {
@@ -26,29 +31,31 @@ class CartInteractor @Inject constructor(
     }
 
     suspend fun addToCartSimple(productId: Long, quantity: Int = 1): Result<Boolean> {
-        return try {
+        return runCatching {
+            val currentItems = getLocalCartItems().getOrNull() ?: emptySet()
 
-            val currentItems = getLocalCartItems()
             val updatedItems = currentItems + productId
             saveLocalCartItems(updatedItems)
 
             val response = cartRepository.addToCart(productId, quantity)
 
-            if (response.isSuccess) {
-                val cartResult = response.getOrNull()!!
-                when (cartResult) {
-                    is CartResult.Success -> {
-                        Result.success(true)
+            response.fold(
+                onSuccess = { cartResult ->
+                    when (cartResult) {
+                        is CartResult.Success -> {
+                            true
+                        }
+                        is CartResult.Error -> {
+                            saveLocalCartItems(currentItems)
+                            false
+                        }
                     }
-                    is CartResult.Error -> {
-                        Result.success(true)
-                    }
+                },
+                onFailure = { error ->
+                    saveLocalCartItems(currentItems)
+                    false
                 }
-            } else {
-                Result.success(true)
-            }
-        } catch (e: Exception) {
-            Result.success(true)
+            )
         }
     }
     

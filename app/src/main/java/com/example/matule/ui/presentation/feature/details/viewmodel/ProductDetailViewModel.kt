@@ -1,4 +1,4 @@
-package com.example.matule.ui.presentation.feature.main.viewmodel
+package com.example.matule.ui.presentation.feature.details.viewmodel
 
 import androidx.lifecycle.viewModelScope
 import com.example.domain.ui.presentation.feature.auth.interactor.AuthInteractor
@@ -6,100 +6,62 @@ import com.example.domain.ui.presentation.feature.cart.interactor.CartInteractor
 import com.example.domain.ui.presentation.feature.cart.model.CartResult
 import com.example.domain.ui.presentation.feature.favorite.interactor.FavoriteInteractor
 import com.example.domain.ui.presentation.feature.favorite.model.FavoriteResult
-import com.example.domain.ui.presentation.feature.main.interactor.MainInteractor
 import com.example.domain.ui.presentation.feature.popular.interactor.PopularInteractor
 import com.example.domain.ui.presentation.feature.popular.model.Product
 import com.example.matule.ui.core.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.max
 
 @HiltViewModel
-class MainViewModel @Inject constructor(
-    private val mainInteractor: MainInteractor,
-    private val cartInteractor: CartInteractor,
-    private val authInteractor: AuthInteractor,
+class ProductDetailViewModel @Inject constructor(
     private val popularInteractor: PopularInteractor,
-    private val favoriteInteractor: FavoriteInteractor,
-) : BaseViewModel<MainScreenContract.Event, MainScreenContract.State, MainScreenContract.Effect>() {
+    private val authInteractor: AuthInteractor,
+    private val cartInteractor: CartInteractor,
+    private val favoriteInteractor: FavoriteInteractor
+) : BaseViewModel<ProductDetailContract.Event, ProductDetailContract.State, ProductDetailContract.Effect>() {
 
-    override fun setInitialState(): MainScreenContract.State = MainScreenContract.State.Loading
+    override fun setInitialState(): ProductDetailContract.State =
+        ProductDetailContract.State.Loading
 
-    override fun handleEvent(event: MainScreenContract.Event) = when (event) {
-        is MainScreenContract.Event.LoadContent -> loadHomeContent()
-        is MainScreenContract.Event.ToggleProductFavorite -> toggleProductFavorite(event.productId, event.currentlyFavorite)
-        is MainScreenContract.Event.SelectCategory -> selectCategory(event.categoryId)
-        is MainScreenContract.Event.LoadProductsByCategory -> loadProductsByCategory(event.category)
-        is MainScreenContract.Event.RefreshContent -> refreshContent()
-        is MainScreenContract.Event.AddToCart -> addToCart(event.productId,event.quantity)
+    override fun handleEvent(event: ProductDetailContract.Event) = when (event) {
+        is ProductDetailContract.Event.LoadContent -> loadProductId(event.productId)
+        is ProductDetailContract.Event.Refresh -> refresh()
+        is ProductDetailContract.Event.ToggleProductFavorite -> toggleProductFavorite(event.productId,event.currentlyFavorite)
+        is ProductDetailContract.Event.AddToCart -> addToCart(event.productId)
     }
 
-    init {
-
+    private fun loadProductId(productId: Long) {
         viewModelScope.launch(dispatcher) {
-            favoriteInteractor.favoriteUpdates.collect { (productId, isFavorite) ->
-                updateProductFavoriteStatus(productId, isFavorite)
-            }
-        }
+            setState(ProductDetailContract.State.Loading)
 
-        checkAuthAndLoadContent()
-    }
+            val result = popularInteractor.loadProductById(productId)
+            authInteractor.isUserLoggedIn()
 
-    private fun checkAuthAndLoadContent() {
-        viewModelScope.launch(dispatcher) {
-            val isLoggedIn = authInteractor.isUserLoggedIn()
-
-            if (isLoggedIn) {
-                loadHomeContent()
-            }
-        }
-    }
-
-
-    private fun loadHomeContent() {
-        viewModelScope.launch(dispatcher) {
-            setState(MainScreenContract.State.Loading)
-
-            val result = mainInteractor.loadHomeContent()
             if (result.isSuccess) {
-                val content = result.getOrNull()!!
 
+                val product = result.getOrNull()!!
                 val cartResult = cartInteractor.getCart()
 
                 cartResult.fold(
-                    onSuccess = { cartState ->
+                    onSuccess = {cartState ->
                         val cartItemIds = cartState.items.map { it.productId }.toSet()
 
                         setState(
-                            MainScreenContract.State.Loaded(
-                                categories = content.categories,
+                            ProductDetailContract.State.LoadProduct(
+                                product = product,
                                 isEnableDot = cartItemIds,
-                                selectedCategoryId = null,
-                                popularProducts = content.popularProducts,
-                                promotions = content.promotions,
                                 cartState = cartState
                             )
                         )
                     },
-                    onFailure = {
-                        val localCartItems = cartInteractor.getLocalCartItems().getOrNull() ?: emptySet()
-
-                        setState(
-                            MainScreenContract.State.Loaded(
-                                categories = content.categories,
-                                isEnableDot = localCartItems,
-                                selectedCategoryId = null,
-                                popularProducts = content.popularProducts,
-                                promotions = content.promotions,
-                            )
-                        )
-                    }
+                    onFailure = {}
                 )
             } else {
-                val error = result.exceptionOrNull()!!
-                setState(MainScreenContract.State.Error(error.message ?: "Ошибка загрузки данных"))
-                setEffect { MainScreenContract.Effect.ShowError("Не удалось загрузить данные") }
+                setEffect { ProductDetailContract.Effect.ShowError("Не удалось загрузить данные") }
             }
         }
     }
@@ -114,75 +76,30 @@ class MainViewModel @Inject constructor(
             if (result.isSuccess) {
                 when (val favoriteResult = result.getOrNull()!!) {
                     is FavoriteResult.Success -> {
-                        setEffect { MainScreenContract.Effect.FavoriteStatusUpdated(favoriteResult) }
+                        setEffect { ProductDetailContract.Effect.FavoriteStatusUpdated(favoriteResult) }
                         updateProductFavoriteStatus(favoriteResult.productId, favoriteResult.isFavorite)
                     }
                     is FavoriteResult.Error -> {
                         updateProductFavoriteStatus(productId, currentlyFavorite)
-                        setEffect { MainScreenContract.Effect.ShowError(favoriteResult.message) }
+                        setEffect { ProductDetailContract.Effect.ShowError(favoriteResult.message) }
                     }
                 }
             } else {
                 updateProductFavoriteStatus(productId, currentlyFavorite)
-                setEffect { MainScreenContract.Effect.ShowError("Ошибка обновления избранного") }
+                setEffect { ProductDetailContract.Effect.ShowError("Ошибка обновления избранного") }
             }
         }
     }
-
-    private fun selectCategory(categoryId: Long) {
-        val currentState = currentState
-        if (currentState is MainScreenContract.State.Loaded) {
-            val category = currentState.categories.find { it.id == categoryId }
-            category?.let {
-                setState(currentState.copy(selectedCategoryId = categoryId))
-
-                viewModelScope.launch(dispatcher) {
-                    loadProductsByCategory(it.slug)
-                }
-            }
-        }
-    }
-
-    private fun loadProductsByCategory(category: String) {
-        viewModelScope.launch(dispatcher) {
-            setState(MainScreenContract.State.Loading)
-            authInteractor.isUserLoggedIn()
-            val result = popularInteractor.loadProductsByCategory(category)
-
-            if (result.isSuccess) {
-                val products = result.getOrNull()!!
-
-                setEffect { MainScreenContract.Effect.CategoryProductsLoaded(category, products) }
-
-                val currentState = currentState
-                if (currentState is MainScreenContract.State.Loaded) {
-                    setState(
-                        currentState.copy(
-                            popularProducts = products,
-                            selectedCategoryId = currentState.categories.find { it.slug == category }?.id
-                        )
-                    )
-                }
-            } else {
-                setEffect { MainScreenContract.Effect.ShowError("Не удалось загрузить товары категории") }
-                val currentState = currentState
-                if (currentState is MainScreenContract.State.Loaded) {
-                    setState(currentState.copy(selectedCategoryId = null))
-                }
-            }
-        }
-    }
-
-    private fun refreshContent() = setState(MainScreenContract.State.Loading)
 
     private fun updateProductFavoriteStatusOptimistic(productId: Long, isFavorite: Boolean) {
         val currentState = currentState
-        if (currentState is MainScreenContract.State.Loaded) {
+        if (currentState is ProductDetailContract.State.LoadProduct) {
             setState(
                 currentState.copy(
-                    popularProducts = currentState.popularProducts.map { product ->
-                        if (product.id == productId) product.copy(isFavorite = isFavorite) else product
-                    }
+                    product = currentState.product.copy(
+                        id = productId,
+                        isFavorite = isFavorite
+                    )
                 )
             )
         }
@@ -190,16 +107,20 @@ class MainViewModel @Inject constructor(
 
     private fun updateProductFavoriteStatus(productId: Long, isFavorite: Boolean) {
         val currentState = currentState
-        if (currentState is MainScreenContract.State.Loaded) {
+        if (currentState is ProductDetailContract.State.LoadProduct) {
             setState(
                 currentState.copy(
-                    popularProducts = currentState.popularProducts.map { product ->
-                        if (product.id == productId) product.copy(isFavorite = isFavorite) else product
-                    }
+                    product = currentState.product.copy(
+                        id = productId,
+                        isFavorite = isFavorite
+                    )
                 )
             )
         }
     }
+
+    private fun refresh() = setState(ProductDetailContract.State.Loading)
+
 
     private fun addToCart(productId: Long, quantity: Int = 1) {
         viewModelScope.launch(dispatcher) {
@@ -214,7 +135,7 @@ class MainViewModel @Inject constructor(
 
     private suspend fun proceedWithAddToCart(productId: Long, quantity: Int = 1) {
         val currentState = currentState
-        if (currentState is MainScreenContract.State.Loaded) {
+        if (currentState is ProductDetailContract.State.LoadProduct) {
             val isAlreadyInCart = currentState.isEnableDot.contains(productId)
 
             if (isAlreadyInCart) {
@@ -235,17 +156,17 @@ class MainViewModel @Inject constructor(
             onSuccess = { success ->
                 if (success) {
                     refreshCartState()
-                    setEffect { MainScreenContract.Effect.CartItemAdded(productId) }
+                    setEffect { ProductDetailContract.Effect.CartItemAdded(productId) }
                 } else {
                     updateCartIconState(productId, false)
                     decrementCartCountOptimistic(quantity)
-                    setEffect { MainScreenContract.Effect.ShowError("Не удалось добавить товар в корзину") }
+                    setEffect { ProductDetailContract.Effect.ShowError("Не удалось добавить товар в корзину") }
                 }
             },
             onFailure = { error ->
                 updateCartIconState(productId, false)
                 decrementCartCountOptimistic(quantity)
-                setEffect { MainScreenContract.Effect.ShowError("Ошибка: ${error.message}") }
+                setEffect { ProductDetailContract.Effect.ShowError("Ошибка: ${error.message}") }
             }
         )
     }
@@ -264,30 +185,30 @@ class MainViewModel @Inject constructor(
                     when (cartResult) {
                         is CartResult.Success -> {
                             refreshCartState()
-                            setEffect { MainScreenContract.Effect.CartItemRemoved(productId) }
+                            setEffect { ProductDetailContract.Effect.CartItemRemoved(productId) }
                         }
                         is CartResult.Error -> {
                             updateCartIconState(productId, true)
                             incrementCartCountOptimistic(quantity)
-                            setEffect { MainScreenContract.Effect.ShowError(cartResult.message) }
+                            setEffect { ProductDetailContract.Effect.ShowError(cartResult.message) }
                         }
                     }
                 },
                 onFailure = { error ->
                     updateCartIconState(productId, true)
                     incrementCartCountOptimistic(quantity)
-                    setEffect { MainScreenContract.Effect.ShowError("Ошибка удаления: ${error.message}") }
+                    setEffect { ProductDetailContract.Effect.ShowError("Ошибка удаления: ${error.message}") }
                 }
             )
         } else {
             refreshCartState()
-            setEffect { MainScreenContract.Effect.ShowError("Товар не найден в корзине") }
+            setEffect { ProductDetailContract.Effect.ShowError("Товар не найден в корзине") }
         }
     }
 
     private fun getCartItemIdForProduct(productId: Long): Long? {
         val currentState = currentState
-        return if (currentState is MainScreenContract.State.Loaded) {
+        return if (currentState is ProductDetailContract.State.LoadProduct) {
             currentState.cartState.items
                 .firstOrNull { it.productId == productId }
                 ?.id
@@ -300,7 +221,7 @@ class MainViewModel @Inject constructor(
         cartInteractor.getCart().fold(
             onSuccess = { cartState ->
                 val currentState = currentState
-                if (currentState is MainScreenContract.State.Loaded) {
+                if (currentState is ProductDetailContract.State.LoadProduct) {
                     val updatedCartItems = cartState.items.map { it.productId }.toSet()
 
                     setState(
@@ -319,7 +240,7 @@ class MainViewModel @Inject constructor(
 
     private fun updateCartIconState(productId: Long, inCart: Boolean) {
         val currentState = currentState
-        if (currentState is MainScreenContract.State.Loaded) {
+        if (currentState is ProductDetailContract.State.LoadProduct) {
             val updatedCartItems = if (inCart) {
                 currentState.isEnableDot + productId
             } else {
@@ -336,7 +257,7 @@ class MainViewModel @Inject constructor(
 
     private fun incrementCartCountOptimistic(quantity: Int) {
         val currentState = currentState
-        if (currentState is MainScreenContract.State.Loaded) {
+        if (currentState is ProductDetailContract.State.LoadProduct) {
             val currentTotal = currentState.cartState.totalItems
             setState(
                 currentState.copy(
@@ -350,7 +271,7 @@ class MainViewModel @Inject constructor(
 
     private fun decrementCartCountOptimistic(quantity: Int) {
         val currentState = currentState
-        if (currentState is MainScreenContract.State.Loaded) {
+        if (currentState is ProductDetailContract.State.LoadProduct) {
             val currentTotal = currentState.cartState.totalItems
             setState(
                 currentState.copy(
@@ -361,5 +282,4 @@ class MainViewModel @Inject constructor(
             )
         }
     }
-
 }

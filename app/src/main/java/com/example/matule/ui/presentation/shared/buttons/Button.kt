@@ -29,7 +29,6 @@ private fun ColumnCustomButtons() {
     Column(verticalArrangement = Arrangement.spacedBy(40.dp)) {
         CustomButtonForBuy(
             modifier = Modifier.fillMaxWidth(),
-            text = R.string.btn_add_to_cart
         )
         CustomButton(
             modifier = Modifier.fillMaxWidth(),
@@ -71,14 +70,22 @@ fun CustomButton(
 @Composable
 fun CustomButtonForBuy(
     modifier: Modifier = Modifier,
-    text: Int,
+    visibleInCart: Boolean = false,
     onClick: () -> Unit = {},
     color: Color = Colors.background,
     backgroundColor: Color = Colors.accent
 ) {
+
+    val text = if (visibleInCart) R.string.btn_added else R.string.btn_add_to_cart
+
     Box(
         modifier = modifier
-            .clickable(onClick = onClick)
+            .clickable(onClick = {
+                    if (!visibleInCart) {
+                        onClick()
+                    }
+                }
+            )
             .background(color = backgroundColor, shape = RoundedCornerShape(14.dp)),
         contentAlignment = Alignment.CenterStart
     ) {
@@ -94,7 +101,8 @@ fun CustomButtonForBuy(
             text = stringResource(text),
             color = color,
             style = MatuleTypography.titleSmall,
-            modifier = Modifier.align(Alignment.Center)
+            modifier = Modifier
+                .align(Alignment.Center)
                 .padding(vertical = 14.dp)
         )
     }

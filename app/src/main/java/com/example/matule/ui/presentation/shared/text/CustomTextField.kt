@@ -1,26 +1,61 @@
+@file:OptIn(ExperimentalPermissionsApi::class)
+
 package com.example.matule.ui.presentation.shared.text
 
-import androidx.compose.foundation.background
+import android.Manifest
+import android.content.Intent
+import android.os.Bundle
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
+import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.matule.R
 import com.example.matule.ui.presentation.theme.Colors
 import com.example.matule.ui.presentation.theme.MatuleTypography
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import java.util.Locale
 
 
 @Composable
@@ -139,21 +174,116 @@ fun TextFieldWithTrailingIcon(
 
 @Composable
 fun TextFieldWithLeadingAndTrailingIcons(
-    modifier: Modifier = Modifier,
     query: String,
     onTextChange: (String) -> Unit,
-    isError: Boolean = false,
     placeholder: String,
-    trailingIcon: @Composable () -> Unit = {},
+    searchScreen: Boolean,
+    onSearch: (() -> Unit)? = null,
     leadingIcon: @Composable () -> Unit = {}
 ) {
+    val width by animateFloatAsState(
+        targetValue = if (searchScreen) 1f else 0.8f,
+        animationSpec = tween(700)
+    )
+
+    var isListening by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    val recordAudioPermissionState = rememberPermissionState(
+        permission = Manifest.permission.RECORD_AUDIO
+    )
+
+    val speechRecognizer = remember {
+        SpeechRecognizer.createSpeechRecognizer(context)
+    }
+
+    val speechRecognizerIntent = remember {
+        Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+            putExtra(RecognizerIntent.EXTRA_PROMPT, "Говорите...")
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+        }
+    }
+
+    val speechRecognitionListener = remember {
+        object : RecognitionListener {
+            override fun onReadyForSpeech(params: Bundle?) {
+                isListening = true
+            }
+
+            override fun onBeginningOfSpeech() {
+                isListening = true
+            }
+
+            override fun onRmsChanged(rmsdB: Float) {}
+
+            override fun onBufferReceived(buffer: ByteArray?) {}
+
+            override fun onEndOfSpeech() {
+                isListening = false
+            }
+
+            override fun onError(error: Int) {
+                isListening = false
+
+            }
+
+            override fun onResults(results: Bundle?) {
+                isListening = false
+                val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                matches?.firstOrNull()?.let { recognizedText ->
+                    onTextChange(recognizedText)
+                    onSearch?.invoke()
+                }
+            }
+
+            override fun onPartialResults(partialResults: Bundle?) {}
+
+            override fun onEvent(eventType: Int, params: Bundle?) {}
+        }
+    }
+
+    LaunchedEffect(speechRecognizer) {
+        speechRecognizer.setRecognitionListener(speechRecognitionListener)
+    }
+
+    DisposableEffect(speechRecognizer) {
+        onDispose {
+            speechRecognizer.destroy()
+        }
+    }
+
+    fun startVoiceRecognition() {
+        if (!recordAudioPermissionState.status.isGranted) {
+            recordAudioPermissionState.launchPermissionRequest()
+        } else {
+            try {
+                speechRecognizer.startListening(speechRecognizerIntent)
+            } catch (e: SecurityException) {
+                Log.e("SpeechRecognition", "SecurityException: ${e.message}")
+            } catch (e: Exception) {
+                Log.e("SpeechRecognition", "Exception: ${e.message}")
+            }
+        }
+    }
+
+    fun stopVoiceRecognition() {
+        try {
+            speechRecognizer.stopListening()
+            isListening = false
+        } catch (e: Exception) {
+            Log.e("SpeechRecognition", "Stop error: ${e.message}")
+        }
+    }
 
     Column(
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         TextField(
-            modifier = modifier
+            modifier = Modifier
+                .fillMaxWidth(width)
                 .shadow(
                     elevation = 4.dp,
                     shape = RoundedCornerShape(14.dp),
@@ -163,6 +293,15 @@ fun TextFieldWithLeadingAndTrailingIcons(
             value = query,
             onValueChange = { onTextChange(it) },
             maxLines = 1,
+            keyboardActions = KeyboardActions(
+                onSearch = {
+                    onSearch?.invoke()
+                }
+            ),
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Search
+            ),
+            singleLine = true,
             textStyle = MatuleTypography.bodyMedium,
             colors = TextFieldDefaults.colors(
                 cursorColor = Colors.text,
@@ -192,9 +331,50 @@ fun TextFieldWithLeadingAndTrailingIcons(
                     style = MatuleTypography.bodyMedium
                 )
             },
-            isError = isError,
             trailingIcon = {
-                trailingIcon()
+                AnimatedVisibility(
+                    visible = width == 1f
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .height(24.dp)
+                            .padding(end = 14.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        VerticalDivider(
+                            thickness = 1.5.dp,
+                            color = Colors.subTextDark
+                        )
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.ic_voice),
+                            contentDescription = null,
+                            tint = Colors.subTextDark,
+                            modifier = Modifier
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() }
+                                ) {
+                                    if (isListening) {
+                                        stopVoiceRecognition()
+                                    } else {
+                                        startVoiceRecognition()
+                                    }
+                                }
+                                .pointerInput(Unit) {
+                                    detectTapGestures(
+                                        onTap = {
+                                            if (isListening) {
+                                                stopVoiceRecognition()
+                                            } else {
+                                                startVoiceRecognition()
+                                            }
+                                        }
+                                    )
+                                }
+
+                        )
+                    }
+                }
             },
             leadingIcon = {
                 leadingIcon()

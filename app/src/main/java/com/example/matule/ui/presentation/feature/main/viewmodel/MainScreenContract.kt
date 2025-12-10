@@ -36,6 +36,7 @@ object MainScreenContract {
 
     sealed interface Effect : ViewEffect {
         data class ShowError(val message: String) : Effect
+        data class CartItemRemoved(val id: Long) : Effect
         data class FavoriteStatusUpdated(val result: FavoriteResult) : Effect
         data class CategoryProductsLoaded(val category: String, val products: List<Product>) : Effect
         data class CartItemAdded(val productId: Long) : Effect

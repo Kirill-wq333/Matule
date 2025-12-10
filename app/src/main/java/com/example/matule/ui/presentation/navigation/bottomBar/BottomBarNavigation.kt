@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -123,6 +124,11 @@ fun BottomContent(
             containerColor = Colors.accent,
             contentColor = Colors.block,
             modifier = Modifier
+                .shadow(
+                    elevation = 24.dp,
+                    clip = false,
+                    shape = CircleShape
+                )
                 .align(Alignment.TopCenter)
         ) {
             Icon(

@@ -40,12 +40,12 @@ class CartScreenViewModel @Inject constructor(
 
     private fun loadCart() {
         viewModelScope.launch(dispatcher) {
-            setState ( CartScreenContract.State.Loading )
+            setState(CartScreenContract.State.Loading)
 
             cartInteractor.getCart().fold(
                 onSuccess = { cartState ->
                     if (cartState.items.isNotEmpty()) {
-                        setState (
+                        setState(
                             CartScreenContract.State.Loaded(
                                 items = cartState.items,
                                 totalPrice = cartState.totalPrice,
@@ -54,12 +54,12 @@ class CartScreenViewModel @Inject constructor(
                             )
                         )
                     } else {
-                        setState ( CartScreenContract.State.Empty )
+                        setState(CartScreenContract.State.Empty)
                     }
                 },
                 onFailure = { error ->
                     setEffect { CartScreenContract.Effect.ShowSnackbar("Ошибка загрузки: ${error.message}") }
-                    setState ( CartScreenContract.State.Empty )
+                    setState(CartScreenContract.State.Empty)
                 }
             )
         }

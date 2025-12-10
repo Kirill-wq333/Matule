@@ -63,12 +63,26 @@ class PopularScreenViewModel @Inject constructor(
             if (result.isSuccess) {
                 val content = result.getOrNull()!!
 
-                val cart = cartInteractor.getLocalCartItems()
-                setState(
-                    PopularScreenContract.State.Loaded(
-                        popularProducts = content,
-                        isEnableDot = cart
-                    )
+                val cartResult = cartInteractor.getCart()
+                cartResult.fold(
+                    onSuccess = { cartState ->
+                        val cartItemIds = cartState.items.map { it.productId }.toSet()
+                        setState(
+                            PopularScreenContract.State.Loaded(
+                                popularProducts = content,
+                                isEnableDot = cartItemIds
+                            )
+                        )
+                    },
+                    onFailure = {
+                        val localCartItems = cartInteractor.getLocalCartItems().getOrNull() ?: emptySet()
+                        setState(
+                            PopularScreenContract.State.Loaded(
+                                popularProducts = content,
+                                isEnableDot = localCartItems
+                            )
+                        )
+                    }
                 )
             } else {
                 val error = result.exceptionOrNull()!!

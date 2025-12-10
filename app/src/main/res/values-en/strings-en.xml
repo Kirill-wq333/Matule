@@ -26,7 +26,9 @@
     <!--  Main  -->
     <string name="main">Main</string>
     <string name="category">Select Category</string>
+    <string name="empty_search">We didn\'t find anything for your query.</string>
     <string name="new_arrivals">New Arrivals</string>
+    <string name="empty_arrivals">There are no shares yet</string>
 
     <!--  Forgot Password  -->
     <string name="forgot_password">Forgot Password</string>
@@ -58,6 +60,7 @@
 
     <!--  Popular  -->
     <string name="popular">Popular shoes</string>
+    <string name="empty_popular">There are no popular products yet</string>
 
     <!--  Favourite  -->
     <string name="favourite">Favourite</string>
@@ -66,6 +69,7 @@
     <!--  Cart  -->
     <string name="cart">Cart</string>
     <string name="cart_items">%1$s Items</string>
+    <string name="empty_cart">You don\'t have any items in your cart yet. Add an item.</string>
 
     <!--  Side menu  -->
     <string name="setting">SETTINGS</string>
@@ -94,9 +98,12 @@
     <string name="btn_checkout">Checkout</string>
     <string name="btn_next">Next</string>
     <string name="btn_start">Start</string>
+    <string name="more_detailed">More detailed</string>
+    <string name="btn_added">Added</string>
     <string name="recovery_password">Recovery Password</string>
     <string name="search">Search</string>
     <string name="see_all">See all</string>
+    <string name="all">All</string>
     <string name="subtotal">Subtotal</string>
     <string name="phone">Phone</string>
     <string name="date_of_birth">Date of birthday</string>

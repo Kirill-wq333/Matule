@@ -98,14 +98,27 @@ class FavoriteScreenViewModel @Inject constructor(
             if (result.isSuccess){
                 val favorite = result.getOrNull()!!
 
-                val cartItems = cartInteractor.getLocalCartItems()
+                val cartResult = cartInteractor.getCart()
                 if (favorite.isEmpty()) {
                     setState(FavoriteScreenContract.State.Empty)
                 } else {
-                    setState(FavoriteScreenContract.State.Loaded(
-                        favorite = favorite,
-                        cartItems = cartItems
-                    ))
+                    cartResult.fold(
+                        onSuccess = { cartState ->
+                            val cartItemIds = cartState.items.map { it.productId }.toSet()
+                            setState(FavoriteScreenContract.State.Loaded(
+                                favorite = favorite,
+                                cartItems = cartItemIds
+                            ))
+                        },
+                        onFailure = {
+                            val localCartItems = cartInteractor.getLocalCartItems().getOrNull() ?: emptySet()
+
+                            setState(FavoriteScreenContract.State.Loaded(
+                                favorite = favorite,
+                                cartItems = localCartItems
+                            ))
+                        }
+                    )
                 }
             } else {
                 val error = result.exceptionOrNull()!!

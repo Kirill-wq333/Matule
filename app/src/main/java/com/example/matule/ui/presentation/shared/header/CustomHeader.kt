@@ -38,24 +38,28 @@ private fun PrevHeader() {
             CustomHeader(
                 text = R.string.main,
                 visibleEndIcon = false,
-                visibleNameScreen = false
+                visibleNameScreen = false,
+                category = ""
             )
             CustomHeader(
                 text = R.string.main,
                 visibleEndIcon = false,
-                visibleNameScreen = true
+                visibleNameScreen = true,
+                category = ""
             )
             CustomHeader(
                 text = R.string.favourite,
                 visibleEndIcon = true,
                 cardItem = 0,
-                visibleNameScreen = true
+                visibleNameScreen = true,
+                category = ""
             )
             CustomHeader(
                 text = R.string.favourite,
                 visibleEndIcon = true,
                 cardItem = 1,
-                visibleNameScreen = true
+                visibleNameScreen = true,
+                category = ""
             )
             CustomHeaderMain(
                 text = R.string.main,
@@ -78,8 +82,8 @@ fun CustomHeaderMain(
     endIcon: Int = R.drawable.ic_cart,
     cardItem: Int = 0,
     padding: Dp = 10.dp,
-    backColor: Color = Colors.block,
     style: TextStyle = MatuleTypography.headlineLarge,
+    backColor: Color = Colors.block,
     visibleCosmeticIcon: Boolean = true,
     size: Dp = 24.dp,
     tintEndIcon: Color = Color.Unspecified,
@@ -107,12 +111,13 @@ fun CustomHeaderMain(
             backColor = Color.Transparent,
             modifier = Modifier.align(Alignment.CenterStart),
         )
-        Text(
-            text = stringResource(text),
-            color = Colors.text,
-            style = style,
-            modifier = Modifier.align(Alignment.Center)
-        )
+            Text(
+                text = stringResource(text),
+                color = Colors.text,
+                style = style,
+                modifier = Modifier.align(Alignment.Center)
+            )
+
         if (visibleEndIcon) {
             CustomIconButton(
                 icon = endIcon,
@@ -135,6 +140,8 @@ fun CustomHeader(
     openScreen: () -> Unit = {},
     text: Int,
     cardItem: Int = 0,
+    visibleText: Boolean = true,
+    category: String = "",
     tint: Color = Color.Unspecified,
     endIcon: Int = R.drawable.ic_cart,
     visibleEndIcon: Boolean = false,
@@ -151,12 +158,21 @@ fun CustomHeader(
             modifier = Modifier.align(Alignment.CenterStart),
         )
         if (visibleNameScreen) {
-            Text(
-                text = stringResource(text),
-                color = Colors.text,
-                style = MatuleTypography.titleMedium,
-                modifier = Modifier.align(Alignment.Center)
-            )
+            if (visibleText) {
+                Text(
+                    text = stringResource(text),
+                    color = Colors.text,
+                    style = MatuleTypography.bodyLarge,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            } else {
+                Text(
+                    text = category,
+                    color = Colors.text,
+                    style = MatuleTypography.bodyLarge,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
         }
         if (visibleEndIcon) {
             CustomIconButton(

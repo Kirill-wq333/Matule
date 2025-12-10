@@ -55,17 +55,31 @@ import com.example.matule.ui.presentation.theme.Colors
 @Preview
 @Composable
 private fun PreviewCartItem() {
-    CartItem(
-        quantity = 1,
-        timeAgo = 5,
-        visibleCartComponents = false,
-        nameProduct = "Nike Air Max 270 Essential",
-        delivery = 364.0,
-        price = 125.0,
-        openDetailScreen = {},
-        numberOrders = 35252,
-        orders = false
-    )
+    Column(
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        CartItem(
+            quantity = 1,
+            timeAgo = 5,
+            nameProduct = "Nike Air Max 270 Essential",
+            delivery = 0.0,
+            price = 1436.0,
+            openDetailScreen = {},
+            numberOrders = 0,
+            orders = false
+        )
+        CartItem(
+            quantity = 1,
+            timeAgo = 5,
+            visibleCartComponents = false,
+            nameProduct = "Nike Air Max 270 Essential",
+            delivery = 364.0,
+            price = 125.0,
+            openDetailScreen = {},
+            numberOrders = 35252,
+            orders = true
+        )
+    }
 }
 
 @Composable

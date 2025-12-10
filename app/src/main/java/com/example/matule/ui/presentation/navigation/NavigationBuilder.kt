@@ -15,12 +15,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.matule.ui.presentation.approuts.AppRouts
 import com.example.matule.ui.presentation.feature.auth.ui.AuthScreen
 import com.example.matule.ui.presentation.feature.main.ui.MainScreen
@@ -30,6 +34,9 @@ import com.example.matule.ui.presentation.feature.register.ui.RegisterScreen
 import com.example.matule.ui.presentation.feature.auth.viewmodel.AuthScreenViewModel
 import com.example.matule.ui.presentation.feature.cart.ui.CartScreen
 import com.example.matule.ui.presentation.feature.cart.viewmodel.CartScreenViewModel
+import com.example.matule.ui.presentation.feature.details.ui.ProductDetailScreen
+import com.example.matule.ui.presentation.feature.details.viewmodel.ProductDetailContract
+import com.example.matule.ui.presentation.feature.details.viewmodel.ProductDetailViewModel
 import com.example.matule.ui.presentation.feature.favorite.ui.FavoriteScreen
 import com.example.matule.ui.presentation.feature.favorite.viewmodel.FavoriteScreenViewModel
 import com.example.matule.ui.presentation.feature.popular.ui.PopularScreen
@@ -69,7 +76,7 @@ fun NavigationBuilder(
 
             composable(
                 AppRouts.MAIN,
-                enterTransition = { fadeIn(tween(1500)) },
+                enterTransition = { fadeIn(tween(700)) },
                 exitTransition = { fadeOut(tween(700)) }
             ) {
                 val vmMain = hiltViewModel<MainViewModel>()
@@ -80,7 +87,7 @@ fun NavigationBuilder(
             }
 
             composable(
-                AppRouts.POPULAR,
+                route = AppRouts.POPULAR,
                 enterTransition = {
                     fadeIn(tween(1500)) +
                             slideInHorizontally(
@@ -107,7 +114,7 @@ fun NavigationBuilder(
             }
 
             composable(
-                AppRouts.ARRIVALS,
+                route = AppRouts.ARRIVALS,
                 enterTransition = {
                     fadeIn(tween(1500)) +
                             slideInHorizontally(
@@ -133,7 +140,7 @@ fun NavigationBuilder(
             }
 
             composable(
-                AppRouts.SIDE_MENU,
+                route = AppRouts.SIDE_MENU,
                 enterTransition = {
                     slideInHorizontally(
                         initialOffsetX = { -it },
@@ -169,7 +176,7 @@ fun NavigationBuilder(
             }
 
             composable(
-                AppRouts.AUTH,
+                route = AppRouts.AUTH,
                 enterTransition = { fadeIn(tween(1500)) },
                 exitTransition = { fadeOut(tween(700)) }
             ) {
@@ -196,11 +203,11 @@ fun NavigationBuilder(
                 )
             }
 
-            composable(AppRouts.FORGOT_PASSWORD) {
+            composable(route = AppRouts.FORGOT_PASSWORD) {
 
             }
 
-            composable(AppRouts.REGISTER) {
+            composable(route = AppRouts.REGISTER) {
                 val vmRegister = hiltViewModel<RegisterViewModel>()
                 RegisterScreen(
                     vm = vmRegister,
@@ -210,7 +217,7 @@ fun NavigationBuilder(
 
             composable(
                 route = AppRouts.FAVOURITE,
-                enterTransition = { fadeIn(tween(1500)) },
+                enterTransition = { fadeIn(tween(700)) },
                 exitTransition = { fadeOut(tween(700)) }
             ) {
                 val vmFavorite = hiltViewModel<FavoriteScreenViewModel>()
@@ -221,13 +228,47 @@ fun NavigationBuilder(
                 )
             }
 
-            composable(AppRouts.DETAILS) {
+            composable(
+                route = "${AppRouts.DETAILS}/{id}",
+                arguments = listOf(
+                    navArgument("id") {
+                        type = NavType.IntType
+                    }
+                ),
+                enterTransition = {
+                    fadeIn(tween(1500)) +
+                            slideInHorizontally(
+                                animationSpec = tween(1500),
+                                initialOffsetX = { it }
+                            )
+                },
+                exitTransition = {
+                    fadeOut(tween(1500)) +
+                            slideOutHorizontally(
+                                animationSpec = tween(1500),
+                                targetOffsetX = { it }
+                            )
+                }
+            ) { backStackEntry ->
+                val productId = backStackEntry.getLongArgument("id") ?: 0L
 
+                val vmProduct = hiltViewModel<ProductDetailViewModel>()
+
+                LaunchedEffect(productId) {
+                    if (productId != 0L) {
+                        vmProduct.handleEvent(ProductDetailContract.Event.LoadContent(productId))
+                    }
+                }
+
+                ProductDetailScreen(
+                    vm = vmProduct,
+                    navController = navController
+                )
             }
 
             composable(
                 route = AppRouts.CART,
-                enterTransition = { fadeIn(tween(1500)) },
+                enterTransition = { fadeIn(tween(700)) },
                 exitTransition = { fadeOut(tween(700)) }
             ) {
                 val vmCart = hiltViewModel<CartScreenViewModel>()
@@ -239,7 +280,7 @@ fun NavigationBuilder(
 
             composable(
                 route = AppRouts.PROFILE,
-                enterTransition = { fadeIn(tween(1500)) },
+                enterTransition = { fadeIn(tween(700)) },
                 exitTransition = { fadeOut(tween(700)) }
             ) {
                 val vmProfile = hiltViewModel<ProfileScreenViewModel>()
@@ -249,13 +290,13 @@ fun NavigationBuilder(
                 )
             }
 
-            composable(AppRouts.ORDERS) {
+            composable(route = AppRouts.ORDERS) {
 
             }
 
             composable(
                 route = AppRouts.NOTIFICATION,
-                enterTransition = { fadeIn(tween(1500)) },
+                enterTransition = { fadeIn(tween(700)) },
                 exitTransition = { fadeOut(tween(700)) }
             ) {
                 val vmNotification = hiltViewModel<NotificationScreenViewModel>()
@@ -278,5 +319,14 @@ fun NavigationBuilder(
                 openCartScreen = { navController.navigate(AppRouts.CART) }
             )
         }
+    }
+}
+
+fun NavBackStackEntry.getLongArgument(key: String): Long? {
+    return when (val value = arguments?.get(key)) {
+        is Long -> value
+        is Int -> value.toLong()
+        is String -> value.toLongOrNull()
+        else -> null
     }
 }
