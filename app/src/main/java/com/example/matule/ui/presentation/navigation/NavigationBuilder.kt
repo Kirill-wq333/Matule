@@ -39,6 +39,7 @@ import com.example.matule.ui.presentation.feature.details.viewmodel.ProductDetai
 import com.example.matule.ui.presentation.feature.details.viewmodel.ProductDetailViewModel
 import com.example.matule.ui.presentation.feature.favorite.ui.FavoriteScreen
 import com.example.matule.ui.presentation.feature.favorite.viewmodel.FavoriteScreenViewModel
+import com.example.matule.ui.presentation.feature.forgor_password.ui.ForgotPassword
 import com.example.matule.ui.presentation.feature.popular.ui.PopularScreen
 import com.example.matule.ui.presentation.feature.sidemenu.ui.SideMenuScreen
 import com.example.matule.ui.presentation.feature.main.viewmodel.MainViewModel
@@ -203,11 +204,21 @@ fun NavigationBuilder(
                 )
             }
 
-            composable(route = AppRouts.FORGOT_PASSWORD) {
-
+            composable(
+                route = AppRouts.FORGOT_PASSWORD,
+                enterTransition = { fadeIn(tween(1500)) },
+                exitTransition = { fadeOut(tween(700)) }
+            ) {
+                ForgotPassword(
+                    navController = navController
+                )
             }
 
-            composable(route = AppRouts.REGISTER) {
+            composable(
+                route = AppRouts.REGISTER,
+                enterTransition = { fadeIn(tween(1500)) },
+                exitTransition = { fadeOut(tween(700)) }
+            ) {
                 val vmRegister = hiltViewModel<RegisterViewModel>()
                 RegisterScreen(
                     vm = vmRegister,

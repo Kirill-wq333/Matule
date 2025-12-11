@@ -103,7 +103,7 @@ fun CartItem(
     var isShiftedLeft by remember { mutableStateOf(false) }
     var isShiftedRight by remember { mutableStateOf(false) }
 
-    val widthFraction = if (isShiftedLeft || isShiftedRight) 0.84f else 1f
+    val widthFraction = if (isShiftedLeft || isShiftedRight) 0.82f else 1f
     var dragOffset by remember { mutableStateOf(0f) }
     val alignment = when {
         isShiftedLeft -> Alignment.CenterEnd

@@ -27,7 +27,7 @@
     <string name="empty_arrivals">Акций пока что нету</string>
 
     <!--  Forgot Password  -->
-    <string name="forgot_password">Forgot Password</string>
+    <string name="forgot_password">Забыл пароль</string>
     <string name="forgot_password_under_heading">Введите свою учетную запись для сброса</string>
 
 
@@ -101,6 +101,7 @@
     <string name="btn_save">Сохранить</string>
     <string name="btn_checkout">Оформить заказ</string>
     <string name="btn_next">Далее</string>
+    <string name="btn_confirm">Подтвердить</string>
     <string name="all">Все</string>
     <string name="more_detailed">Подробнее</string>
     <string name="btn_start">Начать</string>

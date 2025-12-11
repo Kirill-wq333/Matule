@@ -4,16 +4,30 @@ import androidx.lifecycle.viewModelScope
 import com.example.domain.ui.presentation.feature.auth.interactor.AuthInteractor
 import com.example.domain.ui.presentation.feature.cart.interactor.CartInteractor
 import com.example.domain.ui.presentation.feature.cart.model.CartResult
+import com.example.domain.ui.presentation.feature.orders.interactor.OrdersInteractor
+import com.example.domain.ui.presentation.feature.orders.model.CreateOrderRequest
+import com.example.domain.ui.presentation.feature.profile.interactor.ProfileInteractor
+import com.example.domain.ui.presentation.feature.profile.model.ProfileResult
+import com.example.domain.ui.presentation.feature.profile.model.UserProfile
 import com.example.matule.ui.core.viewmodel.BaseViewModel
+import com.example.matule.ui.presentation.feature.orders.viewmodel.OrdersScreenContract
+import com.example.matule.ui.presentation.feature.profile.viewmodel.ProfileScreenContract
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CartScreenViewModel @Inject constructor(
+    private val profileInteractor: ProfileInteractor,
     private val cartInteractor: CartInteractor,
-    private val authInteractor: AuthInteractor
+    private val authInteractor: AuthInteractor,
+    private val ordersInteractor: OrdersInteractor
 ) : BaseViewModel<CartScreenContract.Event, CartScreenContract.State, CartScreenContract.Effect>() {
+
+    private val _profile: MutableStateFlow<UserProfile> = MutableStateFlow(UserProfile())
+    val profile = _profile.asStateFlow()
 
     override fun setInitialState(): CartScreenContract.State = CartScreenContract.State.Loading
 
@@ -22,6 +36,8 @@ class CartScreenViewModel @Inject constructor(
             is CartScreenContract.Event.LoadCart -> loadCart()
             is CartScreenContract.Event.UpdateQuantity -> updateQuantity(event.cartItemId, event.newQuantity)
             is CartScreenContract.Event.RemoveItem -> removeItem(event.cartItemId)
+            is CartScreenContract.Event.LoadCartProfile -> loadProfile()
+            is CartScreenContract.Event.CreateOrder -> createOrder(event.request)
         }
     }
     init {
@@ -34,6 +50,28 @@ class CartScreenViewModel @Inject constructor(
 
             if (isLoggedIn) {
                 loadCart()
+                loadProfile()
+            }
+        }
+    }
+
+    private fun loadProfile() {
+        viewModelScope.launch(dispatcher) {
+            setState (CartScreenContract.State.Loading )
+
+            val result = profileInteractor.getProfile()
+            if (result.isSuccess) {
+                when (val profileResult = result.getOrNull()!!) {
+                    is ProfileResult.Success -> {
+                        _profile.emit(profileResult.profile)
+                        setState (CartScreenContract.State.Loaded())
+                    }
+                    is ProfileResult.Error -> {
+                        setEffect { CartScreenContract.Effect.ShowSnackbar(profileResult.message) }
+                    }
+                }
+            } else {
+                setEffect { CartScreenContract.Effect.ShowSnackbar("Ошибка загрузки профиля") }
             }
         }
     }
@@ -44,7 +82,6 @@ class CartScreenViewModel @Inject constructor(
 
             cartInteractor.getCart().fold(
                 onSuccess = { cartState ->
-                    if (cartState.items.isNotEmpty()) {
                         setState(
                             CartScreenContract.State.Loaded(
                                 items = cartState.items,
@@ -53,13 +90,38 @@ class CartScreenViewModel @Inject constructor(
                                 delivery = cartState.delivery
                             )
                         )
-                    } else {
-                        setState(CartScreenContract.State.Empty)
-                    }
+
                 },
                 onFailure = { error ->
                     setEffect { CartScreenContract.Effect.ShowSnackbar("Ошибка загрузки: ${error.message}") }
                     setState(CartScreenContract.State.Empty)
+                }
+            )
+        }
+    }
+
+    private fun createOrder(request: CreateOrderRequest) {
+        viewModelScope.launch(dispatcher) {
+            setState(CartScreenContract.State.Loading)
+
+            ordersInteractor.createdOrder(request).fold(
+                onSuccess = { order ->
+                    if (!authInteractor.isUserLoggedIn()) {
+                        setEffect {
+                            CartScreenContract.Effect.OrderCreated(
+                                order = order,
+                                message = "Заказ успешно создан"
+                            )
+                        }
+                        return@launch
+                    }
+                },
+                onFailure = { error ->
+                    setEffect {
+                        CartScreenContract.Effect.ShowSnackbar(
+                            message = error.message ?: "Ошибка при создании заказа"
+                        )
+                    }
                 }
             )
         }
@@ -118,5 +180,7 @@ class CartScreenViewModel @Inject constructor(
             )
         }
     }
+
+
 
 }

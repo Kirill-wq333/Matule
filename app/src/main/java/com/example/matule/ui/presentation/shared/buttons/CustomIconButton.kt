@@ -23,6 +23,7 @@ import com.example.matule.ui.presentation.theme.Colors
 @Composable
 fun CustomIconButton(
     modifier: Modifier = Modifier,
+    modifierIcon: Modifier = Modifier,
     icon: Int,
     shape: Shape = CircleShape,
     backColor: Color = Colors.block,
@@ -44,7 +45,7 @@ fun CustomIconButton(
             imageVector = ImageVector.vectorResource(icon),
             contentDescription = null,
             tint = tint,
-            modifier = Modifier
+            modifier = modifierIcon
                 .padding(padding)
                 .size(size)
         )

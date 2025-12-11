@@ -139,6 +139,7 @@ fun CustomHeader(
     onBack: () -> Unit = {},
     openScreen: () -> Unit = {},
     text: Int,
+    backColor: Color = Color.Unspecified,
     cardItem: Int = 0,
     visibleText: Boolean = true,
     category: String = "",
@@ -153,6 +154,7 @@ fun CustomHeader(
             .fillMaxWidth()
     ) {
         CustomIconButton(
+            backColor = backColor,
             icon = R.drawable.ic_back,
             onClick = onBack,
             modifier = Modifier.align(Alignment.CenterStart),

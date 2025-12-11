@@ -98,6 +98,7 @@
     <string name="btn_checkout">Checkout</string>
     <string name="btn_next">Next</string>
     <string name="btn_start">Start</string>
+    <string name="btn_confirm">Confirm</string>
     <string name="more_detailed">More detailed</string>
     <string name="btn_added">Added</string>
     <string name="recovery_password">Recovery Password</string>

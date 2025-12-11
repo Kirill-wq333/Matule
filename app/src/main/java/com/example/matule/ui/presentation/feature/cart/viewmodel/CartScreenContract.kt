@@ -1,20 +1,28 @@
 package com.example.matule.ui.presentation.feature.cart.viewmodel
 
+import android.provider.ContactsContract
 import com.example.domain.ui.presentation.feature.cart.model.CartItem
+import com.example.domain.ui.presentation.feature.orders.model.CreateOrderRequest
+import com.example.domain.ui.presentation.feature.orders.model.Order
+import com.example.domain.ui.presentation.feature.profile.model.UserProfile
 import com.example.matule.ui.core.viewmodel.ViewEffect
 import com.example.matule.ui.core.viewmodel.ViewEvent
 import com.example.matule.ui.core.viewmodel.ViewState
+import com.example.matule.ui.presentation.feature.orders.viewmodel.OrdersScreenContract
 
 object CartScreenContract {
 
     sealed interface Event: ViewEvent{
         data object LoadCart : Event
         data class UpdateQuantity(val cartItemId: Long, val newQuantity: Int) : Event
+        data class CreateOrder(val request: CreateOrderRequest) : Event
         data class RemoveItem(val cartItemId: Long) : Event
+        data object LoadCartProfile: Event
     }
 
     sealed interface State: ViewState{
         data class Loaded(
+            val profile: UserProfile = UserProfile(),
             val items: List<CartItem> = emptyList(),
             val totalPrice: Double = 0.0,
             val subtotal: Double = 0.0,
@@ -25,8 +33,17 @@ object CartScreenContract {
     }
 
     sealed interface Effect: ViewEffect{
+        data class OrderCreated(
+            val order: Order,
+            val message: String
+        ) : Effect
         data class ShowSnackbar(val message: String) : Effect
         data class ShowToast(val message: String) : Effect
     }
 
+
+    enum class ToastDuration {
+        SHORT,
+        LONG
+    }
 }

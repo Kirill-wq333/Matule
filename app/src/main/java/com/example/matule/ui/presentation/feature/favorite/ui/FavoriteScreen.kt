@@ -138,6 +138,7 @@ private fun FavoriteContent(
             }
             is FavoriteScreenContract.State.Empty -> {
                 EmptyScreen(
+                    modifier = Modifier.fillMaxSize(),
                     icon = R.drawable.ic_favorite_fill,
                     emptyText = R.string.empty_favorite,
                     tint = Colors.red

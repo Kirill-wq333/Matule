@@ -31,6 +31,7 @@ import com.example.matule.ui.presentation.feature.popular.viewmodel.PopularScree
 import com.example.matule.ui.presentation.feature.popular.viewmodel.PopularScreenViewModel
 import com.example.matule.ui.presentation.shared.header.CustomHeader
 import com.example.matule.ui.presentation.shared.main.CardItem
+import com.example.matule.ui.presentation.shared.screen.EmptyScreen
 import com.example.matule.ui.presentation.shared.screen.LoadingScreen
 import com.example.matule.ui.presentation.theme.Colors
 import com.example.matule.ui.presentation.theme.MatuleTypography
@@ -135,28 +136,11 @@ private fun PopularContent(
                 )
             }
             is PopularScreenContract.State.Empty -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(20.dp)
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_notification),
-                            contentDescription = null,
-                            tint = Colors.text,
-                            modifier = Modifier.size(96.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.empty_notification),
-                            color = Colors.text,
-                            style = MatuleTypography.headlineSmall
-                        )
-                    }
-                }
+                EmptyScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    icon = R.drawable.ic_favorite,
+                    emptyText = R.string.empty_popular
+                )
             }
             else -> {}
         }

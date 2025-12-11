@@ -113,7 +113,7 @@ class DomainModule {
     fun provideOrdersInteractor(
         ordersRepository: OrdersRepository
     ): OrdersInteractor{
-        return OrdersInteractor()
+        return OrdersInteractor(ordersRepository)
     }
 
     @Provides

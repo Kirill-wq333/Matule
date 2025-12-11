@@ -45,8 +45,7 @@ class ProfileScreenViewModel @Inject constructor(
 
             val result = profileInteractor.getProfile()
             if (result.isSuccess) {
-                val profileResult = result.getOrNull()!!
-                when (profileResult) {
+                when (val profileResult = result.getOrNull()!!) {
                     is ProfileResult.Success -> {
                         _profile.emit(profileResult.profile)
                         setState (ProfileScreenContract.State.ProfileLoaded())

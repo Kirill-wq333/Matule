@@ -38,6 +38,7 @@ fun SearchResult(
 
     if (searchResults.isEmpty()){
         EmptyScreen(
+            modifier = Modifier.fillMaxSize(),
             icon = R.drawable.ic_search,
             emptyText = R.string.empty_search
         )
