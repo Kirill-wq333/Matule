@@ -139,7 +139,7 @@ fun CustomHeader(
     onBack: () -> Unit = {},
     openScreen: () -> Unit = {},
     text: Int,
-    backColor: Color = Color.Unspecified,
+    backColor: Color = Colors.block,
     cardItem: Int = 0,
     visibleText: Boolean = true,
     category: String = "",

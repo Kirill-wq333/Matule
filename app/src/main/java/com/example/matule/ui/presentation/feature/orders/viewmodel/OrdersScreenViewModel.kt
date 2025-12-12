@@ -1,6 +1,7 @@
 package com.example.matule.ui.presentation.feature.orders.viewmodel
 
 import androidx.lifecycle.viewModelScope
+import com.example.domain.ui.presentation.feature.auth.interactor.AuthInteractor
 import com.example.domain.ui.presentation.feature.orders.interactor.OrdersInteractor
 import com.example.domain.ui.presentation.feature.orders.model.CreateOrderRequest
 import com.example.domain.ui.presentation.feature.orders.model.OrderStatus
@@ -11,7 +12,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class OrdersScreenViewModel @Inject constructor(
-    private val ordersInteractor: OrdersInteractor
+    private val ordersInteractor: OrdersInteractor,
+    private val authInteractor: AuthInteractor
 ) : BaseViewModel<OrdersScreenContract.Event, OrdersScreenContract.State, OrdersScreenContract.Effect>() {
 
     override fun setInitialState(): OrdersScreenContract.State = OrdersScreenContract.State.Loading
@@ -26,6 +28,19 @@ class OrdersScreenViewModel @Inject constructor(
 
         is OrdersScreenContract.Event.DeleteOrder -> deleteOrder(event.orderId)
         is OrdersScreenContract.Event.Refresh -> refresh()
+    }
+    init {
+        checkAuthAndLoadContent()
+    }
+
+    private fun checkAuthAndLoadContent() {
+        viewModelScope.launch(dispatcher) {
+            val isLoggedIn = authInteractor.isUserLoggedIn()
+
+            if (isLoggedIn) {
+                loadOrders()
+            }
+        }
     }
 
     private fun loadOrders() {
@@ -58,6 +73,7 @@ class OrdersScreenViewModel @Inject constructor(
         viewModelScope.launch(dispatcher) {
             setState(OrdersScreenContract.State.Loading)
 
+            authInteractor.isUserLoggedIn()
             ordersInteractor.getOrder(orderId).fold(
                 onSuccess = { order ->
                     setState(

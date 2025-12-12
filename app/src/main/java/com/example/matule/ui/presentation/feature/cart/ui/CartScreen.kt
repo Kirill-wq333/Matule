@@ -1,8 +1,5 @@
 package com.example.matule.ui.presentation.feature.cart.ui
 
-import android.app.AlertDialog
-import android.content.Context
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -28,8 +25,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,16 +32,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
@@ -61,7 +53,6 @@ import com.example.domain.ui.presentation.feature.cart.model.CartItem
 import com.example.domain.ui.presentation.feature.orders.model.Address
 import com.example.domain.ui.presentation.feature.orders.model.ContactInfo
 import com.example.domain.ui.presentation.feature.orders.model.CreateOrderRequest
-import com.example.domain.ui.presentation.feature.orders.model.Order
 import com.example.domain.ui.presentation.feature.orders.model.PaymentMethod
 import com.example.domain.ui.presentation.feature.profile.model.UserProfile
 import com.example.matule.R
@@ -76,10 +67,6 @@ import com.example.matule.ui.presentation.shared.screen.EmptyScreen
 import com.example.matule.ui.presentation.shared.screen.MainLoadingScreen
 import com.example.matule.ui.presentation.theme.Colors
 import com.example.matule.ui.presentation.theme.MatuleTypography
-import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.TimeZone
 
 private interface CartScreenCallback{
     fun onBack() {}
@@ -96,34 +83,9 @@ fun CartScreen(
 ) {
     val state by vm.state.collectAsState()
     val profile by vm.profile.collectAsState()
-    val effect = vm.effect.collectAsState(initial = null)
-    val context = LocalContext.current
-    val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
 
     var visibleCheckout by remember { mutableStateOf(false) }
     var visibleSnackbar by remember { mutableStateOf(false) }
-
-    LaunchedEffect(effect.value) {
-        effect.value?.let { effect ->
-            when (effect) {
-                is CartScreenContract.Effect.OrderCreated -> {
-                    showOrderSuccessDialog(context, effect.order, effect.message)
-                }
-                is CartScreenContract.Effect.ShowToast -> {
-                    Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
-                }
-                is CartScreenContract.Effect.ShowSnackbar -> {
-                    coroutineScope.launch {
-                        val snackbarResult = snackbarHostState.showSnackbar(
-                            message = effect.message,
-                            duration = SnackbarDuration.Short
-                        )
-                    }
-                }
-            }
-        }
-    }
 
     LaunchedEffect(Unit) {
         vm.handleEvent(CartScreenContract.Event.LoadCart)
@@ -337,7 +299,7 @@ fun Content(
         horizontalAlignment = Alignment.Start
     ) {
         Text(
-            text = stringResource(R.string.cart_items, cartProduct.sumOf { it.quantity }),
+            text = getProductsCountText(cartProduct.sumOf { it.quantity }),
             color = Colors.text,
             fontSize = 16.sp,
             fontWeight = FontWeight.Normal,
@@ -353,9 +315,8 @@ fun Content(
             ) {
                 cartProduct.forEach { cart ->
 
-                    val timeAgoInMinutes = calculateMinutesAgo(cart.createdAt)
                     CartItem(
-                        timeAgo = timeAgoInMinutes,
+                        timeAgo = "",
                         quantity = cart.quantity,
                         photoProduct = cart.product?.images?.first() ?: "",
                         nameProduct = cart.product?.name ?: "",
@@ -530,35 +491,10 @@ fun CardCongratulations(
     }
 }
 
-fun calculateMinutesAgo(createdAt: String): Int {
-    return try {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
-        dateFormat.timeZone = TimeZone.getTimeZone("UTC")
-
-        val createdDate = dateFormat.parse(createdAt)
-        val currentTime = System.currentTimeMillis()
-
-        if (createdDate != null) {
-            val diffMillis = currentTime - createdDate.time
-            (diffMillis / (1000 * 60)).toInt()
-        } else {
-            0
-        }
-    } catch (_: Exception) {
-        0
+fun getProductsCountText(count: Int): String {
+    return when {
+        count % 10 == 1 && count % 100 != 11 -> "$count товар"
+        count % 10 in 2..4 && count % 100 !in 12..14 -> "$count товара"
+        else -> "$count товаров"
     }
-}
-
-private fun showOrderSuccessDialog(context: Context, order: Order, message: String) {
-    AlertDialog.Builder(context)
-        .setTitle("Заказ создан!")
-        .setMessage("$message\nНомер заказа: #${order.orderNumber}\nСумма: ${order.total.formatPrice()}")
-        .setPositiveButton("ОК") { dialog, _ ->
-            dialog.dismiss()
-        }
-        .show()
-}
-
-fun Double.formatPrice(): String {
-    return String.format("%.2f ₽", this)
 }

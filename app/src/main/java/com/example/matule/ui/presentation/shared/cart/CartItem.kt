@@ -60,24 +60,24 @@ private fun PreviewCartItem() {
     ) {
         CartItem(
             quantity = 1,
-            timeAgo = 5,
+            timeAgo = "5",
             nameProduct = "Nike Air Max 270 Essential",
             delivery = 0.0,
             price = 1436.0,
             openDetailScreen = {},
             numberOrders = 0,
-            orders = false
+            orders = false,
         )
         CartItem(
             quantity = 1,
-            timeAgo = 5,
+            timeAgo = "5",
             visibleCartComponents = false,
             nameProduct = "Nike Air Max 270 Essential",
             delivery = 364.0,
             price = 125.0,
             openDetailScreen = {},
             numberOrders = 35252,
-            orders = true
+            orders = true,
         )
     }
 }
@@ -86,7 +86,7 @@ private fun PreviewCartItem() {
 fun CartItem(
     quantity: Int = 1,
     photoProduct: String? = "",
-    timeAgo: Int,
+    timeAgo: String = "",
     nameProduct: String,
     price: Double,
     numberOrders: Long = 0,
@@ -96,7 +96,8 @@ fun CartItem(
     orders: Boolean = false,
     onPlusQuantity: () -> Unit = {},
     onMinusQuantity: () -> Unit = {},
-    visibleCartComponents: Boolean = true
+    visibleCartComponents: Boolean = true,
+    visibleTimeAgo: Boolean = false
 ) {
 
     var visibleOrders by remember { mutableStateOf(orders) }
@@ -208,6 +209,8 @@ fun CartItem(
             visibleOrders = visibleOrders,
             numberOrders = numberOrders,
             openDetailScreen = openDetailScreen,
+            visibleTimeAgo = visibleTimeAgo,
+            quantity = quantity,
             visibleCartComponents = visibleCartComponents
         )
     }
@@ -244,18 +247,17 @@ fun BoxIcon(
 private fun CartContent(
     modifier: Modifier = Modifier,
     photoProduct: String?,
-    timeAgo: Int,
+    timeAgo: String,
     nameProduct: String,
     price: Double,
     numberOrders: Long,
     delivery: Double,
     visibleCartComponents: Boolean,
     openDetailScreen: () -> Unit,
-    visibleOrders: Boolean
+    visibleOrders: Boolean,
+    quantity: Int,
+    visibleTimeAgo: Boolean
 ) {
-    val timeAgoText = remember(timeAgo) {
-        formatTimeAgo(timeAgo)
-    }
 
     Box(
         modifier = modifier
@@ -303,16 +305,25 @@ private fun CartContent(
                     fontFamily = FontFamily(Font(R.font.new_peninim_mt_inclined_2))
                 )
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(39.dp)
+                    horizontalArrangement = Arrangement.spacedBy(if (quantity > 1) 24.dp else 39.dp)
                 ) {
                     Text(
-                        text = "$price",
+                        text = stringResource(R.string.money, price),
                         color = Colors.text,
                         fontSize = 14.sp,
                         lineHeight = 20.sp,
                         fontWeight = FontWeight.Normal,
                         fontFamily = FontFamily(Font(R.font.new_peninim_mt_inclined_2))
                     )
+                    if (quantity > 0 && !visibleOrders){
+                        Text(
+                            text = "$quantity ШТ",
+                            color = Colors.hint,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Normal,
+                            fontFamily = FontFamily(Font(R.font.new_peninim_mt_inclined_2))
+                        )
+                    }
                     if (visibleOrders && !visibleCartComponents) {
                         Text(
                             text = "$delivery",
@@ -326,9 +337,9 @@ private fun CartContent(
                 }
             }
         }
-        if (visibleOrders && !visibleCartComponents) {
+        if (visibleTimeAgo && !visibleCartComponents) {
             Text(
-                text = timeAgoText,
+                text = timeAgo,
                 color = Colors.hint,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Normal,
@@ -383,15 +394,3 @@ fun QuantityItem(
     }
 }
 
-fun formatTimeAgo(minutes: Int): String {
-    return when {
-        minutes <= 0 -> "Только что"
-        minutes < 60 -> "минут назад".format(minutes)
-        else -> {
-            // Если больше 59 минут, показываем время в формате ЧЧ:ММ
-            val hours = minutes / 60
-            val remainingMinutes = minutes % 60
-            String.format("%02d:%02d", hours, remainingMinutes)
-        }
-    }
-}

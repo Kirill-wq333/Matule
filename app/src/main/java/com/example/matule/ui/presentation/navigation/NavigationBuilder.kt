@@ -47,6 +47,10 @@ import com.example.matule.ui.presentation.feature.notification.ui.NotificationSc
 import com.example.matule.ui.presentation.feature.notification.viewmodel.NotificationScreenViewModel
 import com.example.matule.ui.presentation.feature.onboarding.ui.OnboardingScreen
 import com.example.matule.ui.presentation.feature.onboarding.viewmodel.OnboardingViewModel
+import com.example.matule.ui.presentation.feature.orders.ui.OrdersScreen
+import com.example.matule.ui.presentation.feature.orders.ui.detail.OrdersDetailScreen
+import com.example.matule.ui.presentation.feature.orders.viewmodel.OrdersScreenContract
+import com.example.matule.ui.presentation.feature.orders.viewmodel.OrdersScreenViewModel
 import com.example.matule.ui.presentation.feature.popular.viewmodel.PopularScreenViewModel
 import com.example.matule.ui.presentation.feature.profile.ui.ProfileScreen
 import com.example.matule.ui.presentation.feature.profile.viewmodel.ProfileScreenViewModel
@@ -243,7 +247,7 @@ fun NavigationBuilder(
                 route = "${AppRouts.DETAILS}/{id}",
                 arguments = listOf(
                     navArgument("id") {
-                        type = NavType.IntType
+                        type = NavType.LongType
                     }
                 ),
                 enterTransition = {
@@ -301,8 +305,16 @@ fun NavigationBuilder(
                 )
             }
 
-            composable(route = AppRouts.ORDERS) {
-
+            composable(
+                route = AppRouts.ORDERS,
+                enterTransition = { fadeIn(tween(700)) },
+                exitTransition = { fadeOut(tween(700)) }
+            ) {
+                val vmOrders = hiltViewModel<OrdersScreenViewModel>()
+                OrdersScreen(
+                    navController = navController,
+                    vm = vmOrders
+                )
             }
 
             composable(
@@ -315,6 +327,44 @@ fun NavigationBuilder(
                 NotificationScreen(
                     vm = vmNotification,
                     openSideMenu = { navController.navigate(AppRouts.SIDE_MENU) }
+                )
+            }
+
+            composable(
+                route = "${AppRouts.ORDERS_DETAIL}/{orderId}",
+                arguments = listOf(
+                    navArgument("orderId") {
+                        type = NavType.LongType
+                    }
+                ),
+                enterTransition = {
+                    fadeIn(tween(1500)) +
+                            slideInHorizontally(
+                                animationSpec = tween(1500),
+                                initialOffsetX = { it }
+                            )
+                },
+                exitTransition = {
+                    fadeOut(tween(1500)) +
+                            slideOutHorizontally(
+                                animationSpec = tween(1500),
+                                targetOffsetX = { it }
+                            )
+                }
+            ) { backStackEntry ->
+
+                val orderId = backStackEntry.arguments?.getLong("orderId") ?: 0L
+                val vmOrdersDetail = hiltViewModel<OrdersScreenViewModel>()
+
+                LaunchedEffect(Unit) {
+                    if (orderId != 0L) {
+                        vmOrdersDetail.handleEvent(OrdersScreenContract.Event.LoadOrderDetails(orderId))
+                    }
+                }
+
+                OrdersDetailScreen(
+                    vm = vmOrdersDetail,
+                    navController = navController
                 )
             }
         }

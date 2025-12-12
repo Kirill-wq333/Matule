@@ -52,6 +52,8 @@
     <string name="orders">Orders</string>
     <string name="min_ago">%1$s min ago</string>
     <string name="recent">Recent</string>
+    <string name="number_orders">№ %1$s</string>
+    <string name="empty_orders">You don\'t have any active or old orders yet</string>
     <string name="yesterday">Yesterday</string>
 
     <!--  Checkout  -->

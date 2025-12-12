@@ -71,7 +71,6 @@ fun PopularCard(
                             addedInFavorite = { addedInFavorite(product.id, product.isFavorite) },
                             openCartScreen = openCartScreen,
                             openDetailScreen = {
-                                println("Opening product detail with ID: ${product.id}")
                                 openDetailScreen(product.id)
                             }
                         )

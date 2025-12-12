@@ -304,6 +304,7 @@ fun ActionsTexts(
             fontWeight = FontWeight.Normal,
             fontFamily = FontFamily(Font(R.font.new_peninim_mt_inclined_2))
         )
+        Text(text = " ")
         Text(
             text = stringResource(textClick),
             color = Colors.text,

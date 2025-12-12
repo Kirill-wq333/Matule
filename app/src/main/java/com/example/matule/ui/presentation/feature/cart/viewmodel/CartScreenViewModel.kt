@@ -102,7 +102,6 @@ class CartScreenViewModel @Inject constructor(
 
     private fun createOrder(request: CreateOrderRequest) {
         viewModelScope.launch(dispatcher) {
-            setState(CartScreenContract.State.Loading)
 
             ordersInteractor.createdOrder(request).fold(
                 onSuccess = { order ->

@@ -55,6 +55,7 @@
     <string name="min_ago">%1$s мин назад</string>
     <string name="recent">Недавний</string>
     <string name="number_orders">№ %1$s</string>
+    <string name="empty_orders">У вас пока что нету активных или старых заказов</string>
     <string name="yesterday">Вчера</string>
 
     <!--  Checkout  -->
