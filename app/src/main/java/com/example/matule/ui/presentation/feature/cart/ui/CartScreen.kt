@@ -208,7 +208,9 @@ fun Cart(
 ) {
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         AnimatedVisibility(
@@ -309,8 +311,7 @@ fun Content(
         if (cartProduct.isNotEmpty()) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState()),
+                    .fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 cartProduct.forEach { cart ->
@@ -352,7 +353,7 @@ fun BottomBarCart(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = Colors.block)
+            .background(color = if (visibleCheckout) Colors.background else Colors.block)
             .padding(
                 start = 20.dp,
                 end = 20.dp,
