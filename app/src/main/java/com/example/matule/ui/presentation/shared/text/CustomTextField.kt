@@ -10,12 +10,19 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -41,8 +49,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -55,6 +63,7 @@ import com.example.matule.ui.presentation.theme.MatuleTypography
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import kotlinx.coroutines.delay
 import java.util.Locale
 
 
@@ -188,6 +197,32 @@ fun TextFieldWithLeadingAndTrailingIcons(
 
     var isListening by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    var soundLevel by remember { mutableFloatStateOf(0f) }
+
+    val microphoneColor by animateColorAsState(
+        targetValue = if (isListening) Colors.accent else Colors.subTextDark,
+        animationSpec = tween(300)
+    )
+
+    val currentScale by animateFloatAsState(
+        targetValue = if (isListening) 1f + (soundLevel / 15f).coerceAtMost(0.3f) else 1f,
+        animationSpec = spring(
+            dampingRatio = 0.6f,
+            stiffness = 400f
+        )
+    )
+
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 0.95f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulseScale"
+    )
 
     val recordAudioPermissionState = rememberPermissionState(
         permission = Manifest.permission.RECORD_AUDIO
@@ -216,12 +251,15 @@ fun TextFieldWithLeadingAndTrailingIcons(
                 isListening = true
             }
 
-            override fun onRmsChanged(rmsdB: Float) {}
+            override fun onRmsChanged(rmsdB: Float) {
+                soundLevel = (rmsdB + 20f).coerceIn(0f, 10f)
+            }
 
             override fun onBufferReceived(buffer: ByteArray?) {}
 
             override fun onEndOfSpeech() {
                 isListening = false
+                soundLevel = 0f
             }
 
             override fun onError(error: Int) {
@@ -276,6 +314,21 @@ fun TextFieldWithLeadingAndTrailingIcons(
             Log.e("SpeechRecognition", "Stop error: ${e.message}")
         }
     }
+
+    LaunchedEffect(isListening) {
+        if (isListening) {
+            while (isListening) {
+                delay(100)
+                if (soundLevel < 0.1f) {
+                    delay(200)
+                    if (soundLevel < 0.1f && isListening) {
+                        soundLevel = 0f
+                    }
+                }
+            }
+        }
+    }
+
 
     Column(
         horizontalAlignment = Alignment.Start,
@@ -345,34 +398,38 @@ fun TextFieldWithLeadingAndTrailingIcons(
                             thickness = 1.5.dp,
                             color = Colors.subTextDark
                         )
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_voice),
-                            contentDescription = null,
-                            tint = Colors.subTextDark,
+                        Box(
+                            contentAlignment = Alignment.Center,
                             modifier = Modifier
-                                .clickable(
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() }
-                                ) {
-                                    if (isListening) {
-                                        stopVoiceRecognition()
+                                .graphicsLayer {
+                                    val combinedScale = if (isListening) {
+                                        currentScale * pulseScale
                                     } else {
-                                        startVoiceRecognition()
+                                        currentScale
                                     }
+                                    scaleX = combinedScale
+                                    scaleY = combinedScale
                                 }
-                                .pointerInput(Unit) {
-                                    detectTapGestures(
-                                        onTap = {
-                                            if (isListening) {
-                                                stopVoiceRecognition()
-                                            } else {
-                                                startVoiceRecognition()
-                                            }
-                                        }
-                                    )
-                                }
+                        ) {
 
-                        )
+                            Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.ic_voice),
+                                contentDescription = null,
+                                tint = microphoneColor,
+                                modifier = Modifier
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = remember { MutableInteractionSource() }
+                                    ) {
+                                        if (isListening) {
+                                            stopVoiceRecognition()
+                                        } else {
+                                            startVoiceRecognition()
+                                        }
+                                    }
+
+                            )
+                        }
                     }
                 }
             },
