@@ -75,7 +75,7 @@ dependencies {
 
     implementation(libs.kotlinx.metadata)
 
-    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
+    implementation(libs.accompanist.permissions)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

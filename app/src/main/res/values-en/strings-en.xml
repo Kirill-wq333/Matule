@@ -24,7 +24,7 @@
     <string name="otr_code">OTP Code</string>
 
     <!--  Main  -->
-    <string name="main">Main</string>
+    <string name="main">Explore</string>
     <string name="category">Select Category</string>
     <string name="empty_search">We didn\'t find anything for your query.</string>
     <string name="new_arrivals">New Arrivals</string>

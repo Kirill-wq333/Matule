@@ -159,7 +159,6 @@ fun OrderContent(
                             },
                             delivery = order.delivery,
                             orders = true,
-                            visibleTimeAgo = true,
                             visibleCartComponents = false
                         )
                     }

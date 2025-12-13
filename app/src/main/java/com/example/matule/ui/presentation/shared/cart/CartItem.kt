@@ -94,15 +94,16 @@ fun CartItem(
     delivery: Double = 0.0,
     onDelete: () -> Unit = {},
     orders: Boolean = false,
+    visibleTA: Boolean = true,
     onPlusQuantity: () -> Unit = {},
     onMinusQuantity: () -> Unit = {},
     visibleCartComponents: Boolean = true,
-    visibleTimeAgo: Boolean = false
 ) {
 
     var visibleOrders by remember { mutableStateOf(orders) }
     var isShiftedLeft by remember { mutableStateOf(false) }
     var isShiftedRight by remember { mutableStateOf(false) }
+    var visibleTimeAgo by remember { mutableStateOf(visibleTA) }
 
     val widthFraction = if (isShiftedLeft || isShiftedRight) 0.82f else 1f
     var dragOffset by remember { mutableStateOf(0f) }
@@ -181,19 +182,23 @@ fun CartItem(
                             if (dragOffset > 80f && !isShiftedLeft && !isShiftedRight) {
                                 isShiftedLeft = true
                                 visibleOrders = false
+                                visibleTimeAgo = false
                                 isShiftedRight = false
                             } else {
                                 isShiftedLeft = false
                                 visibleOrders = true
+                                visibleTimeAgo = true
                                 isShiftedRight = false
                             }
                         } else {
                             if (dragOffset < -80f && !isShiftedLeft && !isShiftedRight) {
                                 isShiftedLeft = false
+                                visibleTimeAgo = false
                                 visibleOrders = false
                                 isShiftedRight = true
                             } else {
                                 isShiftedLeft = false
+                                visibleTimeAgo = true
                                 visibleOrders = true
                                 isShiftedRight = false
                             }
@@ -315,7 +320,7 @@ private fun CartContent(
                         fontWeight = FontWeight.Normal,
                         fontFamily = FontFamily(Font(R.font.new_peninim_mt_inclined_2))
                     )
-                    if (quantity > 0 && !visibleOrders){
+                    if (quantity > 0 && !visibleOrders && !visibleTimeAgo && visibleCartComponents){
                         Text(
                             text = "$quantity ШТ",
                             color = Colors.hint,

@@ -48,8 +48,7 @@ fun ForgotPassword(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .blur(radius = if (visiblePopup) 50.dp else 0.dp,)
-            .background(color = if (visiblePopup) Colors.block.copy(0.25f) else Colors.block)
+            .background(color = Colors.block)
             .padding(vertical = 23.dp, horizontal = 20.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -89,6 +88,16 @@ fun ForgotPassword(
             )
         }
     }
+
+    if (visiblePopup) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .blur(50.dp)
+                .background(Colors.block.copy(0.25f))
+        )
+    }
+
     AnimatedVisibility(
         visible = visiblePopup,
         enter = fadeIn() + scaleIn(tween(150)),

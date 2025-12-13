@@ -125,7 +125,9 @@ fun OrdersDetailContent(
                         nameProduct = item.name,
                         openDetailScreen = {},
                         photoProduct = item.image,
-                        price = item.price
+                        price = item.price,
+                        orders = false,
+                        visibleTA = false
                     )
                 }
             }

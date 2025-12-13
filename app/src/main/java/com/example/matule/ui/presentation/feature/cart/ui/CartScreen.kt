@@ -67,6 +67,7 @@ import com.example.matule.ui.presentation.shared.screen.EmptyScreen
 import com.example.matule.ui.presentation.shared.screen.MainLoadingScreen
 import com.example.matule.ui.presentation.theme.Colors
 import com.example.matule.ui.presentation.theme.MatuleTypography
+import java.util.Locale
 
 private interface CartScreenCallback{
     fun onBack() {}
@@ -126,6 +127,14 @@ fun CartScreen(
         onShowCheckoutForm = { visibleCheckout = true },
         visibleSnackBar = visibleSnackbar
     )
+    if (visibleSnackbar) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .blur(4.dp)
+                .background(Colors.background.copy(.2f))
+        )
+    }
 
     AnimatedVisibility(
        visible = visibleSnackbar,
@@ -149,8 +158,7 @@ private fun CartContent(
 ) {
     Column(
         modifier = Modifier
-            .background(color = if (visibleSnackBar) Colors.background.copy(.2f) else Colors.background)
-            .blur(if (visibleSnackBar) 4.dp else 0.dp)
+            .background(color = Colors.background)
             .fillMaxSize()
     ) {
         CustomHeader(
@@ -492,10 +500,16 @@ fun CardCongratulations(
     }
 }
 
-fun getProductsCountText(count: Int): String {
-    return when {
-        count % 10 == 1 && count % 100 != 11 -> "$count товар"
-        count % 10 in 2..4 && count % 100 !in 12..14 -> "$count товара"
-        else -> "$count товаров"
+fun getProductsCountText(count: Int, locale: Locale = Locale.getDefault()): String {
+    return when (locale.language) {
+        "en" -> if (count == 1) "$count product" else "$count products"
+        "ru" -> {
+            when {
+                count % 10 == 1 && count % 100 != 11 -> "$count товар"
+                count % 10 in 2..4 && count % 100 !in 12..14 -> "$count товара"
+                else -> "$count товаров"
+            }
+        }
+        else -> "$count" // другие языки
     }
 }
