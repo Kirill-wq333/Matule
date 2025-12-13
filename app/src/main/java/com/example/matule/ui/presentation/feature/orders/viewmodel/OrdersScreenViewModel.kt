@@ -3,7 +3,6 @@ package com.example.matule.ui.presentation.feature.orders.viewmodel
 import androidx.lifecycle.viewModelScope
 import com.example.domain.ui.presentation.feature.auth.interactor.AuthInteractor
 import com.example.domain.ui.presentation.feature.orders.interactor.OrdersInteractor
-import com.example.domain.ui.presentation.feature.orders.model.CreateOrderRequest
 import com.example.domain.ui.presentation.feature.orders.model.OrderStatus
 import com.example.matule.ui.core.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel

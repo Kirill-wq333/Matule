@@ -3,7 +3,6 @@ package com.example.data.ui.presentation.feature.favorite.datasource
 import com.example.data.ui.presentation.feature.favorite.dto.FavoriteDto
 import com.example.data.ui.presentation.feature.main.dto.response.LikeResponseDto
 import com.example.data.ui.presentation.network.annotation.WithAuthorization
-import com.example.domain.ui.presentation.feature.favorite.model.Favorite
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST

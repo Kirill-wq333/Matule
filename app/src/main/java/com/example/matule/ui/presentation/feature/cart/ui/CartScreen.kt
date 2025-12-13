@@ -125,7 +125,6 @@ fun CartScreen(
         profile = profile,
         visibleCheckout = visibleCheckout,
         onShowCheckoutForm = { visibleCheckout = true },
-        visibleSnackBar = visibleSnackbar
     )
     if (visibleSnackbar) {
         Box(
@@ -150,7 +149,6 @@ fun CartScreen(
 @Composable
 private fun CartContent(
     visibleCheckout: Boolean,
-    visibleSnackBar: Boolean,
     profile: UserProfile,
     onShowCheckoutForm: () -> Unit,
     state: CartScreenContract.State,

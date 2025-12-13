@@ -9,30 +9,28 @@ class NotificationRepositoryImpl @Inject constructor(
     private val apiService: NotificationApiService
 ): NotificationRepository {
 
-    override suspend fun getNotifications(): Result<List<Notifications>> {
-        return try {
+    override suspend fun getNotifications(): Result<List<Notifications>> = runCatching {
 
-            val notificationsDto = apiService.getNotifications()
+        val notificationsDto = apiService.getNotifications()
 
-            val notifications = notificationsDto.map { dto ->
-                Notifications(
-                    id = dto.id,
-                    userId = dto.userId,
-                    title = dto.title,
-                    message = dto.message,
-                    type = Notifications.NotificationType.fromString(dto.type),
-                    isRead = dto.isRead,
-                    createdAt = dto.createdAt
-                )
-            }
-
-
-            Result.success(notifications)
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Result.failure(e)
+        val notifications = notificationsDto.map { dto ->
+            Notifications(
+                id = dto.id,
+                userId = dto.userId,
+                title = dto.title,
+                message = dto.message,
+                type = Notifications.NotificationType.fromString(dto.type),
+                isRead = dto.isRead,
+                createdAt = dto.createdAt
+            )
         }
-    }
+        Result.success(notifications)
+    }.fold(
+        onSuccess = { it },
+        onFailure = {
+            it.printStackTrace()
+            Result.failure(it)
+        }
+    )
 
 }

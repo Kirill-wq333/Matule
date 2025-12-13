@@ -9,13 +9,12 @@ class ForgotPasswordRepositoryImpl @Inject constructor(
     private val apiService: ForgotPasswordApiService
 ) : ForgotPasswordRepository {
 
-    override suspend fun forgotPassword(email: String): Result<Boolean> {
-        return try {
+    override suspend fun forgotPassword(email: String): Result<Boolean> = runCatching {
             val response = apiService.forgotPassword(ForgotPasswordRequest(email))
             Result.success(response.success)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
+    }.fold(
+        onSuccess = { it },
+        onFailure = { Result.failure(it) }
+    )
 
 }

@@ -1,16 +1,12 @@
 package com.example.matule.ui.presentation.feature.favorite.viewmodel
 
 import androidx.lifecycle.viewModelScope
-import com.bumptech.glide.load.engine.Resource
 import com.example.domain.ui.presentation.feature.auth.interactor.AuthInteractor
 import com.example.domain.ui.presentation.feature.cart.interactor.CartInteractor
-import com.example.domain.ui.presentation.feature.cart.model.CartResult
 import com.example.domain.ui.presentation.feature.favorite.interactor.FavoriteInteractor
 import com.example.domain.ui.presentation.feature.favorite.model.FavoriteResult
 import com.example.domain.ui.presentation.feature.favorite.repository.FavoriteRepository
 import com.example.matule.ui.core.viewmodel.BaseViewModel
-import com.example.matule.ui.presentation.feature.notification.viewmodel.NotificationScreenContract
-import com.example.matule.ui.presentation.feature.popular.viewmodel.PopularScreenContract
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

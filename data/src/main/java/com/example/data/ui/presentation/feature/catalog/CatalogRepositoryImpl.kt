@@ -10,12 +10,11 @@ class CatalogRepositoryImpl @Inject constructor(
     private val apiService: CatalogApiService
 ): CatalogRepository {
 
-    override suspend fun getCategories(): Result<List<Category>> {
-        return try {
-            val response = apiService.getCategories()
-            Result.success(response.map { it.toCategory() })
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
+    override suspend fun getCategories(): Result<List<Category>> = runCatching {
+        val response = apiService.getCategories()
+        Result.success(response.map { it.toCategory() })
+    }.fold(
+        onSuccess = { it },
+        onFailure = { Result.failure(it) }
+    )
 }

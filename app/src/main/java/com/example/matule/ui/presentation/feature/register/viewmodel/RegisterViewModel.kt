@@ -1,7 +1,6 @@
 package com.example.matule.ui.presentation.feature.register.viewmodel
 
 import androidx.lifecycle.viewModelScope
-import com.example.data.ui.presentation.storage.tokenprovider.TokenProvider
 import com.example.domain.ui.presentation.feature.register.interactor.RegisterInteractor
 import com.example.matule.ui.core.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel

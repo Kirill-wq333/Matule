@@ -1,9 +1,6 @@
 package com.example.data.ui.presentation.feature.cart.dto.response
 
-import android.os.Message
 import com.example.data.ui.presentation.feature.cart.dto.CartItemDto
-import com.example.domain.ui.presentation.feature.cart.model.CartItem
-import com.google.gson.annotations.SerializedName
 
 data class CartResponseDto(
     val success: Boolean,

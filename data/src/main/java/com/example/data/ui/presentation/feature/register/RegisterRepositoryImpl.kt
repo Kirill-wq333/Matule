@@ -22,7 +22,6 @@ class RegisterRepositoryImpl @Inject constructor(
         const val USER_LAST_NAME_KEY = "user_last_name"
         const val USER_PHONE_KEY = "user_phone"
 
-        const val USER_PASSWORD_KEY = "user_password"
     }
 
     override suspend fun register(
@@ -31,12 +30,11 @@ class RegisterRepositoryImpl @Inject constructor(
         firstName: String,
         lastName: String?,
         phone: String?
-    ): Result<User> {
+    ): Result<User> = runCatching {
 
-        return try {
             val response = apiService.register(RegisterRequest(email, password, firstName, lastName, phone))
 
-            if (response.success == true && response.user != null && response.token != null) {
+            if (response.success && response.user != null && response.token != null) {
                 tokenProvider.saveToken(response.token)
                 saveUser(response.user.toUser())
 
@@ -48,12 +46,12 @@ class RegisterRepositoryImpl @Inject constructor(
                 Result.failure(Exception(errorMessage))
             }
 
-        } catch (e: Exception) {
-            Result.failure(Exception("Сетевая ошибка: ${e.message}"))
-        }
-    }
+    }.fold(
+        onSuccess = { it },
+        onFailure = { Result.failure(it) }
+    )
 
-    private suspend fun saveUser(user: User) {
+    private fun saveUser(user: User) {
         with(sharedPreferences.edit()) {
             putLong(USER_ID_KEY, user.id)
             putString(USER_EMAIL_KEY, user.email)

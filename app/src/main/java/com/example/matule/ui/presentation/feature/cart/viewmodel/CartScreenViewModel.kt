@@ -10,8 +10,6 @@ import com.example.domain.ui.presentation.feature.profile.interactor.ProfileInte
 import com.example.domain.ui.presentation.feature.profile.model.ProfileResult
 import com.example.domain.ui.presentation.feature.profile.model.UserProfile
 import com.example.matule.ui.core.viewmodel.BaseViewModel
-import com.example.matule.ui.presentation.feature.orders.viewmodel.OrdersScreenContract
-import com.example.matule.ui.presentation.feature.profile.viewmodel.ProfileScreenContract
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

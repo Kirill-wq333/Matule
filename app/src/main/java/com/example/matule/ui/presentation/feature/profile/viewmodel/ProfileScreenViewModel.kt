@@ -1,6 +1,5 @@
 package com.example.matule.ui.presentation.feature.profile.viewmodel
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.data.ui.presentation.storage.tokenprovider.TokenProvider
 import com.example.domain.ui.presentation.feature.profile.interactor.ProfileInteractor
@@ -98,8 +97,7 @@ class ProfileScreenViewModel @Inject constructor(
             tokenProvider.getToken()
 
             if (result.isSuccess) {
-                val profileResult = result.getOrNull()!!
-                when (profileResult) {
+                when (val profileResult = result.getOrNull()!!) {
                     is ProfileResult.Success -> {
                         _profile.emit(profileResult.profile)
                         setState (ProfileScreenContract.State.ProfileLoaded())

@@ -11,41 +11,38 @@ class FavoriteRepositoryImpl @Inject constructor(
     private val apiService: FavoriteApiService
 ): FavoriteRepository {
 
-    override suspend fun getFavorite(): Result<List<Favorite>> {
-        return try {
-            val response = apiService.getFavorites()
+    override suspend fun getFavorite(): Result<List<Favorite>> = runCatching {
+        val response = apiService.getFavorites()
 
-            val favorite = response.map { it.toFavorite() }
-            Result.success(favorite)
-        }catch (e: Exception){
-            Result.failure(e)
-        }
-    }
+        val favorite = response.map { it.toFavorite() }
+        Result.success(favorite)
+    }.fold(
+        onSuccess = { it },
+        onFailure = { Result.failure(it) }
+    )
 
-    override suspend fun addToFavorites(productId: Long): Result<FavoriteResult> {
-        return try {
-            val response = apiService.addToFavorites(productId)
-            if (response.success) {
-                Result.success(FavoriteResult.Success(productId, true))
-            } else {
-                Result.success(FavoriteResult.Error(response.message ?: "Unknown error"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+    override suspend fun addToFavorites(productId: Long): Result<FavoriteResult> = runCatching {
+        val response = apiService.addToFavorites(productId)
+        if (response.success) {
+            Result.success(FavoriteResult.Success(productId, true))
+        } else {
+            Result.success(FavoriteResult.Error(response.message ?: "Unknown error"))
         }
-    }
+    }.fold(
+        onSuccess = { it },
+        onFailure = { Result.failure(it) }
+    )
 
-    override suspend fun removeFromFavorites(productId: Long): Result<FavoriteResult> {
-        return try {
-            val response = apiService.removeFromFavorites(productId)
-            if (response.success) {
-                Result.success(FavoriteResult.Success(productId, false))
-            } else {
-                Result.success(FavoriteResult.Error(response.message ?: "Unknown error"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+    override suspend fun removeFromFavorites(productId: Long): Result<FavoriteResult> = runCatching {
+        val response = apiService.removeFromFavorites(productId)
+        if (response.success) {
+            Result.success(FavoriteResult.Success(productId, false))
+        } else {
+            Result.success(FavoriteResult.Error(response.message ?: "Unknown error"))
         }
-    }
+    }.fold(
+        onSuccess = { it },
+        onFailure = { Result.failure(it) }
+    )
 
 }

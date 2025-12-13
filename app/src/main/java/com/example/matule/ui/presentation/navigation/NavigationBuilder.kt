@@ -26,11 +26,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.matule.ui.presentation.approuts.AppRouts
-import com.example.matule.ui.presentation.feature.auth.ui.AuthScreen
-import com.example.matule.ui.presentation.feature.main.ui.MainScreen
 import com.example.matule.ui.presentation.feature.arrivals.ui.ArrivalsScreen
 import com.example.matule.ui.presentation.feature.arrivals.viewmodel.ArrivalsScreenViewModel
-import com.example.matule.ui.presentation.feature.register.ui.RegisterScreen
+import com.example.matule.ui.presentation.feature.auth.ui.AuthScreen
 import com.example.matule.ui.presentation.feature.auth.viewmodel.AuthScreenViewModel
 import com.example.matule.ui.presentation.feature.cart.ui.CartScreen
 import com.example.matule.ui.presentation.feature.cart.viewmodel.CartScreenViewModel
@@ -40,8 +38,7 @@ import com.example.matule.ui.presentation.feature.details.viewmodel.ProductDetai
 import com.example.matule.ui.presentation.feature.favorite.ui.FavoriteScreen
 import com.example.matule.ui.presentation.feature.favorite.viewmodel.FavoriteScreenViewModel
 import com.example.matule.ui.presentation.feature.forgor_password.ui.ForgotPassword
-import com.example.matule.ui.presentation.feature.popular.ui.PopularScreen
-import com.example.matule.ui.presentation.feature.sidemenu.ui.SideMenuScreen
+import com.example.matule.ui.presentation.feature.main.ui.MainScreen
 import com.example.matule.ui.presentation.feature.main.viewmodel.MainViewModel
 import com.example.matule.ui.presentation.feature.notification.ui.NotificationScreen
 import com.example.matule.ui.presentation.feature.notification.viewmodel.NotificationScreenViewModel
@@ -51,10 +48,13 @@ import com.example.matule.ui.presentation.feature.orders.ui.OrdersScreen
 import com.example.matule.ui.presentation.feature.orders.ui.detail.OrdersDetailScreen
 import com.example.matule.ui.presentation.feature.orders.viewmodel.OrdersScreenContract
 import com.example.matule.ui.presentation.feature.orders.viewmodel.OrdersScreenViewModel
+import com.example.matule.ui.presentation.feature.popular.ui.PopularScreen
 import com.example.matule.ui.presentation.feature.popular.viewmodel.PopularScreenViewModel
 import com.example.matule.ui.presentation.feature.profile.ui.ProfileScreen
 import com.example.matule.ui.presentation.feature.profile.viewmodel.ProfileScreenViewModel
+import com.example.matule.ui.presentation.feature.register.ui.RegisterScreen
 import com.example.matule.ui.presentation.feature.register.viewmodel.RegisterViewModel
+import com.example.matule.ui.presentation.feature.sidemenu.ui.SideMenuScreen
 import com.example.matule.ui.presentation.feature.sidemenu.viewmodel.SideMenuScreenViewModel
 import com.example.matule.ui.presentation.navigation.bottomBar.BottomBarNavigation
 
@@ -383,6 +383,7 @@ fun NavigationBuilder(
     }
 }
 
+@Suppress("DEPRECATION")
 fun NavBackStackEntry.getLongArgument(key: String): Long? {
     return when (val value = arguments?.get(key)) {
         is Long -> value

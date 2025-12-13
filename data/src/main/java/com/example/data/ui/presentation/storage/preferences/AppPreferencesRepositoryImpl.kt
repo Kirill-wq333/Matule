@@ -54,11 +54,11 @@ class AppPreferencesImpl @Inject constructor(
         return longSet
     }
 
-    suspend fun clearCartItems() {
-        dataStore.edit { preferences ->
-            preferences.remove(CART_ITEMS)
-        }
-    }
+//    suspend fun clearCartItems() {
+//        dataStore.edit { preferences ->
+//            preferences.remove(CART_ITEMS)
+//        }
+//    }
 
     suspend fun getAppPreferences(): AppPreferences {
         val prefs = dataStore.data.first()

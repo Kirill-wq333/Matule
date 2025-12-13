@@ -1,9 +1,7 @@
 package com.example.matule.ui.presentation.feature.orders.viewmodel
 
-import com.example.domain.ui.presentation.feature.orders.model.CreateOrderRequest
 import com.example.domain.ui.presentation.feature.orders.model.Order
 import com.example.domain.ui.presentation.feature.orders.model.OrderStatus
-import com.example.domain.ui.presentation.feature.orders.model.OrdersSummary
 import com.example.matule.ui.core.viewmodel.ViewEffect
 import com.example.matule.ui.core.viewmodel.ViewEvent
 import com.example.matule.ui.core.viewmodel.ViewState
@@ -30,12 +28,6 @@ object OrdersScreenContract {
 
         data class OrderDetailsLoaded(
             val order: Order,
-            val isLoading: Boolean = false,
-            val error: String? = null
-        ) : State
-
-        data class SummaryLoaded(
-            val summary: OrdersSummary,
             val isLoading: Boolean = false,
             val error: String? = null
         ) : State

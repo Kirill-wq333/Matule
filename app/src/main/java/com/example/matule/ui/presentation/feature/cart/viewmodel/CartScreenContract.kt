@@ -1,6 +1,5 @@
 package com.example.matule.ui.presentation.feature.cart.viewmodel
 
-import android.provider.ContactsContract
 import com.example.domain.ui.presentation.feature.cart.model.CartItem
 import com.example.domain.ui.presentation.feature.orders.model.CreateOrderRequest
 import com.example.domain.ui.presentation.feature.orders.model.Order
@@ -8,7 +7,6 @@ import com.example.domain.ui.presentation.feature.profile.model.UserProfile
 import com.example.matule.ui.core.viewmodel.ViewEffect
 import com.example.matule.ui.core.viewmodel.ViewEvent
 import com.example.matule.ui.core.viewmodel.ViewState
-import com.example.matule.ui.presentation.feature.orders.viewmodel.OrdersScreenContract
 
 object CartScreenContract {
 
@@ -39,11 +37,5 @@ object CartScreenContract {
         ) : Effect
         data class ShowSnackbar(val message: String) : Effect
         data class ShowToast(val message: String) : Effect
-    }
-
-
-    enum class ToastDuration {
-        SHORT,
-        LONG
     }
 }

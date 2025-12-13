@@ -2,28 +2,18 @@ package com.example.matule.ui.presentation.feature.favorite.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.domain.ui.presentation.feature.favorite.model.Favorite
@@ -36,7 +26,6 @@ import com.example.matule.ui.presentation.shared.main.CardItem
 import com.example.matule.ui.presentation.shared.screen.EmptyScreen
 import com.example.matule.ui.presentation.shared.screen.LoadingScreen
 import com.example.matule.ui.presentation.theme.Colors
-import com.example.matule.ui.presentation.theme.MatuleTypography
 
 interface FavoriteScreenCallback{
     fun openDetailScreen(id: Long) {}

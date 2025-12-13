@@ -19,15 +19,15 @@ class TokenProvider @Inject constructor(
             appPreferences.setUserLoggedIn(true)
         }
 
-        val saved = getToken()
+        getToken()
     }
 
-    fun clearToken() {
-        runBlocking {
-            appPreferences.setUserToken(null)
-            appPreferences.setUserLoggedIn(false)
-        }
-    }
+//    fun clearToken() {
+//        runBlocking {
+//            appPreferences.setUserToken(null)
+//            appPreferences.setUserLoggedIn(false)
+//        }
+//    }
 
     fun isUserLoggedIn(): Boolean {
         return runBlocking {

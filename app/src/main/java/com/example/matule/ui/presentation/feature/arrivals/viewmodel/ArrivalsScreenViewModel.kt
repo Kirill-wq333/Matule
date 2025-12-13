@@ -5,8 +5,6 @@ import com.example.domain.ui.presentation.feature.arrivals.interactor.ArrivalsIn
 import com.example.domain.ui.presentation.feature.auth.interactor.AuthInteractor
 import com.example.domain.ui.presentation.feature.cart.interactor.CartInteractor
 import com.example.matule.ui.core.viewmodel.BaseViewModel
-import com.example.matule.ui.presentation.feature.main.viewmodel.MainScreenContract
-import com.example.matule.ui.presentation.feature.popular.viewmodel.PopularScreenContract
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

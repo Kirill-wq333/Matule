@@ -7,11 +7,8 @@ import com.example.domain.ui.presentation.feature.cart.model.CartResult
 import com.example.domain.ui.presentation.feature.favorite.interactor.FavoriteInteractor
 import com.example.domain.ui.presentation.feature.favorite.model.FavoriteResult
 import com.example.domain.ui.presentation.feature.popular.interactor.PopularInteractor
-import com.example.domain.ui.presentation.feature.popular.model.Product
 import com.example.matule.ui.core.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.max

@@ -6,7 +6,6 @@ import com.example.domain.ui.presentation.feature.popular.model.Product
 import com.example.matule.ui.core.viewmodel.ViewEffect
 import com.example.matule.ui.core.viewmodel.ViewEvent
 import com.example.matule.ui.core.viewmodel.ViewState
-import com.example.matule.ui.presentation.feature.main.viewmodel.MainScreenContract
 
 object ProductDetailContract {
 

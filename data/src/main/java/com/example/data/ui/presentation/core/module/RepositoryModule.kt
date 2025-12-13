@@ -1,12 +1,10 @@
 package com.example.data.ui.presentation.core.module
 
 import android.content.SharedPreferences
-import com.example.data.ui.presentation.feature.auth.AuthRepositoryImpl
-import com.example.data.ui.presentation.feature.auth.datasource.AuthApiService
-import com.example.data.ui.presentation.storage.tokenprovider.TokenProvider
-import com.example.domain.ui.presentation.feature.auth.repository.AuthRepository
 import com.example.data.ui.presentation.feature.arrivals.ArrivalsRepositoryImpl
 import com.example.data.ui.presentation.feature.arrivals.datasource.ArrivalsApiService
+import com.example.data.ui.presentation.feature.auth.AuthRepositoryImpl
+import com.example.data.ui.presentation.feature.auth.datasource.AuthApiService
 import com.example.data.ui.presentation.feature.cart.CartRepositoryImpl
 import com.example.data.ui.presentation.feature.cart.datasource.CartApiService
 import com.example.data.ui.presentation.feature.catalog.CatalogRepositoryImpl
@@ -28,7 +26,9 @@ import com.example.data.ui.presentation.feature.register.datasource.RegisterApiS
 import com.example.data.ui.presentation.feature.sidemenu.SideMenuRepositoryImpl
 import com.example.data.ui.presentation.feature.sidemenu.datasource.SideMenuApiService
 import com.example.data.ui.presentation.storage.preferences.AppPreferencesImpl
+import com.example.data.ui.presentation.storage.tokenprovider.TokenProvider
 import com.example.domain.ui.presentation.feature.arrivals.repository.ArrivalsRepository
+import com.example.domain.ui.presentation.feature.auth.repository.AuthRepository
 import com.example.domain.ui.presentation.feature.cart.repository.CartRepository
 import com.example.domain.ui.presentation.feature.catalog.repository.CatalogRepository
 import com.example.domain.ui.presentation.feature.favorite.repository.FavoriteRepository
@@ -42,7 +42,6 @@ import com.example.domain.ui.presentation.feature.sidemenu.repository.SideMenuRe
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -69,7 +68,6 @@ class RepositoryModule {
     fun provideAuthRepository(
         apiService: AuthApiService,
         sharedPreferences: SharedPreferences,
-        cartRepository: CartRepository,
         tokenProvider: TokenProvider,
         appPreferencesImpl: AppPreferencesImpl
     ): AuthRepository = AuthRepositoryImpl(apiService,tokenProvider,sharedPreferences,appPreferencesImpl)
@@ -77,11 +75,10 @@ class RepositoryModule {
     @Provides
     @Singleton
     fun provideCartRepository(
-        popularRepository: PopularRepository,
         apiService: CartApiService,
         tokenProvider: TokenProvider,
         appPreferences: AppPreferencesImpl
-    ): CartRepository = CartRepositoryImpl(popularRepository, apiService, tokenProvider, appPreferences)
+    ): CartRepository = CartRepositoryImpl(apiService, tokenProvider, appPreferences)
 
     @Provides
     @Singleton
@@ -129,6 +126,5 @@ class RepositoryModule {
     @Singleton
     fun provideSideMenuRepository(
         apiService: SideMenuApiService,
-        appPreferences: AppPreferencesImpl
     ): SideMenuRepository = SideMenuRepositoryImpl(apiService)
 }

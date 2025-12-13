@@ -1,7 +1,6 @@
 package com.example.data.ui.presentation.feature.cart
 
 import com.example.data.ui.presentation.feature.cart.datasource.CartApiService
-import com.example.data.ui.presentation.feature.cart.dto.CartItemDto.Companion.toCartItem
 import com.example.data.ui.presentation.feature.cart.dto.ProductCartDto.Companion.toProductCart
 import com.example.data.ui.presentation.feature.cart.dto.request.AddToCartRequest
 import com.example.data.ui.presentation.feature.cart.dto.request.UpdateCartItemRequest
@@ -12,12 +11,9 @@ import com.example.domain.ui.presentation.feature.cart.model.CartResult
 import com.example.domain.ui.presentation.feature.cart.model.CartState
 import com.example.domain.ui.presentation.feature.cart.model.ProductCart
 import com.example.domain.ui.presentation.feature.cart.repository.CartRepository
-import com.example.domain.ui.presentation.feature.popular.model.Product
-import com.example.domain.ui.presentation.feature.popular.repository.PopularRepository
 import javax.inject.Inject
 
 class CartRepositoryImpl @Inject constructor(
-    private val popularRepository: PopularRepository,
     private val apiService: CartApiService,
     private val tokenProvider: TokenProvider,
     private val appPreferences: AppPreferencesImpl

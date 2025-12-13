@@ -10,13 +10,12 @@ class ArrivalsRepositoryImpl @Inject constructor(
     private val apiService: ArrivalsApiService
 ): ArrivalsRepository {
 
-    override suspend fun getPromotions(): Result<List<Promotion>> {
-        return try {
-            val response = apiService.getPromotions()
-            Result.success(response.map { it.toPromotion() })
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
+    override suspend fun getPromotions(): Result<List<Promotion>> = runCatching {
+        val response = apiService.getPromotions()
+        Result.success(response.map { it.toPromotion() })
+    }.fold(
+        onSuccess = { it },
+        onFailure = { Result.failure(it) }
+    )
 
 }

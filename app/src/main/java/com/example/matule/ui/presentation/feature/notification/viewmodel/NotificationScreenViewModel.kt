@@ -1,7 +1,6 @@
 package com.example.matule.ui.presentation.feature.notification.viewmodel
 
 import androidx.lifecycle.viewModelScope
-import com.example.data.ui.presentation.storage.tokenprovider.TokenProvider
 import com.example.domain.ui.presentation.feature.auth.interactor.AuthInteractor
 import com.example.domain.ui.presentation.feature.notification.interactor.NotificationInteractor
 import com.example.matule.ui.core.viewmodel.BaseViewModel

@@ -5,7 +5,6 @@ import com.example.domain.ui.presentation.feature.profile.model.UserProfile
 import com.example.matule.ui.core.viewmodel.ViewEffect
 import com.example.matule.ui.core.viewmodel.ViewEvent
 import com.example.matule.ui.core.viewmodel.ViewState
-import com.example.matule.ui.presentation.feature.profile.viewmodel.ProfileScreenContract
 
 object SideMenuScreenContract {
     sealed interface Event: ViewEvent{

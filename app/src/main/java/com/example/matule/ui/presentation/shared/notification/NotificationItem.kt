@@ -81,7 +81,7 @@ fun formatIsoToDisplayUTC(isoDate: String): String {
         val outputFormat = SimpleDateFormat("dd.MM.yyyy, HH:mm", Locale.getDefault())
 
         outputFormat.format(date!!)
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         isoDate
     }
 }

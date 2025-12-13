@@ -8,7 +8,6 @@ import com.example.domain.ui.presentation.feature.favorite.interactor.FavoriteIn
 import com.example.domain.ui.presentation.feature.favorite.model.FavoriteResult
 import com.example.domain.ui.presentation.feature.main.interactor.MainInteractor
 import com.example.domain.ui.presentation.feature.popular.interactor.PopularInteractor
-import com.example.domain.ui.presentation.feature.popular.model.Product
 import com.example.matule.ui.core.viewmodel.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

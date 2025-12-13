@@ -1,6 +1,5 @@
 package com.example.domain.ui.presentation.feature.favorite.model
 
-import com.example.domain.ui.presentation.feature.popular.model.Product
 import kotlinx.serialization.Serializable
 
 @Serializable

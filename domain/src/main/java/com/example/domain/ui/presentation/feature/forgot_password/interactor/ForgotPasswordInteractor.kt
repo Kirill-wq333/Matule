@@ -1,6 +1,5 @@
 package com.example.domain.ui.presentation.feature.forgot_password.interactor
 
-import com.example.domain.ui.presentation.feature.auth.interactor.AuthInteractor
 import com.example.domain.ui.presentation.feature.forgot_password.repository.ForgotPasswordRepository
 
 class ForgotPasswordInteractor(

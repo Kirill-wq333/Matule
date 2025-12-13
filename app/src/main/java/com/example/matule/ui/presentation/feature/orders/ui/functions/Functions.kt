@@ -6,7 +6,6 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
-import kotlin.collections.forEach
 
 enum class DayGroup(val getLocalizedTitle: (Locale) -> String) {
     TODAY({ locale ->
@@ -189,22 +188,6 @@ fun formatDaysAgoSmart(
     }
 }
 
-fun formatTimeOnly(
-    isoDate: String,
-    locale: Locale = Locale.getDefault()
-): String {
-    return try {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-        dateFormat.timeZone = TimeZone.getTimeZone("UTC")
-        val date = dateFormat.parse(isoDate) ?: return ""
-
-        val timeFormat = SimpleDateFormat("HH:mm", locale)
-        timeFormat.format(date)
-    } catch (_: Exception) {
-        ""
-    }
-}
-
 fun getDayGroupTitle(
     dayGroup: DayGroup,
     locale: Locale = Locale.getDefault()
@@ -215,7 +198,6 @@ fun getDayGroupTitle(
 // Группировка заказов с поддержкой локалей
 fun groupOrdersByDay(
     orders: List<Order>,
-    locale: Locale = Locale.getDefault()
 ): Map<DayGroup, List<Order>> {
     val result = mutableMapOf<DayGroup, MutableList<Order>>()
 

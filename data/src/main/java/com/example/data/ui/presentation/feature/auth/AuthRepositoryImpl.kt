@@ -25,27 +25,25 @@ class AuthRepositoryImpl @Inject constructor(
         const val USER_PHONE_KEY = "user_phone"
     }
 
-    override suspend fun login(email: String, password: String): Result<User> {
-        return try {
-            val response = apiService.login(LoginRequest(email, password))
+    override suspend fun login(email: String, password: String): Result<User> = runCatching {
+        val response = apiService.login(LoginRequest(email, password))
 
 
-            if (response.success == true && response.user != null && response.token != null) {
-                tokenProvider.saveToken(response.token)
+        if (response.success && response.user != null && response.token != null) {
+            tokenProvider.saveToken(response.token)
 
-                saveUser(response.user.toUser())
+            saveUser(response.user.toUser())
 
-                Result.success(response.user.toUser())
-            } else {
-                val errorMessage = response.error ?: "Неизвестная ошибка авторизации"
-                Result.failure(Exception(errorMessage))
-            }
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Result.failure(Exception("Сетевая ошибка: ${e.message}"))
+            Result.success(response.user.toUser())
+        } else {
+            val errorMessage = response.error ?: "Неизвестная ошибка авторизации"
+            Result.failure(Exception(errorMessage))
         }
-    }
+
+    }.fold(
+        onSuccess = { it },
+        onFailure = { Result.failure(it) }
+    )
 
     override suspend fun saveToken(token: String) {
         tokenProvider.saveToken(token)
@@ -73,7 +71,7 @@ class AuthRepositoryImpl @Inject constructor(
         )
     }
 
-    private suspend fun saveUser(user: User) {
+    private fun saveUser(user: User) {
         with(sharedPreferences.edit()) {
             putLong(USER_ID_KEY, user.id)
             putString(USER_EMAIL_KEY, user.email)

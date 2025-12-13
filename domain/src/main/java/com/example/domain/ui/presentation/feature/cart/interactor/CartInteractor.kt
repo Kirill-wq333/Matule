@@ -26,10 +26,6 @@ class CartInteractor @Inject constructor(
         }
     }
 
-    suspend fun syncCartWithServer(): Result<Boolean> {
-        return cartRepository.syncCartWithServer()
-    }
-
     suspend fun addToCartSimple(productId: Long, quantity: Int = 1): Result<Boolean> {
         return runCatching {
             val currentItems = getLocalCartItems().getOrNull() ?: emptySet()
@@ -51,7 +47,7 @@ class CartInteractor @Inject constructor(
                         }
                     }
                 },
-                onFailure = { error ->
+                onFailure = {
                     saveLocalCartItems(currentItems)
                     false
                 }
