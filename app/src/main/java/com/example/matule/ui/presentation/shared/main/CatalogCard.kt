@@ -23,7 +23,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -49,6 +51,7 @@ fun CatalogCard(
     val catalog = remember(categories) {
         listOf(all) + categories.map { it.name }
     }
+    var wasSelected by remember { mutableStateOf(false) }
 
     LaunchedEffect(pagerState.currentPage) {
         lazyListState.animateScrollToItem(pagerState.currentPage)
@@ -74,8 +77,9 @@ fun CatalogCard(
 
                 Item(
                     text = category,
-                    isSelected = (index == pagerState.currentPage),
+                    isSelected = if(wasSelected) index == pagerState.currentPage else false,
                     onClick = {
+                        wasSelected = true
                         val categoryId = if (index == 0) 0L else categories.getOrNull(index - 1)?.id
                         onCategorySelected(categoryId)
                     }

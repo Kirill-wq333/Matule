@@ -1,5 +1,7 @@
 package com.example.matule.ui.presentation.feature.main.ui
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
@@ -174,6 +176,7 @@ private fun Main(
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @Composable
 private fun Content(
     search: String,
