@@ -37,8 +37,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
@@ -48,6 +51,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import com.example.domain.ui.presentation.feature.cart.model.CartItem
 import com.example.domain.ui.presentation.feature.orders.model.Address
@@ -92,18 +97,18 @@ fun CartScreen(
         vm.handleEvent(CartScreenContract.Event.LoadCart)
     }
 
-    val callback = object : CartScreenCallback{
+    val callback = object : CartScreenCallback {
         override fun onBack() {
-            if (visibleCheckout){
-             visibleCheckout = false
+            if (visibleCheckout) {
+                visibleCheckout = false
             } else {
                 navController.popBackStack()
             }
         }
 
         override fun checkoutScreen(request: CreateOrderRequest) {
-           vm.handleEvent(CartScreenContract.Event.CreateOrder(request))
-           visibleSnackbar = true
+            vm.handleEvent(CartScreenContract.Event.CreateOrder(request))
+            visibleSnackbar = true
         }
 
         override fun deleteProduct(id: Long) {
@@ -119,29 +124,46 @@ fun CartScreen(
         }
     }
 
-    CartContent(
-        callback = callback,
-        state = state,
-        profile = profile,
-        visibleCheckout = visibleCheckout,
-        onShowCheckoutForm = { visibleCheckout = true },
-    )
-    if (visibleSnackbar) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .blur(4.dp)
-                .background(Colors.background.copy(.2f))
-        )
-    }
 
-    AnimatedVisibility(
-       visible = visibleSnackbar,
-       enter = fadeIn() + scaleIn(tween(150)),
-       exit = fadeOut() + scaleOut(tween(150))
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Colors.background)
     ) {
-        CardCongratulations {
-            navController.navigate(AppRouts.MAIN)
+        CartContent(
+            callback = callback,
+            state = state,
+            profile = profile,
+            visibleCheckout = visibleCheckout,
+            onShowCheckoutForm = { visibleCheckout = true },
+        )
+
+        if (visibleSnackbar) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Colors.background.copy(alpha = 0.2f))
+                    .graphicsLayer {
+                        renderEffect = BlurEffect(
+                            radiusX = 4.dp.toPx(),
+                            radiusY = 4.dp.toPx(),
+                            edgeTreatment = TileMode.Decal
+                        )
+                    }
+            )
+
+            Dialog(
+                onDismissRequest = { visibleSnackbar = false },
+                properties = DialogProperties(
+                    dismissOnBackPress = true,
+                    dismissOnClickOutside = false,
+                    usePlatformDefaultWidth = false
+                )
+            ) {
+                CardCongratulations {
+                    navController.navigate(AppRouts.MAIN)
+                }
+            }
         }
     }
 }
@@ -156,8 +178,8 @@ private fun CartContent(
 ) {
     Column(
         modifier = Modifier
-            .background(color = Colors.background)
             .fillMaxSize()
+            .background(color = Colors.background)
     ) {
         CustomHeader(
             text = R.string.cart,

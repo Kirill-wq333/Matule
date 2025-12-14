@@ -25,9 +25,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.BlurEffect
+import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import com.example.matule.R
 import com.example.matule.ui.presentation.feature.auth.ui.TitleAndSubTitleAuth
@@ -45,65 +50,79 @@ fun ForgotPassword(
     var email by remember { mutableStateOf("") }
     var visiblePopup by remember { mutableStateOf(false) }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(color = Colors.block)
-            .padding(vertical = 23.dp, horizontal = 20.dp),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        CustomHeader(
-            backColor = Colors.background,
-            onBack = {
-                navController.popBackStack()
-            },
-            text = R.string.forgot_password
-        )
-        Spacer(modifier = Modifier.height(20.dp))
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(40.dp)
-        ) {
-            TitleAndSubTitleAuth(
-                heading = R.string.forgot_password,
-                underHeading = R.string.forgot_password_under_heading
-            )
-            TextFieldWithTrailingIcon(
-                modifier = Modifier.fillMaxWidth(),
-                query = email,
-                onTextChange = {
-                    email = it
-                },
-                placeholder = "email@example.com"
-            )
-            CustomButton(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                text = R.string.btn_sent,
-                onClick = {
-                    visiblePopup =true
-                }
-            )
-        }
-    }
-
-    if (visiblePopup) {
-        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .blur(50.dp)
-                .background(Colors.block.copy(0.25f))
-        )
-    }
+                .padding(vertical = 23.dp, horizontal = 20.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CustomHeader(
+                backColor = Colors.background,
+                onBack = {
+                    navController.popBackStack()
+                },
+                text = R.string.forgot_password
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(40.dp)
+            ) {
+                TitleAndSubTitleAuth(
+                    heading = R.string.forgot_password,
+                    underHeading = R.string.forgot_password_under_heading
+                )
+                TextFieldWithTrailingIcon(
+                    modifier = Modifier.fillMaxWidth(),
+                    query = email,
+                    onTextChange = {
+                        email = it
+                    },
+                    placeholder = "email@example.com"
+                )
+                CustomButton(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    text = R.string.btn_sent,
+                    onClick = {
+                        visiblePopup = true
+                    }
+                )
+            }
+        }
 
-    AnimatedVisibility(
-        visible = visiblePopup,
-        enter = fadeIn() + scaleIn(tween(150)),
-        exit = fadeOut() + scaleOut(tween(150))
-    ) {
-        Popup()
+        if (visiblePopup) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Colors.block.copy(0.25f))
+                    .graphicsLayer {
+                        renderEffect = BlurEffect(
+                            radiusX = 4.dp.toPx(),
+                            radiusY = 4.dp.toPx(),
+                            edgeTreatment = TileMode.Decal
+                        )
+                    }
+            )
+            Dialog(
+                onDismissRequest = { visiblePopup = false },
+                properties = DialogProperties(
+                    dismissOnBackPress = true,
+                    dismissOnClickOutside = false,
+                    usePlatformDefaultWidth = false
+                )
+            ) {
+                Popup()
+            }
+        }
+
     }
 }
 
