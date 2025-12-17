@@ -11,14 +11,13 @@ class ProfileRepositoryImpl @Inject constructor(
     private val apiService: ProfileApiService
 ): ProfileRepository {
 
-    override suspend fun getProfile(): Result<ProfileResult> {
-        return try {
+    override suspend fun getProfile(): Result<ProfileResult> = runCatching {
             val response = apiService.getProfile()
             Result.success(ProfileResult.Success(response.toUserProfile()))
-        } catch (e: Exception) {
-            Result.success(ProfileResult.Error("Не удалось загрузить профиль: ${e.message}"))
-        }
-    }
+    }.fold(
+        onSuccess = { it },
+        onFailure = { Result.failure(it) }
+    )
 
     override suspend fun updateProfileFields(
         email: String,
@@ -30,23 +29,22 @@ class ProfileRepositoryImpl @Inject constructor(
         address: String?,
         postalCode: String?,
         dateOfBirth: String?
-    ): Result<ProfileResult> {
-        return try {
-            val request = UpdateProfileRequest(
-                email = email,
-                firstName = firstName,
-                lastName = lastName,
-                phone = phone,
-                country = country,
-                city = city,
-                address = address,
-                postalCode = postalCode,
-                dateOfBirth = dateOfBirth
-            )
-            val response = apiService.updateProfile(request)
-            Result.success(ProfileResult.Success(response.toUserProfile()))
-        } catch (e: Exception) {
-            Result.success(ProfileResult.Error("Не удалось обновить профиль: ${e.message}"))
-        }
-    }
+    ): Result<ProfileResult> = runCatching {
+        val request = UpdateProfileRequest(
+            email = email,
+            firstName = firstName,
+            lastName = lastName,
+            phone = phone,
+            country = country,
+            city = city,
+            address = address,
+            postalCode = postalCode,
+            dateOfBirth = dateOfBirth
+        )
+        val response = apiService.updateProfile(request)
+        Result.success(ProfileResult.Success(response.toUserProfile()))
+    }.fold(
+        onSuccess = { it },
+        onFailure = { Result.failure(it) }
+    )
 }

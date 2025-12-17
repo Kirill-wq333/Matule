@@ -23,6 +23,7 @@ import com.example.matule.ui.presentation.feature.popular.viewmodel.PopularScree
 import com.example.matule.ui.presentation.feature.popular.viewmodel.PopularScreenViewModel
 import com.example.matule.ui.presentation.shared.header.CustomHeader
 import com.example.matule.ui.presentation.shared.main.CardItem
+import com.example.matule.ui.presentation.shared.pullToRefresh.PullRefreshLayout
 import com.example.matule.ui.presentation.shared.screen.EmptyScreen
 import com.example.matule.ui.presentation.shared.screen.LoadingScreen
 import com.example.matule.ui.presentation.theme.Colors
@@ -33,6 +34,7 @@ interface PopularScreenCallback{
     fun openFavoriteScreen() {}
     fun openCartScreen() {}
     fun addedInFavorite(id: Long, isFavorite: Boolean) {}
+    fun onRefresh() {}
 }
 
 @Composable
@@ -68,6 +70,10 @@ fun PopularScreen(
         override fun openDetailScreen(id: Long) {
             navController.navigate("${AppRouts.DETAILS}/$id")
         }
+
+        override fun onRefresh() {
+            vm.handleEvent(PopularScreenContract.Event.RefreshContent)
+        }
     }
 
     PopularContent(
@@ -83,7 +89,8 @@ fun PopularScreen(
         addedInFavorite = { id, isFavorite ->
             callback.addedInFavorite(id, isFavorite)
         },
-        state = state
+        state = state,
+        onRefresh = callback::onRefresh
     )
 }
 
@@ -91,6 +98,7 @@ fun PopularScreen(
 private fun PopularContent(
     addedInCart: (Long) -> Unit,
     state: PopularScreenContract.State,
+    onRefresh: () -> Unit,
     onLike: () -> Unit,
     onBack: () -> Unit,
     addedInFavorite: (Long, Boolean) -> Unit,
@@ -112,7 +120,7 @@ private fun PopularContent(
             visibleNameScreen = true,
             visibleEndIcon = true
         )
-        when(state) {
+        when (state) {
             is PopularScreenContract.State.Loading -> {
                 LoadingScreen()
             }

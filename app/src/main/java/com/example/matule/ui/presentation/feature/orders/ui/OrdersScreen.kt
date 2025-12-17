@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.domain.ui.presentation.feature.orders.model.Order
+import com.example.domain.ui.presentation.feature.orders.model.OrderStatus
 import com.example.matule.R
 import com.example.matule.ui.presentation.approuts.AppRouts
 import com.example.matule.ui.presentation.feature.orders.ui.functions.DayGroup
@@ -36,6 +37,7 @@ import com.example.matule.ui.presentation.feature.orders.viewmodel.OrdersScreenC
 import com.example.matule.ui.presentation.feature.orders.viewmodel.OrdersScreenViewModel
 import com.example.matule.ui.presentation.shared.cart.CartItem
 import com.example.matule.ui.presentation.shared.header.CustomHeader
+import com.example.matule.ui.presentation.shared.pullToRefresh.PullRefreshLayout
 import com.example.matule.ui.presentation.shared.screen.EmptyScreen
 import com.example.matule.ui.presentation.shared.screen.MainLoadingScreen
 import com.example.matule.ui.presentation.theme.Colors
@@ -58,6 +60,15 @@ fun OrdersScreen(
         },
         openOrderScreen = { orderId ->
             navController.navigate("${AppRouts.ORDERS_DETAIL}/$orderId")
+        },
+        onRefresh = {
+            vm.handleEvent(OrdersScreenContract.Event.Refresh)
+        },
+        onDelete = { id ->
+            vm.handleEvent(OrdersScreenContract.Event.DeleteOrder(id))
+        },
+        onUpdateOrder = { id, status ->
+            vm.handleEvent(OrdersScreenContract.Event.UpdateOrderStatus(id, status))
         }
     )
 
@@ -67,6 +78,9 @@ fun OrdersScreen(
 private fun Content(
     state: OrdersScreenContract.State,
     onBack: () -> Unit,
+    onRefresh: () -> Unit,
+    onDelete: (Long) -> Unit,
+    onUpdateOrder: (Long, OrderStatus) -> Unit,
     openOrderScreen: (Long) -> Unit
 ) {
     Column(
@@ -82,15 +96,18 @@ private fun Content(
             visibleNameScreen = true
         )
         Spacer(modifier = Modifier.height(16.dp))
-        when(state) {
+        when (state) {
             is OrdersScreenContract.State.OrdersLoaded -> {
                 OrderContent(
                     orders = state.orders,
                     openOrderScreen = openOrderScreen,
+                    onDelete = onDelete,
+                    onUpdateOrder = onUpdateOrder
                 )
             }
             is OrdersScreenContract.State.Empty -> {
                 EmptyScreen(
+                    modifier = Modifier.fillMaxSize(),
                     icon = R.drawable.ic_orders,
                     emptyText = R.string.empty_orders
                 )
@@ -108,6 +125,8 @@ private fun Content(
 fun OrderContent(
     orders: List<Order>,
     openOrderScreen: (Long) -> Unit,
+    onDelete: (Long) -> Unit,
+    onUpdateOrder: (Long, OrderStatus) -> Unit
 ) {
 
     val groupedOrders = groupOrdersByDay(orders)
@@ -155,6 +174,12 @@ fun OrderContent(
                             numberOrders = order.orderNumber.toLong(),
                             openDetailScreen = {
                                 openOrderScreen(order.id)
+                            },
+                            onDelete = {
+                                onDelete(order.id)
+                            },
+                            onUpdateOrder = {
+                                onUpdateOrder(order.id, order.status)
                             },
                             delivery = order.delivery,
                             orders = true,

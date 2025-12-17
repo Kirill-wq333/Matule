@@ -87,6 +87,7 @@ fun CartItem(
     price: Double,
     numberOrders: Long = 0,
     openDetailScreen: () -> Unit,
+    onUpdateOrder: () -> Unit = {},
     delivery: Double = 0.0,
     onDelete: () -> Unit = {},
     orders: Boolean = false,
@@ -135,7 +136,7 @@ fun CartItem(
                     horizontalPadding = 13.dp,
                     width = 32.dp,
                     height = 32.dp,
-                    onClick = {},
+                    onClick = onUpdateOrder,
                 )
             }
         }
@@ -161,7 +162,7 @@ fun CartItem(
                     horizontalPadding = 13.dp,
                     width = 32.dp,
                     height = 32.dp,
-                    onClick = {},
+                    onClick = onDelete,
                 )
             }
         }

@@ -71,6 +71,7 @@ import com.example.matule.ui.presentation.feature.profile.viewmodel.ProfileScree
 import com.example.matule.ui.presentation.shared.buttons.CustomButton
 import com.example.matule.ui.presentation.shared.header.CustomHeaderMain
 import com.example.matule.ui.presentation.shared.mask.rememberMaskVisualTransformation
+import com.example.matule.ui.presentation.shared.pullToRefresh.PullRefreshLayout
 import com.example.matule.ui.presentation.shared.screen.MainLoadingScreen
 import com.example.matule.ui.presentation.shared.text.CustomTextField
 import com.example.matule.ui.presentation.theme.Colors
@@ -108,22 +109,22 @@ fun ProfileContent(
         mutableStateOf(profile.firstName)
     }
     var lastName by remember(profile) {
-        mutableStateOf(profile.lastName)
+        mutableStateOf(profile.lastName ?: "")
     }
     var phone by remember(profile) {
-        mutableStateOf(profile.phone)
+        mutableStateOf(profile.phone ?: "")
     }
     var country by remember(profile) {
-        mutableStateOf(profile.country)
+        mutableStateOf(profile.country ?: "")
     }
     var city by remember(profile) {
-        mutableStateOf(profile.city)
+        mutableStateOf(profile.city ?: "")
     }
     var address by remember(profile) {
-        mutableStateOf(profile.address)
+        mutableStateOf(profile.address ?: "")
     }
     var postalCode by remember(profile) {
-        mutableStateOf(profile.postalCode)
+        mutableStateOf(profile.postalCode ?: "")
     }
     var email by remember(profile) {
         mutableStateOf(profile.email)
@@ -168,7 +169,7 @@ fun ProfileContent(
     ) {
         AnimatedVisibility(
             visible = !visibleEditingScreen,
-            enter = fadeIn(tween(1700)) + slideInHorizontally( tween(700)) { it },
+            enter = fadeIn(tween(1700)) + slideInHorizontally(tween(700)) { it },
             exit = fadeOut(tween(700)) + slideOutHorizontally(tween(700)) { it }
         ) {
             Column {
@@ -192,7 +193,7 @@ fun ProfileContent(
 
         AnimatedVisibility(
             visible = visibleEditingScreen && hasChanges,
-            enter = fadeIn(tween(1700)) + slideInVertically( tween(700)) { -it },
+            enter = fadeIn(tween(1700)) + slideInVertically(tween(700)) { -it },
             exit = fadeOut(tween(700)) + slideOutVertically(tween(700)) { -it }
         ) {
             Column {
@@ -221,7 +222,7 @@ fun ProfileContent(
                 Spacer(modifier = Modifier.height(43.dp))
             }
         }
-        when(state) {
+        when (state) {
             is ProfileScreenContract.State.ProfileLoaded -> {
                 Content(
                     photo = profile.avatar ?: "",

@@ -16,6 +16,7 @@ object CartScreenContract {
         data class CreateOrder(val request: CreateOrderRequest) : Event
         data class RemoveItem(val cartItemId: Long) : Event
         data object LoadCartProfile: Event
+        data object Refresh: Event
     }
 
     sealed interface State: ViewState{

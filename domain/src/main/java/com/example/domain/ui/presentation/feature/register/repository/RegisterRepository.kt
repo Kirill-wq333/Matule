@@ -7,7 +7,5 @@ interface RegisterRepository {
         email: String,
         password: String,
         firstName: String,
-        lastName: String?,
-        phone: String?
     ): Result<User>
 }

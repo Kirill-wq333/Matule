@@ -15,18 +15,16 @@ class RegisterViewModel @Inject constructor(
     override fun setInitialState(): RegisterContract.State = RegisterContract.State.Loaded
 
     override fun handleEvent(event: RegisterContract.Event) = when(event) {
-        is RegisterContract.Event.Register -> register(event.email, event.password, event.firstName, event.lastName, event.phone)
+        is RegisterContract.Event.Register -> register(event.email, event.password, event.firstName)
     }
 
     private fun register(
         email: String,
         password: String,
         firstName: String,
-        lastName: String? = null,
-        phone: String? = null
     ){
         viewModelScope.launch(dispatcher) {
-            val registerUser = registerInteractor.register(email,password,firstName,lastName,phone)
+            val registerUser = registerInteractor.register(email,password,firstName)
 
             when {
                 registerUser.isSuccess -> {

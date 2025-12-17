@@ -14,13 +14,13 @@ class ProfileInteractor(
     suspend fun updateProfileFields(
         email: String,
         firstName: String,
-        lastName: String? = null,
-        phone: String? = null,
-        country: String? = null,
-        city: String? = null,
-        address: String? = null,
-        postalCode: String? = null,
-        dateOfBirth: String? = null
+        lastName: String? = "",
+        phone: String? = "",
+        country: String? = "",
+        city: String? = "",
+        address: String? = "",
+        postalCode: String? = "",
+        dateOfBirth: String? = ""
     ): Result<ProfileResult> {
         return profileRepository.updateProfileFields(
             email = email,

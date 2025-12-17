@@ -17,6 +17,7 @@ import com.example.matule.ui.presentation.feature.arrivals.viewmodel.ArrivalsScr
 import com.example.matule.ui.presentation.feature.arrivals.viewmodel.ArrivalsScreenViewModel
 import com.example.matule.ui.presentation.shared.header.CustomHeader
 import com.example.matule.ui.presentation.shared.main.Arrivals
+import com.example.matule.ui.presentation.shared.pullToRefresh.PullRefreshLayout
 import com.example.matule.ui.presentation.shared.screen.LoadingScreen
 import com.example.matule.ui.presentation.theme.Colors
 
@@ -32,24 +33,21 @@ fun ArrivalsScreen(
         vm.handleEvent(ArrivalsScreenContract.Event.LoadedContent)
     }
 
-    when (val currentState = state) {
-        is ArrivalsScreenContract.State.Loaded -> {
-            ArrivalsContent(
-                arrivals = currentState.promotions,
-                onBack = onBack
-            )
+    ArrivalsContent(
+        onBack = onBack,
+        state = state,
+        onRefresh = {
+            vm.handleEvent(ArrivalsScreenContract.Event.RefreshContent)
         }
-        is ArrivalsScreenContract.State.Loading -> {
-            LoadingScreen()
-        }
-        else -> {}
-    }
+    )
+
 }
 
 @Composable
 private fun ArrivalsContent(
     onBack: () -> Unit,
-    arrivals: List<Promotion>
+    state: ArrivalsScreenContract.State,
+    onRefresh: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -63,11 +61,18 @@ private fun ArrivalsContent(
             onBack = onBack,
             visibleNameScreen = true,
         )
-        Content(
-            arrivals = arrivals
-        )
+        when (state) {
+            is ArrivalsScreenContract.State.Loaded -> {
+                Content(
+                    arrivals = state.promotions
+                )
+            }
+            is ArrivalsScreenContract.State.Loading -> {
+                LoadingScreen()
+            }
+            else -> {}
+        }
     }
-
 }
 
 @Composable

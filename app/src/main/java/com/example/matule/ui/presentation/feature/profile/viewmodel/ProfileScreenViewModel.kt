@@ -1,7 +1,7 @@
 package com.example.matule.ui.presentation.feature.profile.viewmodel
 
 import androidx.lifecycle.viewModelScope
-import com.example.data.ui.presentation.storage.tokenprovider.TokenProvider
+import com.example.domain.ui.presentation.feature.auth.interactor.AuthInteractor
 import com.example.domain.ui.presentation.feature.profile.interactor.ProfileInteractor
 import com.example.domain.ui.presentation.feature.profile.model.ProfileResult
 import com.example.domain.ui.presentation.feature.profile.model.UserProfile
@@ -15,7 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileScreenViewModel @Inject constructor(
     private val profileInteractor: ProfileInteractor,
-    private val tokenProvider: TokenProvider
+    private val authInteractor: AuthInteractor
 ) : BaseViewModel<ProfileScreenContract.Event, ProfileScreenContract.State, ProfileScreenContract.Effect>() {
 
     private val _profile: MutableStateFlow<UserProfile> = MutableStateFlow(UserProfile())
@@ -25,6 +25,7 @@ class ProfileScreenViewModel @Inject constructor(
 
     override fun handleEvent(event: ProfileScreenContract.Event) = when (event) {
         is ProfileScreenContract.Event.LoadProfile -> loadProfile()
+        is ProfileScreenContract.Event.Refresh -> refresh()
         is ProfileScreenContract.Event.UpdateProfileFields -> updateProfileFields(
             event.email,
             event.firstName,
@@ -61,16 +62,18 @@ class ProfileScreenViewModel @Inject constructor(
         }
     }
 
+    private fun refresh() = setState(ProfileScreenContract.State.Loading)
+
     private fun updateProfileFields(
         email: String,
         firstName: String,
-        lastName: String?,
-        phone: String?,
-        country: String?,
-        city: String?,
-        address: String?,
-        postalCode: String?,
-        dateOfBirth: String?
+        lastName: String? = "",
+        phone: String? = "",
+        country: String? = "",
+        city: String? = "",
+        address: String? = "",
+        postalCode: String? = "",
+        dateOfBirth: String? = ""
     ) {
         viewModelScope.launch(dispatcher) {
 
@@ -94,7 +97,7 @@ class ProfileScreenViewModel @Inject constructor(
                 dateOfBirth = dateOfBirth
             )
 
-            tokenProvider.getToken()
+            authInteractor.getToken()
 
             if (result.isSuccess) {
                 when (val profileResult = result.getOrNull()!!) {
@@ -128,7 +131,7 @@ class ProfileScreenViewModel @Inject constructor(
     init {
         viewModelScope.launch(dispatcher) {
             loadProfile()
-            tokenProvider.getToken()
+            authInteractor.isUserLoggedIn()
         }
     }
 }

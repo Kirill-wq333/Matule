@@ -32,6 +32,7 @@ import com.example.matule.ui.presentation.feature.orders.viewmodel.OrdersScreenV
 import com.example.matule.ui.presentation.shared.cart.CartItem
 import com.example.matule.ui.presentation.shared.cart.InformationSection
 import com.example.matule.ui.presentation.shared.header.CustomHeader
+import com.example.matule.ui.presentation.shared.pullToRefresh.PullRefreshLayout
 import com.example.matule.ui.presentation.shared.screen.MainLoadingScreen
 import com.example.matule.ui.presentation.theme.Colors
 
@@ -46,13 +47,17 @@ fun OrdersDetailScreen(
         onBack = {
             navController.popBackStack()
         },
-        state = state
+        state = state,
+        onRefresh = {
+            vm.handleEvent(OrdersScreenContract.Event.Refresh)
+        }
     )
 }
 
 @Composable
 private fun Content(
     state: OrdersScreenContract.State,
+    onRefresh: () -> Unit,
     onBack: () -> Unit
 ) {
     Column(
@@ -62,7 +67,7 @@ private fun Content(
             .padding(bottom = 25.dp),
         verticalArrangement = Arrangement.spacedBy(17.dp)
     ) {
-        when(state) {
+        when (state) {
             is OrdersScreenContract.State.OrderDetailsLoaded -> {
                 CustomHeader(
                     modifier = Modifier.padding(horizontal = 20.dp),

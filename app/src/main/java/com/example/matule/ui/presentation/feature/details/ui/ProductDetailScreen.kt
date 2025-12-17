@@ -49,6 +49,7 @@ import com.example.matule.ui.presentation.feature.details.viewmodel.ProductDetai
 import com.example.matule.ui.presentation.shared.buttons.CustomButtonForBuy
 import com.example.matule.ui.presentation.shared.buttons.CustomIconButton
 import com.example.matule.ui.presentation.shared.header.CustomHeader
+import com.example.matule.ui.presentation.shared.pullToRefresh.PullRefreshLayout
 import com.example.matule.ui.presentation.shared.screen.MainLoadingScreen
 import com.example.matule.ui.presentation.theme.Colors
 
@@ -57,6 +58,7 @@ private interface ProductDetailScreenCallback{
     fun onBack() {}
     fun addedInCart(productId: Long) {}
     fun addedInFavorite(id: Long, isFavorite: Boolean) {}
+    fun onRefresh() {}
 }
 
 @Composable
@@ -81,6 +83,10 @@ fun ProductDetailScreen(
 
         override fun onBack() {
             navController.popBackStack()
+        }
+
+        override fun onRefresh() {
+            vm.handleEvent(ProductDetailContract.Event.Refresh)
         }
     }
 

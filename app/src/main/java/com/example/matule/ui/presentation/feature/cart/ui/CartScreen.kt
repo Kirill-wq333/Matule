@@ -68,6 +68,7 @@ import com.example.matule.ui.presentation.shared.buttons.CustomButton
 import com.example.matule.ui.presentation.shared.cart.CartItem
 import com.example.matule.ui.presentation.shared.cart.InformationSection
 import com.example.matule.ui.presentation.shared.header.CustomHeader
+import com.example.matule.ui.presentation.shared.pullToRefresh.PullRefreshLayout
 import com.example.matule.ui.presentation.shared.screen.EmptyScreen
 import com.example.matule.ui.presentation.shared.screen.MainLoadingScreen
 import com.example.matule.ui.presentation.theme.Colors
@@ -80,6 +81,7 @@ private interface CartScreenCallback{
     fun deleteProduct(id: Long) {}
     fun checkoutScreen(request: CreateOrderRequest) {}
     fun updateQuality(cartItemId: Long, newQuantity: Int) {}
+    fun onRefresh() {}
 }
 
 @Composable
@@ -122,6 +124,10 @@ fun CartScreen(
         override fun updateQuality(cartItemId: Long, newQuantity: Int) {
             vm.handleEvent(CartScreenContract.Event.UpdateQuantity(cartItemId, newQuantity))
         }
+
+        override fun onRefresh() {
+            vm.handleEvent(CartScreenContract.Event.Refresh)
+        }
     }
 
 
@@ -136,6 +142,7 @@ fun CartScreen(
             profile = profile,
             visibleCheckout = visibleCheckout,
             onShowCheckoutForm = { visibleCheckout = true },
+            onRefresh = callback::onRefresh
         )
 
         if (visibleSnackbar) {
@@ -147,7 +154,7 @@ fun CartScreen(
                         renderEffect = BlurEffect(
                             radiusX = 4.dp.toPx(),
                             radiusY = 4.dp.toPx(),
-                            edgeTreatment = TileMode.Decal
+                            edgeTreatment = TileMode.Mirror
                         )
                     }
             )
@@ -172,6 +179,7 @@ fun CartScreen(
 private fun CartContent(
     visibleCheckout: Boolean,
     profile: UserProfile,
+    onRefresh: () -> Unit,
     onShowCheckoutForm: () -> Unit,
     state: CartScreenContract.State,
     callback: CartScreenCallback,
@@ -188,7 +196,7 @@ private fun CartContent(
             onBack = callback::onBack
         )
         Spacer(modifier = Modifier.height(if (visibleCheckout) 46.dp else 16.dp))
-        when(state) {
+        when (state) {
             is CartScreenContract.State.Loaded -> {
                 Cart(
                     state = state,

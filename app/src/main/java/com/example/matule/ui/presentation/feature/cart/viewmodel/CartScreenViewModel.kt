@@ -36,6 +36,7 @@ class CartScreenViewModel @Inject constructor(
             is CartScreenContract.Event.RemoveItem -> removeItem(event.cartItemId)
             is CartScreenContract.Event.LoadCartProfile -> loadProfile()
             is CartScreenContract.Event.CreateOrder -> createOrder(event.request)
+            is CartScreenContract.Event.Refresh -> refresh()
         }
     }
     init {
@@ -73,6 +74,8 @@ class CartScreenViewModel @Inject constructor(
             }
         }
     }
+
+    private fun refresh() = setState(CartScreenContract.State.Loading)
 
     private fun loadCart() {
         viewModelScope.launch(dispatcher) {

@@ -54,6 +54,8 @@ import com.example.matule.ui.presentation.shared.main.CatalogCard
 import com.example.matule.ui.presentation.shared.main.CatalogProducts
 import com.example.matule.ui.presentation.shared.main.PopularCard
 import com.example.matule.ui.presentation.shared.main.SearchScreenContent
+import com.example.matule.ui.presentation.shared.pullToRefresh.PullRefreshLayout
+import com.example.matule.ui.presentation.shared.screen.EmptyContent
 import com.example.matule.ui.presentation.shared.screen.MainLoadingScreen
 import com.example.matule.ui.presentation.shared.text.TextFieldWithLeadingAndTrailingIcons
 import com.example.matule.ui.presentation.theme.Colors
@@ -67,6 +69,7 @@ private interface MainScreenCallback{
     fun openArrivalsScreen() {}
     fun openDetailScreen(productId: Long) {}
     fun openSideMenu() {}
+    fun onRefresh() {}
 }
 
 @Composable
@@ -109,6 +112,10 @@ fun MainScreen(
 
         override fun openSideMenu() {
             navController.navigate(AppRouts.SIDE_MENU)
+        }
+
+        override fun onRefresh() {
+            vm.handleEvent(MainScreenContract.Event.RefreshContent)
         }
     }
 
@@ -169,6 +176,7 @@ private fun Main(
         openDetailScreen = {
             callback.openDetailScreen(it)
         },
+        onRefresh = callback::onRefresh,
         openSideMenu = callback::openSideMenu,
         state = state,
         addedInFavorite = addedInFavorite,
@@ -176,7 +184,6 @@ private fun Main(
     )
 }
 
-@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @Composable
 private fun Content(
     search: String,
@@ -187,6 +194,7 @@ private fun Content(
     openDetailScreen: (Long) -> Unit = {},
     openPopularScreen: () -> Unit,
     openSideMenu: () -> Unit,
+    onRefresh: () -> Unit,
     onCategorySelected: (Long?) -> Unit,
     addedInFavorite: (Long, Boolean) -> Unit,
     openArrivalsScreen: () -> Unit,
@@ -330,7 +338,7 @@ private fun Content(
                         if (search.isNotEmpty() && !searchHistory.contains(search)) {
                             searchHistory.add(0, search)
                             if (searchHistory.size > 10) {
-                                searchHistory.removeLast()
+                                searchHistory.removeAt(searchHistory.lastIndex)
                             }
                         }
                     }
@@ -424,16 +432,23 @@ private fun Content(
                         }
                     }
 
-                CatalogProducts(
-                    addedInCart = addedInCart,
-                    openCartScreen = openCartScreen,
-                    openDetailScreen = openDetailScreen,
-                    addedInFavorite = addedInFavorite,
-                    cartItems = state.isEnableDot,
-                    products = productsForPage,
-                    categories = state.categories,
-                    categoryId = state.selectedCategoryId
-                )
+                if (productsForPage.isEmpty()) {
+                    EmptyContent(
+                        icon = R.drawable.ic_orders,
+                        emptyText = R.string.empty_arrivals
+                    )
+                } else {
+                    CatalogProducts(
+                        addedInCart = addedInCart,
+                        openCartScreen = openCartScreen,
+                        openDetailScreen = openDetailScreen,
+                        addedInFavorite = addedInFavorite,
+                        cartItems = state.isEnableDot,
+                        products = productsForPage,
+                        categories = state.categories,
+                        categoryId = state.selectedCategoryId
+                    )
+                }
             }
         }
         AnimatedVisibility(

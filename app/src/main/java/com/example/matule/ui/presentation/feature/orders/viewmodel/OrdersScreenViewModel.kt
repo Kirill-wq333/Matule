@@ -48,13 +48,17 @@ class OrdersScreenViewModel @Inject constructor(
 
             ordersInteractor.getOrders().fold(
                 onSuccess = { orders ->
-                    setState(
-                        OrdersScreenContract.State.OrdersLoaded(
-                            orders = orders,
-                            isLoading = false,
-                            error = null
+                    if (orders.isEmpty()) {
+                        setState(OrdersScreenContract.State.Empty)
+                    } else {
+                        setState(
+                            OrdersScreenContract.State.OrdersLoaded(
+                                orders = orders,
+                                isLoading = false,
+                                error = null
+                            )
                         )
-                    )
+                    }
                 },
                 onFailure = { error ->
                     setState(

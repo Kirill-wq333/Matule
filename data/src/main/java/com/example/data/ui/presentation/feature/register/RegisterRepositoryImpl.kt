@@ -28,11 +28,9 @@ class RegisterRepositoryImpl @Inject constructor(
         email: String,
         password: String,
         firstName: String,
-        lastName: String?,
-        phone: String?
     ): Result<User> = runCatching {
 
-            val response = apiService.register(RegisterRequest(email, password, firstName, lastName, phone))
+            val response = apiService.register(RegisterRequest(email, password, firstName))
 
             if (response.success && response.user != null && response.token != null) {
                 tokenProvider.saveToken(response.token)
@@ -58,9 +56,6 @@ class RegisterRepositoryImpl @Inject constructor(
             putString(USER_NAME_KEY, user.name)
 
             user.firstName?.let { putString(USER_FIRST_NAME_KEY, it) }
-            user.lastName?.let { putString(USER_LAST_NAME_KEY, it) }
-            user.phone?.let { putString(USER_PHONE_KEY, it) }
-
             apply()
         }
     }

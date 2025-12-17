@@ -11,10 +11,8 @@ class RegisterInteractor(
         email: String,
         password: String,
         firstName: String,
-        lastName: String? = null,
-        phone: String? = null
     ): Result<User> {
-        return registerRepository.register(email, password, firstName, lastName, phone)
+        return registerRepository.register(email, password, firstName)
     }
 
 }

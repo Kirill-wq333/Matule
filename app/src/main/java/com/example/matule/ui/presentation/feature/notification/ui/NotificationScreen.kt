@@ -21,6 +21,7 @@ import com.example.matule.ui.presentation.feature.notification.viewmodel.Notific
 import com.example.matule.ui.presentation.feature.notification.viewmodel.NotificationScreenViewModel
 import com.example.matule.ui.presentation.shared.header.CustomHeaderMain
 import com.example.matule.ui.presentation.shared.notification.NotificationItem
+import com.example.matule.ui.presentation.shared.pullToRefresh.PullRefreshLayout
 import com.example.matule.ui.presentation.shared.screen.EmptyScreen
 import com.example.matule.ui.presentation.shared.screen.MainLoadingScreen
 import com.example.matule.ui.presentation.theme.Colors
@@ -39,13 +40,17 @@ fun NotificationScreen(
 
     Content(
         state = state,
-        openSideMenu = openSideMenu
+        openSideMenu = openSideMenu,
+        onRefresh = {
+            vm.handleEvent(NotificationScreenContract.Event.RefreshNotifications)
+        }
     )
 }
 
 @Composable
 private fun Content(
     openSideMenu: () -> Unit,
+    onRefresh: () -> Unit,
     state: NotificationScreenContract.State
 ) {
 
@@ -64,8 +69,7 @@ private fun Content(
             visibleCosmeticIcon = false,
             openSideMenu = openSideMenu
         )
-
-        when(state) {
+        when (state) {
             is NotificationScreenContract.State.Loaded -> {
                 NotificationContent(
                     notifications = state.notifications

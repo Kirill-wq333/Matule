@@ -20,6 +20,7 @@ object ProfileScreenContract {
             val postalCode: String? = null,
             val dateOfBirth: String? = null
         ) : Event
+        data object Refresh : Event
     }
 
     sealed interface State : ViewState {
