@@ -360,6 +360,7 @@ fun Content(
                         price = cart.product?.price ?: 0.0,
                         openDetailScreen = { openDetailScreen(cart.product?.id ?: 0) },
                         onDelete = { onDelete(cart.id) },
+                        visibleQuantity = false,
                         onMinusQuantity = { onMinusQuantity(cart.id, cart.quantity) },
                         onPlusQuantity = { onPlusQuantity(cart.id, cart.quantity) }
                     )

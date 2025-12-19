@@ -175,6 +175,7 @@ fun OrderContent(
                             openDetailScreen = {
                                 openOrderScreen(order.id)
                             },
+                            visibleQuantity = false,
                             onDelete = {
                                 onDelete(order.id)
                             },

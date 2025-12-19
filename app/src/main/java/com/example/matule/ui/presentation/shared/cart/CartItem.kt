@@ -1,15 +1,24 @@
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package com.example.matule.ui.presentation.shared.cart
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.AnchoredDraggableState
+import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.gestures.anchoredDraggable
+import androidx.compose.foundation.gestures.animateTo
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +26,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,15 +35,19 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -47,6 +61,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.matule.R
 import com.example.matule.ui.presentation.theme.Colors
+import kotlinx.coroutines.launch
 
 @Preview
 @Composable
@@ -78,6 +93,9 @@ private fun PreviewCartItem() {
     }
 }
 
+
+enum class SlideState { LEFT, CENTER, RIGHT }
+
 @Composable
 fun CartItem(
     quantity: Int = 1,
@@ -90,17 +108,21 @@ fun CartItem(
     onUpdateOrder: () -> Unit = {},
     delivery: Double = 0.0,
     onDelete: () -> Unit = {},
+    visibleQuantity: Boolean = true,
     orders: Boolean = false,
     visibleTA: Boolean = true,
     onPlusQuantity: () -> Unit = {},
     onMinusQuantity: () -> Unit = {},
     visibleCartComponents: Boolean = true,
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val density = LocalDensity.current
 
     var visibleOrders by remember { mutableStateOf(orders) }
     var isShiftedLeft by remember { mutableStateOf(false) }
     var isShiftedRight by remember { mutableStateOf(false) }
     var visibleTimeAgo by remember { mutableStateOf(visibleTA) }
+    var visibleQuantity by remember { mutableStateOf(visibleQuantity) }
 
     val widthFraction = if (isShiftedLeft || isShiftedRight) 0.82f else 1f
     var dragOffset by remember { mutableStateOf(0f) }
@@ -108,6 +130,49 @@ fun CartItem(
         isShiftedLeft -> Alignment.CenterEnd
         isShiftedRight -> Alignment.CenterStart
         else -> Alignment.Center
+    }
+
+    val actionPanelWidthPx = with(density) { 80.dp.toPx() }
+
+    val decayAnimationSpec = rememberSplineBasedDecay<Float>()
+    val dragState = remember {
+        AnchoredDraggableState(
+            initialValue = SlideState.CENTER,
+            anchors = DraggableAnchors {
+                SlideState.LEFT at -actionPanelWidthPx
+                SlideState.CENTER at 0f
+                SlideState.RIGHT at actionPanelWidthPx
+            },
+            positionalThreshold = { distance -> distance * 0.5f },
+            velocityThreshold = { 125f },
+            snapAnimationSpec = tween(700),
+            decayAnimationSpec = decayAnimationSpec
+        )
+    }
+
+    LaunchedEffect(dragState.currentValue) {
+        when (dragState.currentValue) {
+            SlideState.LEFT -> {
+                isShiftedLeft = false
+                isShiftedRight = true
+                visibleOrders = false
+                visibleTimeAgo = false
+            }
+
+            SlideState.RIGHT -> {
+                isShiftedLeft = true
+                isShiftedRight = false
+                visibleOrders = false
+                visibleTimeAgo = false
+            }
+
+            SlideState.CENTER -> {
+                isShiftedLeft = false
+                isShiftedRight = false
+                visibleOrders = orders
+                visibleTimeAgo = visibleTA
+            }
+        }
     }
 
     Box(
@@ -119,8 +184,10 @@ fun CartItem(
             visible = isShiftedLeft,
             modifier = Modifier
                 .align(Alignment.CenterStart),
-            enter = fadeIn() + slideInHorizontally { -it },
-            exit = fadeOut() + slideOutHorizontally { -it }
+            enter = fadeIn(tween(500))
+                    + slideInHorizontally(tween(500)) { -it },
+            exit = fadeOut(tween(500))
+                    + slideOutHorizontally(tween(500)) { -it }
         ) {
             if (visibleCartComponents) {
                 QuantityItem(
@@ -136,23 +203,36 @@ fun CartItem(
                     horizontalPadding = 13.dp,
                     width = 32.dp,
                     height = 32.dp,
-                    onClick = onUpdateOrder,
+                    onClick = {
+                        onUpdateOrder()
+                        coroutineScope.launch {
+                            dragState.animateTo(SlideState.CENTER)
+                        }
+                    },
                 )
             }
         }
+
 
         AnimatedVisibility(
             visible = isShiftedRight,
             modifier = Modifier
                 .align(Alignment.CenterEnd),
-            enter = fadeIn() + slideInHorizontally { it },
-            exit = fadeOut() + slideOutHorizontally { it }
+            enter = fadeIn(tween(500))
+                    + slideInHorizontally(tween(500)) { it },
+            exit = fadeOut(tween(500))
+                    + slideOutHorizontally(tween(500)) { it }
         ) {
             if (visibleCartComponents) {
                 BoxIcon(
                     icon = R.drawable.ic_trash,
                     backColor = Colors.red,
-                    onClick = onDelete
+                    onClick = {
+                        onDelete()
+                        coroutineScope.launch {
+                            dragState.animateTo(SlideState.CENTER)
+                        }
+                    }
                 )
             } else {
                 BoxIcon(
@@ -162,7 +242,12 @@ fun CartItem(
                     horizontalPadding = 13.dp,
                     width = 32.dp,
                     height = 32.dp,
-                    onClick = onDelete,
+                    onClick = {
+                        onDelete()
+                        coroutineScope.launch {
+                            dragState.animateTo(SlideState.CENTER)
+                        }
+                    },
                 )
             }
         }
@@ -170,39 +255,24 @@ fun CartItem(
             modifier = Modifier
                 .fillMaxWidth(widthFraction)
                 .align(alignment)
-                .draggable(
-                    state = rememberDraggableState { delta ->
-                        dragOffset += delta
-                    },
-                    onDragStopped = {
-                        if (it > 0) {
-                            if (dragOffset > 80f && !isShiftedLeft && !isShiftedRight) {
-                                isShiftedLeft = true
-                                visibleOrders = false
-                                visibleTimeAgo = false
-                                isShiftedRight = false
+                .offset(x = with(density) { dragOffset.toDp() })
+                .anchoredDraggable(
+                    state = dragState,
+                    orientation = Orientation.Horizontal
+                )
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = {
+                            if (dragState.currentValue != SlideState.CENTER) {
+                                coroutineScope.launch {
+                                    dragState.animateTo(SlideState.CENTER)
+                                }
                             } else {
-                                isShiftedLeft = false
-                                visibleOrders = true
-                                visibleTimeAgo = true
-                                isShiftedRight = false
-                            }
-                        } else {
-                            if (dragOffset < -80f && !isShiftedLeft && !isShiftedRight) {
-                                isShiftedLeft = false
-                                visibleTimeAgo = false
-                                visibleOrders = false
-                                isShiftedRight = true
-                            } else {
-                                isShiftedLeft = false
-                                visibleTimeAgo = true
-                                visibleOrders = true
-                                isShiftedRight = false
+                                openDetailScreen()
                             }
                         }
-                    },
-                    orientation = Orientation.Horizontal,
-                ),
+                    )
+                },
             photoProduct = photoProduct,
             timeAgo = timeAgo,
             nameProduct = nameProduct,
@@ -210,10 +280,19 @@ fun CartItem(
             delivery = delivery,
             visibleOrders = visibleOrders,
             numberOrders = numberOrders,
-            openDetailScreen = openDetailScreen,
+            openDetailScreen = {
+                if (dragState.currentValue != SlideState.CENTER) {
+                    coroutineScope.launch {
+                        dragState.animateTo(SlideState.CENTER)
+                    }
+                } else {
+                    openDetailScreen()
+                }
+            },
             visibleTimeAgo = visibleTimeAgo,
             quantity = quantity,
-            visibleCartComponents = visibleCartComponents
+            visibleCartComponents = visibleCartComponents,
+            visibleQuantity = visibleQuantity
         )
     }
 }
@@ -254,6 +333,7 @@ private fun CartContent(
     price: Double,
     numberOrders: Long,
     delivery: Double,
+    visibleQuantity: Boolean,
     visibleCartComponents: Boolean,
     openDetailScreen: () -> Unit,
     visibleOrders: Boolean,
@@ -317,7 +397,7 @@ private fun CartContent(
                         fontWeight = FontWeight.Normal,
                         fontFamily = FontFamily(Font(R.font.new_peninim_mt_inclined_2))
                     )
-                    if (quantity > 0 && !visibleOrders && !visibleTimeAgo && visibleCartComponents){
+                    if (quantity > 0 && visibleQuantity){
                         Text(
                             text = "$quantity ШТ",
                             color = Colors.hint,
@@ -366,7 +446,7 @@ fun QuantityItem(
     Column(
         modifier = modifier
             .background(color = Colors.accent, shape = RoundedCornerShape(8.dp))
-            .padding(horizontal = 22.dp, vertical = 14.dp),
+            .padding(start = 22.dp, end = 22.dp, top = 14.dp, bottom = 13.5.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
