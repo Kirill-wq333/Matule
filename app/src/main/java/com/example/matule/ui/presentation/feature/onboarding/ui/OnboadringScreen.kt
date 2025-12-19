@@ -1,8 +1,10 @@
 package com.example.matule.ui.presentation.feature.onboarding.ui
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -15,16 +17,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -41,6 +44,7 @@ import com.example.matule.ui.presentation.mock.Mock
 import com.example.matule.ui.presentation.shared.buttons.CustomButton
 import com.example.matule.ui.presentation.theme.Colors
 import com.example.matule.ui.presentation.theme.MatuleTypography
+import kotlinx.coroutines.launch
 
 private interface OnboardingScreenCallback{
     fun openAuthScreen() {}
@@ -90,36 +94,77 @@ private fun OnboardingContent(
     onboarding: List<Onboarding>,
     callback: OnboardingScreenCallback
 ) {
-    var activeCircle by remember { mutableIntStateOf(0) }
-    val item = onboarding.getOrNull(activeCircle) ?: return
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        pageCount = { onboarding.size }
+    )
 
-    val linearGradient =
-        if (item.visibleDownHeadingAndUnderHeading)Brush.linearGradient(
-        listOf(Colors.accent, Color(0xFF44A9DC), Colors.disable))
-        else Brush.linearGradient(listOf(Colors.accent, Colors.disable))
+    val scope = rememberCoroutineScope()
 
-    Column(
-        modifier = Modifier
-            .background(linearGradient)
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        if (item.visibleHeading) {
-            Text(
-                text = stringResource(item.heading),
-                color = Colors.block,
-                textAlign = TextAlign.Center,
-                style = MatuleTypography.headlineMedium,
-                modifier = Modifier.padding(start = 50.dp, end = 58.dp, top = 29.dp)
+    val animatedAccentColor by animateColorAsState(
+        targetValue = when (pagerState.currentPage) {
+            0 -> Colors.accent
+            1 -> Color(0xFF44A9DC)
+            2 -> Colors.accent
+            else -> Colors.accent
+        },
+        animationSpec = tween(durationMillis = 500)
+    )
+
+    val animatedDisableColor by animateColorAsState(
+        targetValue = Colors.disable,
+        animationSpec = tween(durationMillis = 500)
+    )
+
+    HorizontalPager(
+        state = pagerState,
+        modifier = Modifier.fillMaxSize(),
+        userScrollEnabled = true
+    ) { page ->
+        val currentItem = onboarding.getOrNull(page) ?: return@HorizontalPager
+
+        val linearGradient = if (currentItem.visibleDownHeadingAndUnderHeading) {
+            Brush.linearGradient(
+                colors = listOf(animatedAccentColor, Color(0xFF44A9DC), animatedDisableColor),
+                start = Offset(0f, 0f),
+                end = Offset.Infinite
             )
-            Spacer(modifier = Modifier.height(130.dp))
+        } else {
+            Brush.linearGradient(
+                colors = listOf(animatedAccentColor, animatedDisableColor),
+                start = Offset(0f, 0f),
+                end = Offset.Infinite
+            )
         }
-        Content(
-            onboarding = item,
-            activeCircle = activeCircle,
-            openAuthScreen = callback::openAuthScreen,
-            nextOnboarding = { activeCircle = (activeCircle + 1) % 3 }
-        )
+
+        Column(
+            modifier = Modifier
+                .background(linearGradient)
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (currentItem.visibleHeading) {
+                Text(
+                    text = stringResource(currentItem.heading),
+                    color = Colors.block,
+                    textAlign = TextAlign.Center,
+                    style = MatuleTypography.headlineMedium,
+                    modifier = Modifier.padding(start = 50.dp, end = 58.dp, top = 29.dp)
+                )
+                Spacer(modifier = Modifier.height(130.dp))
+            }
+            Content(
+                onboarding = currentItem,
+                activeCircle = page,
+                openAuthScreen = callback::openAuthScreen,
+                nextOnboarding = {
+                    scope.launch {
+                        val nextPage = (page + 1) % onboarding.size
+                        pagerState.animateScrollToPage(nextPage)
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -141,37 +186,23 @@ private fun Content(
             onboarding = onboarding,
             activeCircle = activeCircle
         )
-        if (onboarding.visibleDownHeadingAndUnderHeading) {
-            val isLastScreen = activeCircle == 2
+        val isLastScreen = activeCircle == 2
 
-            CustomButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 20.dp, end = 20.dp, bottom = 36.dp ),
-                text = R.string.btn_next,
-                color = Colors.text,
-                backgroundColor = Colors.block,
-                onClick = {
-                    if (isLastScreen){
-                        openAuthScreen()
-                    }
-                    else{
-                        nextOnboarding()
-                    }
+        CustomButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, bottom = 36.dp),
+            text = if (activeCircle == 2) R.string.btn_start else R.string.btn_next,
+            color = Colors.text,
+            backgroundColor = Colors.block,
+            onClick = {
+                if (isLastScreen) {
+                    openAuthScreen()
+                } else {
+                    nextOnboarding()
                 }
-            )
-        }
-        else{
-            CustomButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 20.dp, end = 20.dp, bottom = 36.dp ),
-                text = R.string.btn_start,
-                color = Colors.text,
-                backgroundColor = Colors.block,
-                onClick = nextOnboarding
-            )
-        }
+            }
+        )
     }
 }
 
