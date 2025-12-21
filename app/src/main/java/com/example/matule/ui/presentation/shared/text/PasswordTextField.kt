@@ -5,10 +5,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
@@ -27,18 +23,6 @@ fun PasswordTextField(
     onCLickEye: () -> Unit
 ) {
 
-    val placeholder = remember(password) {
-        if (password.isEmpty()) {
-            "••••••"
-        } else {
-            buildString {
-                repeat(password.length.coerceAtLeast(1)) {
-                    append('•')
-                }
-            }
-        }
-    }
-
     CustomTextField(
         modifier = Modifier.fillMaxWidth(),
         query = password,
@@ -46,7 +30,7 @@ fun PasswordTextField(
         label = R.string.password,
         textError = textError,
         isError = isError,
-        placeholder = placeholder,
+        placeholder = "••••••",
         visualTransformation = transformation,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         trailingIcon = {

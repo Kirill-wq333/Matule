@@ -71,6 +71,9 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    debugImplementation(libs.hyperion.core)
+    debugImplementation(libs.chucker)
+    releaseImplementation(libs.chucker.noop)
 
     implementation(libs.androidx.datastore.preferences)
 

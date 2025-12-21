@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -44,7 +45,9 @@ import com.example.matule.ui.presentation.mock.Mock
 import com.example.matule.ui.presentation.shared.buttons.CustomButton
 import com.example.matule.ui.presentation.theme.Colors
 import com.example.matule.ui.presentation.theme.MatuleTypography
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlin.collections.getOrNull
 
 private interface OnboardingScreenCallback{
     fun openAuthScreen() {}
@@ -116,76 +119,60 @@ private fun OnboardingContent(
         animationSpec = tween(durationMillis = 500)
     )
 
-    HorizontalPager(
-        state = pagerState,
-        modifier = Modifier.fillMaxSize(),
-        userScrollEnabled = true
-    ) { page ->
-        val currentItem = onboarding.getOrNull(page) ?: return@HorizontalPager
+    val linearGradient = Brush.linearGradient(
+        colors = listOf(animatedAccentColor, animatedDisableColor),
+        start = Offset(0f, 0f),
+        end = Offset.Infinite
+    )
 
-        val linearGradient = if (currentItem.visibleDownHeadingAndUnderHeading) {
-            Brush.linearGradient(
-                colors = listOf(animatedAccentColor, Color(0xFF44A9DC), animatedDisableColor),
-                start = Offset(0f, 0f),
-                end = Offset.Infinite
-            )
-        } else {
-            Brush.linearGradient(
-                colors = listOf(animatedAccentColor, animatedDisableColor),
-                start = Offset(0f, 0f),
-                end = Offset.Infinite
-            )
-        }
+    Column(
+        modifier = Modifier
+            .background(linearGradient)
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        val currentItem = onboarding.getOrNull(pagerState.currentPage)
 
-        Column(
-            modifier = Modifier
-                .background(linearGradient)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (currentItem.visibleHeading) {
-                Text(
-                    text = stringResource(currentItem.heading),
-                    color = Colors.block,
-                    textAlign = TextAlign.Center,
-                    style = MatuleTypography.headlineMedium,
-                    modifier = Modifier.padding(start = 50.dp, end = 58.dp, top = 29.dp)
-                )
-                Spacer(modifier = Modifier.height(130.dp))
-            }
-            Content(
-                onboarding = currentItem,
-                activeCircle = page,
-                openAuthScreen = callback::openAuthScreen,
-                nextOnboarding = {
-                    scope.launch {
-                        val nextPage = (page + 1) % onboarding.size
-                        pagerState.animateScrollToPage(nextPage)
-                    }
-                }
+        if (currentItem?.visibleHeading ?: true) {
+            Text(
+                text = stringResource(currentItem?.heading ?: 0),
+                color = Colors.block,
+                textAlign = TextAlign.Center,
+                style = MatuleTypography.headlineMedium,
+                modifier = Modifier.padding(start = 50.dp, end = 58.dp, top = 29.dp)
             )
+            Spacer(modifier = Modifier.height(130.dp))
         }
+        Content(
+            onboarding = onboarding,
+            activeCircle = pagerState.currentPage,
+            pagerState = pagerState,
+            openAuthScreen = callback::openAuthScreen,
+            scope = scope
+        )
     }
 }
 
+
 @Composable
 private fun Content(
-    onboarding: Onboarding,
+    onboarding: List<Onboarding>,
+    pagerState: PagerState,
     activeCircle: Int,
+    scope: CoroutineScope,
     openAuthScreen: () -> Unit,
-    nextOnboarding: () -> Unit
 ) {
-
 
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ImageAndMain(
-            onboarding = onboarding,
-            activeCircle = activeCircle
-        )
+            ImageAndMain(
+                pagerState = pagerState,
+                onboarding = onboarding,
+                activeCircle = activeCircle
+            )
         val isLastScreen = activeCircle == 2
 
         CustomButton(
@@ -199,7 +186,10 @@ private fun Content(
                 if (isLastScreen) {
                     openAuthScreen()
                 } else {
-                    nextOnboarding()
+                    scope.launch {
+                        val nextPage = (pagerState.currentPage + 1) % onboarding.size
+                        pagerState.animateScrollToPage(nextPage)
+                    }
                 }
             }
         )
@@ -208,56 +198,69 @@ private fun Content(
 
 @Composable
 fun ImageAndMain(
-    onboarding: Onboarding,
-    activeCircle: Int
+    onboarding: List<Onboarding>,
+    pagerState: PagerState,
+    activeCircle: Int,
 ) {
-    val spacerImageAndHeadingUnderHeading =
-        if (onboarding.visibleDownHeadingAndUnderHeading) 60.dp
-        else 26.dp
-
-    val paddingImage =
-        if (onboarding.visibleDownHeadingAndUnderHeading) 37.dp
-        else 0.dp
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = paddingImage),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(onboarding.image),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-            )
-        }
-        Spacer(modifier = Modifier.height(spacerImageAndHeadingUnderHeading))
-        if (onboarding.visibleDownHeadingAndUnderHeading) {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxWidth(),
+            userScrollEnabled = true
+        ) { page ->
+
+            val currentItem = onboarding.getOrNull(page) ?: return@HorizontalPager
+            val spacerImageAndHeadingUnderHeading =
+                if (currentItem.visibleDownHeadingAndUnderHeading) 60.dp
+                else 26.dp
+
+            val paddingImage =
+                if (currentItem.visibleDownHeadingAndUnderHeading) 37.dp
+                else 0.dp
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 30.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = stringResource(onboarding.heading),
-                    color = Colors.block,
-                    textAlign = TextAlign.Center,
-                    style = MatuleTypography.displaySmall
-                )
-                Text(
-                    text = stringResource(onboarding.underHeading),
-                    color = Colors.subTextLight,
-                    textAlign = TextAlign.Center,
-                    style = MatuleTypography.titleMedium
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = paddingImage),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(currentItem.image),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                }
+                Spacer(modifier = Modifier.height(spacerImageAndHeadingUnderHeading))
+                if (currentItem.visibleDownHeadingAndUnderHeading) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 30.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            text = stringResource(currentItem.heading),
+                            color = Colors.block,
+                            textAlign = TextAlign.Center,
+                            style = MatuleTypography.displaySmall
+                        )
+                        Text(
+                            text = stringResource(currentItem.underHeading),
+                            color = Colors.subTextLight,
+                            textAlign = TextAlign.Center,
+                            style = MatuleTypography.titleMedium
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(40.dp))
+                }
             }
-            Spacer(modifier = Modifier.height(40.dp))
         }
         ThreeCircular(
             activeCircle = activeCircle

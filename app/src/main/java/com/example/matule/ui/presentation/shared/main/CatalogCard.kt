@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -91,9 +92,7 @@ fun CatalogCard(
 
 @Composable
 fun CatalogProducts(
-    categoryId: Long?,
     products: List<Product>,
-    categories: List<Category>,
     cartItems: Set<Long>,
     addedInCart: (Long) -> Unit,
     addedInFavorite: (Long, Boolean) -> Unit,
@@ -101,26 +100,14 @@ fun CatalogProducts(
     openDetailScreen: (Long) -> Unit
 ) {
 
-    val filteredProducts = remember(categoryId, products, categories) {
-        when {
-            categoryId == null || categoryId == 0L -> {
-                products
-            }
-
-            else -> {
-                val selectedCategory = categories.find { it.id == categoryId }
-                selectedCategory?.let { category ->
-                    products.filter { it.category == category.slug }
-                } ?: emptyList()
-            }
-        }
-    }
-
     LazyVerticalGrid(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxSize(),
         columns = GridCells.Fixed(2),
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 5.dp),
+        verticalArrangement = Arrangement.spacedBy(15.dp),
+        horizontalArrangement = Arrangement.spacedBy(15.dp)
     ) {
-        items(filteredProducts, key = { it.id }) { product ->
+        items(products, key = { it.id }) { product ->
             val isInCart = cartItems.contains(product.id)
 
             CardItem(

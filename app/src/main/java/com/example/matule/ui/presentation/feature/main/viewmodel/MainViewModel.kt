@@ -144,7 +144,7 @@ class MainViewModel @Inject constructor(
 
     private fun loadProductsByCategory(category: String) {
         viewModelScope.launch(dispatcher) {
-            setState(MainScreenContract.State.Loading)
+//            setState(MainScreenContract.State.Loading)
             authInteractor.isUserLoggedIn()
             val result = popularInteractor.loadProductsByCategory(category)
 

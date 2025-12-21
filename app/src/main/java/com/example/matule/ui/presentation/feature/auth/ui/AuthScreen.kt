@@ -203,7 +203,7 @@ private fun AuthContent(
     val transformation = if (passwordVisible){
         VisualTransformation.None
     } else {
-        PasswordVisualTransformation()
+        PasswordVisualTransformation('•')
     }
     LaunchedEffect(authData.email) {
         if (hasError) {

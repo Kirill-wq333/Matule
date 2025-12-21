@@ -1,5 +1,9 @@
 package com.example.data.ui.presentation.network.di
 
+import android.content.Context
+import android.content.pm.ApplicationInfo
+import android.util.Log
+import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.example.data.ui.presentation.network.interceptor.AuthTokenInterceptor
 import com.example.data.ui.presentation.storage.tokenprovider.TokenProvider
 import com.google.gson.Gson
@@ -7,6 +11,7 @@ import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -31,16 +36,18 @@ class NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(
+        @ApplicationContext context: Context,
         authInterceptor: AuthTokenInterceptor
     ): OkHttpClient {
-        return OkHttpClient.Builder()
-            .addInterceptor(authInterceptor)
-            .addInterceptor(createLoggingInterceptor())
-            .addInterceptor(createDebugInterceptor())
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            .build()
+        return OkHttpClient.Builder().apply {
+            addInterceptor(authInterceptor)
+            addInterceptor(ChuckerInterceptor(context))
+            addInterceptor(createDebugInterceptor())
+            addInterceptor(createLoggingInterceptor())
+            connectTimeout(30, TimeUnit.SECONDS)
+            readTimeout(30, TimeUnit.SECONDS)
+            writeTimeout(30, TimeUnit.SECONDS)
+        }.build()
     }
 
     private fun createLoggingInterceptor(): HttpLoggingInterceptor {

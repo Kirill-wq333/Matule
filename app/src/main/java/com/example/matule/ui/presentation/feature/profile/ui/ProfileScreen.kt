@@ -350,7 +350,7 @@ private fun Content(
                     onLastNameChange(it)
                 },
                 label = R.string.last_name,
-                placeholder = stringResource(R.string.last_name)
+                placeholder = if (visibleEditingScreen) stringResource(R.string.last_name) else ""
             )
             if (visibleEditingScreen) {
                 CustomTextField(
@@ -394,7 +394,7 @@ private fun Content(
                     else "$country, $city, $address, $postalCode",
                     onTextChange = {},
                     label = R.string.address,
-                    placeholder = "Область, город, адрес, почтовый индекс",
+                    placeholder = "",
                 )
             }
             CustomTextField(
@@ -406,10 +406,14 @@ private fun Content(
                     keyboardType = KeyboardType.Phone,
                     imeAction = ImeAction.Next
                 ),
-                onTextChange = {
-                    onPhoneChange(it)
+                onTextChange = { newText ->
+                    val digitsOnly = newText.filter { it.isDigit() }
+
+                    if (digitsOnly.length <= 11) {
+                        onPhoneChange(newText)
+                    }
                 },
-                placeholder = "+7 (999) 999-00-00",
+                placeholder = if(visibleEditingScreen) "+7 (999) 999-00-00" else "",
                 label = R.string.phone
             )
             CustomTextField(

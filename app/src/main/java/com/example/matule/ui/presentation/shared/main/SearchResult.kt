@@ -2,6 +2,7 @@ package com.example.matule.ui.presentation.shared.main
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,10 +45,9 @@ fun SearchResult(
         )
     } else {
         LazyVerticalGrid(
+            modifier = Modifier.fillMaxSize(),
             columns = GridCells.Fixed(2),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 20.dp),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 5.dp),
             horizontalArrangement = Arrangement.spacedBy(15.dp),
             verticalArrangement = Arrangement.spacedBy(15.dp)
         ) {
