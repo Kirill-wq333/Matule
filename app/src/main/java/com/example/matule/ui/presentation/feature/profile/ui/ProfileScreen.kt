@@ -1,9 +1,12 @@
 package com.example.matule.ui.presentation.feature.profile.ui
 
 import android.app.Activity
+import android.os.Environment
 import android.view.Window
 import android.view.WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_FULL
 import android.view.WindowManager.LayoutParams.SCREEN_BRIGHTNESS_CHANGED
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -18,6 +21,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,8 +39,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -50,6 +58,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -61,6 +70,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.domain.ui.presentation.feature.profile.model.UserProfile
@@ -76,6 +86,11 @@ import com.example.matule.ui.presentation.shared.screen.MainLoadingScreen
 import com.example.matule.ui.presentation.shared.text.CustomTextField
 import com.example.matule.ui.presentation.theme.Colors
 import com.example.matule.ui.presentation.theme.MatuleTypography
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun ProfileScreen(
@@ -104,6 +119,102 @@ fun ProfileContent(
     state: ProfileScreenContract.State,
     openSideMenu: () -> Unit
 ) {
+
+    var tempProfilePhotoUri by remember { mutableStateOf<String?>(null) }
+    val currentPhotoUri = tempProfilePhotoUri ?: profile.avatar
+
+    // Launcher для галереи
+//    val galleryLauncher = rememberLauncherForActivityResult(
+//        contract = ActivityResultContracts.GetContent()
+//    ) { uri ->
+//        uri?.let {
+//            tempProfilePhotoUri = it.toString()
+//            // Сохраняем фото в профиль
+//            vm.handleEvent(
+//                ProfileScreenContract.Event.UpdateProfilePhoto(it.toString())
+//            )
+//        }
+//    }
+//
+//    // Launcher для камеры
+//    val context = LocalContext.current
+//    val cameraLauncher = rememberLauncherForActivityResult(
+//        contract = ActivityResultContracts.TakePicture()
+//    ) { success ->
+//        if (success && currentPhotoUri != null) {
+//            // Фото уже сохранено по URI
+//            tempProfilePhotoUri = currentPhotoUri
+//            vm.handleEvent(
+//                ProfileScreenContract.Event.UpdateProfilePhoto(currentPhotoUri)
+//            )
+//        }
+//    }
+//
+//    // Функция для создания временного файла для фото
+//    fun createTempImageFile(): File? {
+//        return try {
+//            val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+//            val storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+//            File.createTempFile(
+//                "PROFILE_${timeStamp}_",
+//                ".jpg",
+//                storageDir
+//            )
+//        } catch (e: IOException) {
+//            null
+//        }
+//    }
+//
+//    // Функция для открытия диалога выбора
+//    fun openPhotoSelectionDialog() {
+//        val options = listOf("Сделать фото", "Выбрать из галереи", "Отмена")
+//
+//        // Показываем AlertDialog с выбором
+//        AlertDialog(
+//            onDismissRequest = { /* при отмене */ },
+//            title = { Text("Выберите источник") },
+//            text = {
+//                Column {
+//                    options.forEach { option ->
+//                        Text(
+//                            text = option,
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .clickable {
+//                                    when (option) {
+//                                        "Сделать фото" -> {
+//                                            val file = createTempImageFile()
+//                                            file?.let {
+//                                                val photoUri = FileProvider.getUriForFile(
+//                                                    context,
+//                                                    "${context.packageName}.fileprovider",
+//                                                    it
+//                                                )
+//                                                tempProfilePhotoUri = photoUri.toString()
+//                                                cameraLauncher.launch(photoUri)
+//                                            }
+//                                        }
+//                                        "Выбрать из галереи" -> {
+//                                            galleryLauncher.launch("image/*")
+//                                        }
+//                                    }
+//                                }
+//                                .padding(vertical = 12.dp)
+//                        )
+//                        if (option != "Отмена") {
+//                            Divider()
+//                        }
+//                    }
+//                }
+//            },
+//            confirmButton = {},
+//            dismissButton = {
+//                TextButton(onClick = { /* закрыть диалог */ }) {
+//                    Text("Отмена")
+//                }
+//            }
+//        )
+//    }
 
     var firstName by remember(profile) {
         mutableStateOf(profile.firstName)
@@ -243,7 +354,9 @@ fun ProfileContent(
                     onAddressChange = { address = it },
                     onCityChange = { city = it },
                     onCountryChange = { country = it },
-                    onPostalCodeChange = { postalCode = it }
+                    onPostalCodeChange = { postalCode = it },
+                    onChangePhotoClick = { // openPhotoSelectionDialog()
+                         }
                 )
             }
             is ProfileScreenContract.State.Loading -> {
@@ -284,6 +397,7 @@ private fun Content(
     onCityChange: (String) -> Unit,
     onPhoneChange: (String) -> Unit,
     onAddressChange: (String) -> Unit,
+    onChangePhotoClick: () -> Unit = {}
 ) {
 
     Column(
@@ -295,7 +409,7 @@ private fun Content(
         AvatarWithNameUser(
             photo = photo,
             firstName = firstName,
-            lastName = lastName
+            lastName = lastName,
         )
 
         AnimatedVisibility(
@@ -308,7 +422,13 @@ private fun Content(
                 Text(
                     text = stringResource(R.string.change_your_profile_photo),
                     color = Colors.accent,
-                    style = MatuleTypography.bodySmall
+                    style = MatuleTypography.bodySmall,
+                    modifier = Modifier
+                        .clickable(
+                            onClick = onChangePhotoClick,
+                            indication = null, // Убираем эффект нажатия
+                            interactionSource = remember { MutableInteractionSource() }
+                        )
                 )
                 Spacer(modifier = Modifier.height(21.dp))
             }
@@ -337,18 +457,14 @@ private fun Content(
                 modifier = Modifier.fillMaxWidth(),
                 readOnly = !visibleEditingScreen,
                 query = firstName,
-                onTextChange = {
-                    onFirstNameChange(it)
-                },
+                onTextChange = { onFirstNameChange(it) },
                 label = R.string.name,
             )
             CustomTextField(
                 modifier = Modifier.fillMaxWidth(),
                 readOnly = !visibleEditingScreen,
                 query = lastName ?: "",
-                onTextChange = {
-                    onLastNameChange(it)
-                },
+                onTextChange = { onLastNameChange(it) },
                 label = R.string.last_name,
                 placeholder = if (visibleEditingScreen) stringResource(R.string.last_name) else ""
             )
@@ -479,7 +595,7 @@ fun QrCode(
 private fun AvatarWithNameUser(
     photo: String?,
     firstName: String,
-    lastName: String?
+    lastName: String?,
 ) {
     Column(
         modifier = Modifier,
