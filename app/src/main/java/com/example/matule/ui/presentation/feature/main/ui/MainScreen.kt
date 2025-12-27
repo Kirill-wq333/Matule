@@ -164,35 +164,36 @@ private fun Main(
     addedInFavorite: (Long, Boolean) -> Unit,
 ) {
     var search by remember { mutableStateOf("") }
-
     Content(
         openPopularScreen = callback::openPopularScreen,
         openArrivalsScreen = callback::openArrivalsScreen,
         openCartScreen = callback::openCartScreen,
-        search = search,
         addedInCart = addedInCart,
-        onSearchChange = { search = it },
         openDetailScreen = {
             callback.openDetailScreen(it)
         },
         onRefresh = callback::onRefresh,
         openSideMenu = callback::openSideMenu,
         state = state,
+        search = search,
         addedInFavorite = addedInFavorite,
+        onSearchChange = {
+            search = it
+        }
     )
 }
 
 @Composable
 private fun Content(
-    search: String,
-    onSearchChange: (String) -> Unit,
     addedInCart: (Long) -> Unit,
     state: MainScreenContract.State.Loaded,
     openCartScreen: () -> Unit = {},
     openDetailScreen: (Long) -> Unit = {},
     openPopularScreen: () -> Unit,
+    search: String,
     openSideMenu: () -> Unit,
     onRefresh: () -> Unit,
+    onSearchChange: (String) -> Unit,
     addedInFavorite: (Long, Boolean) -> Unit,
     openArrivalsScreen: () -> Unit,
 ) {
@@ -201,14 +202,17 @@ private fun Content(
     var searchScreen by remember { mutableStateOf(false) }
     var isSearchPerformed by remember { mutableStateOf(false) }
     var visibleCategoryItem by remember { mutableStateOf(false) }
-
+    var selectedCategory by remember { mutableStateOf(-1) }
+    val scope = rememberCoroutineScope()
     val popularProduct = state.popularProducts.filter { it.isPopular }
     val showSearchHeader = searchScreen || search.isNotEmpty()
 
-    val pagerState = rememberPagerState(
-        initialPage = calculateInitialPage(state),
-        pageCount = { state.categories.size + 1 }
-    )
+    val all = stringResource(R.string.all)
+    val catalog = remember(state.popularProducts) {
+        listOf(all) + state.popularProducts.map { it.subcategory }.toSet().toList().sorted()
+    }
+
+    val pagerState = rememberPagerState( pageCount = { catalog.size })
     val searchHistory = remember { mutableStateListOf<String>() }
 
     val searchResults = remember(search, state.popularProducts) {
@@ -219,20 +223,6 @@ private fun Content(
             }
         } else {
             emptyList()
-        }
-    }
-
-    LaunchedEffect(state.selectedCategoryId) {
-        val targetPage = when (state.selectedCategoryId) {
-            null, 0L -> 0
-            else -> {
-                val index = state.categories.indexOfFirst { it.id == state.selectedCategoryId }
-                if (index >= 0) index + 1 else 0
-            }
-        }
-
-        if (pagerState.currentPage != targetPage) {
-            pagerState.animateScrollToPage(targetPage)
         }
     }
 
@@ -329,7 +319,15 @@ private fun Content(
             openCartScreen = openCartScreen,
             openDetailScreen = openDetailScreen,
             pagerState = pagerState,
-            isSelected = visibleCategoryItem
+            isSelected = visibleCategoryItem,
+            catalog = catalog,
+            onCategorySelected = {
+                selectedCategory == it
+                catalogScreen = true
+                scope.launch {
+                    pagerState.animateScrollToPage(it)
+                }
+            },
         )
         MainContent(
             catalogScreen = catalogScreen,
@@ -471,19 +469,16 @@ fun AnimatableCategory(
     showSearchHeader: Boolean,
     state: MainScreenContract.State.Loaded,
     screenState: ScreenState,
+    catalog: List<String>,
     addedInCart: (Long) -> Unit,
     addedInFavorite: (Long, Boolean) -> Unit,
     openCartScreen: () -> Unit,
+    onCategorySelected: (Int) -> Unit,
     openDetailScreen: (Long) -> Unit,
     pagerState: PagerState,
     isSelected: Boolean
 ) {
-    val all = stringResource(R.string.all)
-    var selectedCategory by remember { mutableStateOf(0) }
 
-    val catalog = remember(state.popularProducts) {
-        listOf(all) + state.popularProducts.map { it.subcategory }.distinct()
-    }
 
     AnimatedVisibility(
         visible = !showSearchHeader,
@@ -498,11 +493,8 @@ fun AnimatableCategory(
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             CatalogCard(
-                categories = state.popularProducts,
                 catalog = catalog,
-                onCategorySelected = {
-                    selectedCategory == it
-                },
+                onCategorySelected = onCategorySelected,
                 pagerState = pagerState,
                 isSelected = isSelected
             )
@@ -527,28 +519,16 @@ fun AnimatableCategory(
             ) {
 
                 HorizontalPager(
-                    beyondViewportPageCount = catalog.size,
                     state = pagerState,
                     modifier = Modifier.fillMaxSize(),
                 ) { page ->
 
-                    val currentSubcategory = if (page == 0) null else catalog[page]
-
-                    val productsForPage = remember(
-                        state.popularProducts,
-                        page,
-                        catalog,
-                    ) {
-                        derivedStateOf {
-                            state.popularProducts.filter { product ->
-                                val matchesSubcategory = currentSubcategory == null ||
-                                        currentSubcategory == all ||
-                                        product.subcategory == currentSubcategory
-
-                                matchesSubcategory
-                            }
-                        }
-                    }.value
+                    val productsForPage = if (page == 0) {
+                        state.popularProducts
+                    } else {
+                        val subcategory = catalog.getOrNull(page) ?: ""
+                        state.popularProducts.filter { it.subcategory == subcategory }
+                    }
 
                     if (productsForPage.isEmpty()) {
                         EmptyContent(
@@ -697,15 +677,5 @@ fun Card(
             )
         }
         content()
-    }
-}
-
-private fun calculateInitialPage(state: MainScreenContract.State.Loaded): Int {
-    return when (state.selectedCategoryId) {
-        null, 0L -> 0
-        else -> {
-            val index = state.categories.indexOfFirst { it.id == state.selectedCategoryId }
-            if (index >= 0) index + 1 else 0
-        }
     }
 }

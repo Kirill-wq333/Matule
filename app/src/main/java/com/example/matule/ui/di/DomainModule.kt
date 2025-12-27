@@ -6,8 +6,6 @@ import com.example.domain.ui.presentation.feature.auth.interactor.AuthInteractor
 import com.example.domain.ui.presentation.feature.auth.repository.AuthRepository
 import com.example.domain.ui.presentation.feature.cart.interactor.CartInteractor
 import com.example.domain.ui.presentation.feature.cart.repository.CartRepository
-import com.example.domain.ui.presentation.feature.catalog.interactor.CatalogInteractor
-import com.example.domain.ui.presentation.feature.catalog.repository.CatalogRepository
 import com.example.domain.ui.presentation.feature.favorite.interactor.FavoriteInteractor
 import com.example.domain.ui.presentation.feature.favorite.repository.FavoriteRepository
 import com.example.domain.ui.presentation.feature.forgot_password.interactor.ForgotPasswordInteractor
@@ -57,14 +55,6 @@ class DomainModule {
         arrivalsRepository: ArrivalsRepository
     ): ArrivalsInteractor{
         return ArrivalsInteractor(arrivalsRepository)
-    }
-
-    @Provides
-    @Singleton
-    fun provideCatalogInteractor(
-        catalogRepository: CatalogRepository
-    ): CatalogInteractor{
-        return CatalogInteractor(catalogRepository)
     }
 
     @Provides
@@ -119,11 +109,10 @@ class DomainModule {
     @Provides
     @Singleton
     fun provideMainInteractor(
-        catalogRepository: CatalogRepository,
         arrivalsRepository: ArrivalsRepository,
         popularRepository: PopularRepository,
     ): MainInteractor{
-        return MainInteractor(catalogRepository, arrivalsRepository, popularRepository)
+        return MainInteractor(arrivalsRepository, popularRepository)
     }
 
     @Provides

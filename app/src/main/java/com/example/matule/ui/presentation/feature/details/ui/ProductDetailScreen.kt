@@ -129,7 +129,7 @@ private fun Content(
 
                     ProductDetailContent(
                         nameProduct = state.product.name,
-                        categoryProduct = state.product.category,
+                        categoryProduct = state.product.subcategory,
                         price = state.product.price,
                         mainPhoto = state.product.images.first(),
                         photos = state.product.images,

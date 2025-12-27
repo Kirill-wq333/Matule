@@ -1,6 +1,5 @@
 package com.example.matule.ui.presentation.shared.main
 
-import android.media.AudioRecord
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -33,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.example.domain.ui.presentation.feature.catalog.model.Category
 import com.example.domain.ui.presentation.feature.popular.model.Product
 import com.example.matule.R
 import com.example.matule.ui.presentation.theme.Colors
@@ -44,7 +42,6 @@ fun CatalogCard(
     onCategorySelected: (Int) -> Unit,
     pagerState: PagerState,
     catalog: List<String>,
-    categories: List<Product>,
     isSelected: Boolean
 ) {
     val lazyListState = rememberLazyListState()

@@ -87,7 +87,7 @@ fun NavigationBuilder(
                 val vmMain = hiltViewModel<MainViewModel>()
                 MainScreen(
                     vm = vmMain,
-                    navController = navController
+                    navController = navController,
                 )
             }
 

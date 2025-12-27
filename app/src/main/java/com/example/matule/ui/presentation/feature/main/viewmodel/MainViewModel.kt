@@ -19,7 +19,6 @@ class MainViewModel @Inject constructor(
     private val mainInteractor: MainInteractor,
     private val cartInteractor: CartInteractor,
     private val authInteractor: AuthInteractor,
-    private val popularInteractor: PopularInteractor,
     private val favoriteInteractor: FavoriteInteractor,
 ) : BaseViewModel<MainScreenContract.Event, MainScreenContract.State, MainScreenContract.Effect>() {
 
@@ -28,8 +27,6 @@ class MainViewModel @Inject constructor(
     override fun handleEvent(event: MainScreenContract.Event) = when (event) {
         is MainScreenContract.Event.LoadContent -> loadHomeContent()
         is MainScreenContract.Event.ToggleProductFavorite -> toggleProductFavorite(event.productId, event.currentlyFavorite)
-        is MainScreenContract.Event.SelectCategory -> selectCategory(event.categoryId)
-        is MainScreenContract.Event.LoadProductsByCategory -> loadProductsByCategory(event.category)
         is MainScreenContract.Event.RefreshContent -> refreshContent()
         is MainScreenContract.Event.AddToCart -> addToCart(event.productId,event.quantity)
     }
@@ -72,9 +69,7 @@ class MainViewModel @Inject constructor(
 
                         setState(
                             MainScreenContract.State.Loaded(
-                                categories = content.categories,
                                 isEnableDot = cartItemIds,
-                                selectedCategoryId = null,
                                 popularProducts = content.popularProducts,
                                 promotions = content.promotions,
                                 cartState = cartState
@@ -86,9 +81,7 @@ class MainViewModel @Inject constructor(
 
                         setState(
                             MainScreenContract.State.Loaded(
-                                categories = content.categories,
                                 isEnableDot = localCartItems,
-                                selectedCategoryId = null,
                                 popularProducts = content.popularProducts,
                                 promotions = content.promotions,
                             )
@@ -124,50 +117,6 @@ class MainViewModel @Inject constructor(
             } else {
                 updateProductFavoriteStatus(productId, currentlyFavorite)
                 setEffect { MainScreenContract.Effect.ShowError("Ошибка обновления избранного") }
-            }
-        }
-    }
-
-    private fun selectCategory(categoryId: Long) {
-        val currentState = currentState
-        if (currentState is MainScreenContract.State.Loaded) {
-            val category = currentState.categories.find { it.id == categoryId }
-            category?.let {
-                setState(currentState.copy(selectedCategoryId = categoryId))
-
-                viewModelScope.launch(dispatcher) {
-                    loadProductsByCategory(it.slug)
-                }
-            }
-        }
-    }
-
-    private fun loadProductsByCategory(category: String) {
-        viewModelScope.launch(dispatcher) {
-//            setState(MainScreenContract.State.Loading)
-            authInteractor.isUserLoggedIn()
-            val result = popularInteractor.loadProductsByCategory(category)
-
-            if (result.isSuccess) {
-                val products = result.getOrNull()!!
-
-                setEffect { MainScreenContract.Effect.CategoryProductsLoaded(category, products) }
-
-                val currentState = currentState
-                if (currentState is MainScreenContract.State.Loaded) {
-                    setState(
-                        currentState.copy(
-                            popularProducts = products,
-                            selectedCategoryId = currentState.categories.find { it.slug == category }?.id
-                        )
-                    )
-                }
-            } else {
-                setEffect { MainScreenContract.Effect.ShowError("Не удалось загрузить товары категории") }
-                val currentState = currentState
-                if (currentState is MainScreenContract.State.Loaded) {
-                    setState(currentState.copy(selectedCategoryId = null))
-                }
             }
         }
     }

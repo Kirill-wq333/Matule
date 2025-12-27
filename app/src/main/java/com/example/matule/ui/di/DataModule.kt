@@ -3,7 +3,6 @@ package com.example.matule.ui.di
 import com.example.data.ui.presentation.feature.arrivals.datasource.ArrivalsApiService
 import com.example.data.ui.presentation.feature.auth.datasource.AuthApiService
 import com.example.data.ui.presentation.feature.cart.datasource.CartApiService
-import com.example.data.ui.presentation.feature.catalog.datasource.CatalogApiService
 import com.example.data.ui.presentation.feature.favorite.datasource.FavoriteApiService
 import com.example.data.ui.presentation.feature.forgot_password.datasource.ForgotPasswordApiService
 import com.example.data.ui.presentation.feature.notification.datasource.NotificationApiService
@@ -39,12 +38,6 @@ class DataModule {
     @Singleton
     fun provideArrivalsApiService(retrofit: Retrofit): ArrivalsApiService{
         return retrofit.create(ArrivalsApiService::class.java)
-    }
-
-    @Provides
-    @Singleton
-    fun provideCatalogApiService(retrofit: Retrofit): CatalogApiService{
-        return retrofit.create(CatalogApiService::class.java)
     }
 
     @Provides

@@ -7,8 +7,6 @@ import com.example.data.ui.presentation.feature.auth.AuthRepositoryImpl
 import com.example.data.ui.presentation.feature.auth.datasource.AuthApiService
 import com.example.data.ui.presentation.feature.cart.CartRepositoryImpl
 import com.example.data.ui.presentation.feature.cart.datasource.CartApiService
-import com.example.data.ui.presentation.feature.catalog.CatalogRepositoryImpl
-import com.example.data.ui.presentation.feature.catalog.datasource.CatalogApiService
 import com.example.data.ui.presentation.feature.favorite.FavoriteRepositoryImpl
 import com.example.data.ui.presentation.feature.favorite.datasource.FavoriteApiService
 import com.example.data.ui.presentation.feature.forgot_password.ForgotPasswordRepositoryImpl
@@ -30,7 +28,6 @@ import com.example.data.ui.presentation.storage.tokenprovider.TokenProvider
 import com.example.domain.ui.presentation.feature.arrivals.repository.ArrivalsRepository
 import com.example.domain.ui.presentation.feature.auth.repository.AuthRepository
 import com.example.domain.ui.presentation.feature.cart.repository.CartRepository
-import com.example.domain.ui.presentation.feature.catalog.repository.CatalogRepository
 import com.example.domain.ui.presentation.feature.favorite.repository.FavoriteRepository
 import com.example.domain.ui.presentation.feature.forgot_password.repository.ForgotPasswordRepository
 import com.example.domain.ui.presentation.feature.notification.repository.NotificationRepository
@@ -85,12 +82,6 @@ class RepositoryModule {
     fun provideArrivalsRepository(
         apiService: ArrivalsApiService
     ): ArrivalsRepository = ArrivalsRepositoryImpl(apiService)
-
-    @Provides
-    @Singleton
-    fun provideCatalogRepository(
-        apiService: CatalogApiService
-    ): CatalogRepository = CatalogRepositoryImpl(apiService)
 
     @Provides
     @Singleton
