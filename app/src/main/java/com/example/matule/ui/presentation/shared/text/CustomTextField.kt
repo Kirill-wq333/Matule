@@ -4,6 +4,7 @@ package com.example.matule.ui.presentation.shared.text
 
 import android.Manifest
 import android.content.Intent
+import android.media.AudioRecord
 import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
@@ -221,7 +222,6 @@ fun TextFieldWithLeadingAndTrailingIcons(
             animation = tween(1200, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "pulseScale"
     )
 
     val recordAudioPermissionState = rememberPermissionState(

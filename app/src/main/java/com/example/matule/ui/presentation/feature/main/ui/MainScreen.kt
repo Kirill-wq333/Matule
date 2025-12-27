@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -29,10 +30,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +47,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.example.domain.ui.presentation.feature.popular.model.Product
 import com.example.matule.R
 import com.example.matule.ui.presentation.approuts.AppRouts
 import com.example.matule.ui.presentation.feature.main.viewmodel.MainScreenContract
@@ -62,6 +66,9 @@ import com.example.matule.ui.presentation.shared.screen.MainLoadingScreen
 import com.example.matule.ui.presentation.shared.text.TextFieldWithLeadingAndTrailingIcons
 import com.example.matule.ui.presentation.theme.Colors
 import com.example.matule.ui.presentation.theme.MatuleTypography
+import kotlinx.coroutines.launch
+import kotlin.compareTo
+import kotlin.text.contains
 
 private interface MainScreenCallback{
     fun addedInCart(productId: Long){}
@@ -121,14 +128,6 @@ fun MainScreen(
         }
     }
 
-    val onCategorySelected: (Long?) -> Unit = { categoryId ->
-        if (categoryId == null || categoryId == 0L) {
-            vm.handleEvent(MainScreenContract.Event.SelectCategory(0))
-        } else {
-            vm.handleEvent(MainScreenContract.Event.SelectCategory(categoryId))
-        }
-    }
-
     when (val currentState = state) {
         is MainScreenContract.State.Loaded -> {
             Main(
@@ -137,7 +136,6 @@ fun MainScreen(
                     vm.handleEvent(MainScreenContract.Event.AddToCart(productId))
                 },
                 state = currentState,
-                onCategorySelected = onCategorySelected,
                 addedInFavorite = { id, isFavorite ->
                     vm.handleEvent(
                         MainScreenContract.Event.ToggleProductFavorite(
@@ -164,7 +162,6 @@ private fun Main(
     state: MainScreenContract.State.Loaded,
     addedInCart: (Long) -> Unit,
     addedInFavorite: (Long, Boolean) -> Unit,
-    onCategorySelected: (Long?) -> Unit
 ) {
     var search by remember { mutableStateOf("") }
 
@@ -182,7 +179,6 @@ private fun Main(
         openSideMenu = callback::openSideMenu,
         state = state,
         addedInFavorite = addedInFavorite,
-        onCategorySelected = onCategorySelected
     )
 }
 
@@ -197,7 +193,6 @@ private fun Content(
     openPopularScreen: () -> Unit,
     openSideMenu: () -> Unit,
     onRefresh: () -> Unit,
-    onCategorySelected: (Long?) -> Unit,
     addedInFavorite: (Long, Boolean) -> Unit,
     openArrivalsScreen: () -> Unit,
 ) {
@@ -205,6 +200,7 @@ private fun Content(
     var catalogScreen by remember { mutableStateOf(false) }
     var searchScreen by remember { mutableStateOf(false) }
     var isSearchPerformed by remember { mutableStateOf(false) }
+    var visibleCategoryItem by remember { mutableStateOf(false) }
 
     val popularProduct = state.popularProducts.filter { it.isPopular }
     val showSearchHeader = searchScreen || search.isNotEmpty()
@@ -240,17 +236,6 @@ private fun Content(
         }
     }
 
-    LaunchedEffect(pagerState.currentPage) {
-        val newCategoryId = when (val currentPage = pagerState.currentPage) {
-            0 -> 0L
-            else -> state.categories.getOrNull(currentPage - 1)?.id ?: 0L
-        }
-
-        if (state.selectedCategoryId != newCategoryId) {
-            onCategorySelected(newCategoryId)
-        }
-    }
-
     LaunchedEffect(search) {
         if (search.isEmpty()) {
             isSearchPerformed = false
@@ -268,7 +253,7 @@ private fun Content(
     val columnModifier = when(screenState){
         ScreenState.MAIN -> Modifier
             .fillMaxSize()
-//            .verticalScroll(rememberScrollState())
+            .verticalScroll(rememberScrollState())
             .background(color = Colors.background)
             .padding(bottom = 100.dp)
 
@@ -281,228 +266,125 @@ private fun Content(
     Column(
         modifier = columnModifier
     ) {
-        Crossfade(
-            targetState = screenState,
-            animationSpec = tween(durationMillis = 700)
-        ) { stateScreen ->
-            when (stateScreen) {
-                ScreenState.CATALOG -> {
-                    CustomHeader(
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        text = R.string.category,
-                        onBack = { catalogScreen = false },
-                        visibleNameScreen = true
-                    )
-                }
-
-                ScreenState.SEARCH -> {
-                    CustomHeader(
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        text = R.string.search,
-                        onBack = {
-                            searchScreen = false
-                            onSearchChange("")
-                        },
-                        visibleNameScreen = true
-                    )
-                }
-
-                ScreenState.MAIN -> {
-                    CustomHeaderMain(
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        text = R.string.main,
-                        cardItem = state.isEnableDot.size,
-                        openSideMenu = openSideMenu,
-                        openCartScreen = openCartScreen
-                    )
-                }
-            }
-        }
+        Header(
+            state = state,
+            openSideMenu = openSideMenu,
+            openCartScreen = openCartScreen,
+            onBackSearch = {
+                searchScreen = false
+                onSearchChange("")
+            },
+            onBackCategory = {
+                visibleCategoryItem = false
+                catalogScreen = false
+            },
+            screenState = screenState,
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        AnimatedVisibility(
-            visible = !catalogScreen,
-            enter = expandVertically(
-                animationSpec = tween(700),
-                expandFrom = Alignment.Top
-            ) + fadeIn(animationSpec = tween(700)),
-            exit = shrinkVertically(
-                animationSpec = tween(700),
-                shrinkTowards = Alignment.Top
-            ) + fadeOut(animationSpec = tween(700))
-        ) {
-            Column {
-                SearchAndFeature(
-                    query = search,
-                    searchScreen = searchScreen,
-                    onTextChange = { newText ->
-                        onSearchChange(newText)
-                        searchScreen = newText.isNotEmpty()
+        AnimatableSearch(
+            onSearchChange = { newText ->
+                onSearchChange(newText)
+                searchScreen = newText.isNotEmpty()
 
-                        if (isSearchPerformed && newText != search) {
-                            isSearchPerformed = false
-                        }
-                    },
-                    onSearch = {
-                        isSearchPerformed = true
-                        if (search.isNotEmpty() && !searchHistory.contains(search)) {
-                            searchHistory.add(0, search)
-                            if (searchHistory.size > 10) {
-                                searchHistory.removeAt(searchHistory.lastIndex)
-                            }
-                        }
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(if (catalogScreen) 28.dp else 22.dp))
-            }
-        }
-        when(screenState) {
-            ScreenState.SEARCH -> {
-                AnimatedVisibility(
-                    visible = search.isNotEmpty(),
-                    enter = expandVertically(
-                        animationSpec = tween(700),
-                        expandFrom = Alignment.Bottom
-                    ) + fadeIn(animationSpec = tween(700)),
-                    exit = shrinkVertically(
-                        animationSpec = tween(700),
-                        shrinkTowards = Alignment.Bottom
-                    ) + fadeOut(animationSpec = tween(700))
-                ) {
-                    SearchScreenContent(
-                        searchQuery = search,
-                        searchResults = searchResults,
-                        searchHistory = searchHistory,
-                        cartItems = state.isEnableDot,
-                        addedInCart = addedInCart,
-                        addedInFavorite = addedInFavorite,
-                        openCartScreen = openCartScreen,
-                        openDetailScreen = openDetailScreen,
-                        onSearchItemClick = { searchItem ->
-                            onSearchChange(searchItem)
-                            searchScreen = true
-                            isSearchPerformed = true
-                        },
-                        isSearchPerformed = isSearchPerformed
-                    )
+                if (isSearchPerformed && newText != search) {
+                    isSearchPerformed = false
                 }
-            }
+            },
+            screenState = screenState,
+            catalogScreen = catalogScreen,
+            search = search,
+            onSearch = {
+                isSearchPerformed = true
+                if (search.isNotEmpty() && !searchHistory.contains(search)) {
+                    searchHistory.add(0, search)
+                    if (searchHistory.size > 10) {
+                        searchHistory.removeAt(searchHistory.lastIndex)
+                    }
+                }
+            },
+            searchScreen = searchScreen,
+            searchResults = searchResults,
+            searchHistory = searchHistory,
+            onSearchItemClick = { searchItem ->
+                onSearchChange(searchItem)
+                searchScreen = true
+                isSearchPerformed = true
+            },
+            addedInCart = addedInCart,
+            addedInFavorite = addedInFavorite,
+            openCartScreen = openCartScreen,
+            openDetailScreen = openDetailScreen,
+            isSearchPerformed = isSearchPerformed,
+            state = state,
+        )
 
-            else -> {}
-        }
+        AnimatableCategory(
+            showSearchHeader = showSearchHeader,
+            state = state,
+            screenState = screenState,
+            addedInCart = addedInCart,
+            addedInFavorite = addedInFavorite,
+            openCartScreen = openCartScreen,
+            openDetailScreen = openDetailScreen,
+            pagerState = pagerState,
+            isSelected = visibleCategoryItem
+        )
+        MainContent(
+            catalogScreen = catalogScreen,
+            openArrivalsScreen = openArrivalsScreen,
+            showSearchHeader = showSearchHeader,
+            openPopularScreen = openPopularScreen,
+            openCartScreen = openCartScreen,
+            openDetailScreen = openDetailScreen,
+            addedInCart = addedInCart,
+            addedInFavorite = addedInFavorite,
+            popularProduct = popularProduct,
+            state = state
+        )
+    }
+}
 
-        AnimatedVisibility(
-            visible = !showSearchHeader,
-            enter = expandVertically(
-                animationSpec = tween(700),
-                expandFrom = Alignment.Top
-            ) + fadeIn(animationSpec = tween(700)),
-            exit = shrinkVertically(
-                animationSpec = tween(700),
-                shrinkTowards = Alignment.Top
-            ) + fadeOut(animationSpec = tween(700))
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                CatalogCard(
-                    categories = state.categories,
-                    onCategorySelected = {
-                        onCategorySelected(it)
-                        catalogScreen = true
-                    },
-                    pagerState = pagerState,
-                )
-
-                Spacer(modifier = Modifier.height(if (showSearchHeader) 20.dp else 24.dp))
-
-            }
-        }
-        when(screenState) {
+@Composable
+fun Header(
+    state: MainScreenContract.State.Loaded,
+    screenState: ScreenState,
+    onBackCategory: () -> Unit,
+    onBackSearch: () -> Unit,
+    openSideMenu: () -> Unit,
+    openCartScreen: () -> Unit
+) {
+    Crossfade(
+        targetState = screenState,
+        animationSpec = tween(durationMillis = 700)
+    ) { stateScreen ->
+        when (stateScreen) {
             ScreenState.CATALOG -> {
-                AnimatedVisibility(
-                    visible = state.selectedCategoryId != null,
-                    modifier = Modifier.fillMaxSize(),
-                    enter = expandVertically(
-                        animationSpec = tween(700),
-                        expandFrom = Alignment.Top
-                    ) + fadeIn(animationSpec = tween(700)),
-                    exit = shrinkVertically(
-                        animationSpec = tween(700),
-                        shrinkTowards = Alignment.Top
-                    ) + fadeOut(animationSpec = tween(700))
-                ) {
-
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier.fillMaxSize(),
-                    ) { page ->
-                        val currentCategory =
-                            if (page == 0) null else state.categories.getOrNull(page - 1)
-
-                        val productsForPage =
-                            remember(page, state.popularProducts, state.categories) {
-                                if (page == 0) {
-                                    state.popularProducts
-                                } else {
-                                    currentCategory?.let { category ->
-                                        state.popularProducts.filter { product ->
-                                            product.category == category.slug
-                                        }
-                                    } ?: emptyList()
-                                }
-                            }
-
-                        if (productsForPage.isEmpty()) {
-                            EmptyContent(
-                                icon = R.drawable.ic_orders,
-                                emptyText = R.string.empty_arrivals
-                            )
-                        } else {
-
-                            CatalogProducts(
-                                addedInCart = addedInCart,
-                                openCartScreen = openCartScreen,
-                                openDetailScreen = openDetailScreen,
-                                addedInFavorite = addedInFavorite,
-                                cartItems = state.isEnableDot,
-                                products = productsForPage,
-                            )
-                        }
-                    }
-                }
+                CustomHeader(
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                    text = R.string.category,
+                    onBack = onBackCategory,
+                    visibleNameScreen = true
+                )
             }
 
-            else -> {}
-        }
-        AnimatedVisibility(
-            visible = !catalogScreen && !showSearchHeader,
-            enter = expandVertically(
-                animationSpec = tween(700),
-                expandFrom = Alignment.Top
-            ) + fadeIn(animationSpec = tween(700)),
-            exit = shrinkVertically(
-                animationSpec = tween(700),
-                shrinkTowards = Alignment.Top
-            ) + fadeOut(animationSpec = tween(700))
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                PopularCard(
-                    openPopularScreen = openPopularScreen,
-                    addedInCart = addedInCart,
-                    openCartScreen = openCartScreen,
-                    openDetailScreen = openDetailScreen,
-                    popularProducts = popularProduct,
-                    addedInFavorite = addedInFavorite,
-                    cartItems = state.isEnableDot
+            ScreenState.SEARCH -> {
+                CustomHeader(
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                    text = R.string.search,
+                    onBack = onBackSearch,
+                    visibleNameScreen = true
                 )
-                Spacer(modifier = Modifier.height(29.dp))
-                ArrivalsCard(
-                    openArrivalsScreen = openArrivalsScreen,
-                    promotions = state.promotions
+            }
+
+            ScreenState.MAIN -> {
+                CustomHeaderMain(
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                    text = R.string.main,
+                    cardItem = state.isEnableDot.size,
+                    openSideMenu = openSideMenu,
+                    openCartScreen = openCartScreen
                 )
             }
         }
@@ -510,6 +392,232 @@ private fun Content(
 }
 enum class ScreenState {
     MAIN, CATALOG, SEARCH
+}
+
+
+@Composable
+fun AnimatableSearch(
+    screenState: ScreenState,
+    catalogScreen: Boolean,
+    search: String,
+    searchResults: List<Product>,
+    searchHistory: List<String>,
+    onSearchItemClick: (String) -> Unit,
+    addedInCart: (Long) -> Unit,
+    addedInFavorite: (Long, Boolean) -> Unit,
+    openCartScreen: () -> Unit,
+    openDetailScreen: (Long) -> Unit,
+    isSearchPerformed: Boolean,
+    state: MainScreenContract.State.Loaded,
+    searchScreen: Boolean,
+    onSearch: (() -> Unit)?,
+    onSearchChange: (String) -> Unit
+) {
+    AnimatedVisibility(
+        visible = !catalogScreen,
+        enter = expandVertically(
+            animationSpec = tween(700),
+            expandFrom = Alignment.Top
+        ) + fadeIn(animationSpec = tween(700)),
+        exit = shrinkVertically(
+            animationSpec = tween(700),
+            shrinkTowards = Alignment.Top
+        ) + fadeOut(animationSpec = tween(700))
+    ) {
+        Column {
+            SearchAndFeature(
+                query = search,
+                searchScreen = searchScreen,
+                onTextChange = onSearchChange,
+                onSearch = onSearch
+            )
+
+            Spacer(modifier = Modifier.height(if (catalogScreen) 28.dp else 22.dp))
+        }
+    }
+    when(screenState) {
+        ScreenState.SEARCH -> {
+            AnimatedVisibility(
+                visible = search.isNotEmpty(),
+                enter = expandVertically(
+                    animationSpec = tween(700),
+                    expandFrom = Alignment.Bottom
+                ) + fadeIn(animationSpec = tween(700)),
+                exit = shrinkVertically(
+                    animationSpec = tween(700),
+                    shrinkTowards = Alignment.Bottom
+                ) + fadeOut(animationSpec = tween(700))
+            ) {
+                SearchScreenContent(
+                    searchQuery = search,
+                    searchResults = searchResults,
+                    searchHistory = searchHistory,
+                    cartItems = state.isEnableDot,
+                    addedInCart = addedInCart,
+                    addedInFavorite = addedInFavorite,
+                    openCartScreen = openCartScreen,
+                    openDetailScreen = openDetailScreen,
+                    onSearchItemClick = onSearchItemClick,
+                    isSearchPerformed = isSearchPerformed
+                )
+            }
+        }
+
+        else -> {}
+    }
+}
+@Composable
+fun AnimatableCategory(
+    showSearchHeader: Boolean,
+    state: MainScreenContract.State.Loaded,
+    screenState: ScreenState,
+    addedInCart: (Long) -> Unit,
+    addedInFavorite: (Long, Boolean) -> Unit,
+    openCartScreen: () -> Unit,
+    openDetailScreen: (Long) -> Unit,
+    pagerState: PagerState,
+    isSelected: Boolean
+) {
+    val all = stringResource(R.string.all)
+    var selectedCategory by remember { mutableStateOf(0) }
+
+    val catalog = remember(state.popularProducts) {
+        listOf(all) + state.popularProducts.map { it.subcategory }.distinct()
+    }
+
+    AnimatedVisibility(
+        visible = !showSearchHeader,
+        enter = expandVertically(
+            animationSpec = tween(700),
+            expandFrom = Alignment.Top
+        ) + fadeIn(animationSpec = tween(700)),
+        exit = shrinkVertically(
+            animationSpec = tween(700),
+            shrinkTowards = Alignment.Top
+        ) + fadeOut(animationSpec = tween(700))
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            CatalogCard(
+                categories = state.popularProducts,
+                catalog = catalog,
+                onCategorySelected = {
+                    selectedCategory == it
+                },
+                pagerState = pagerState,
+                isSelected = isSelected
+            )
+
+            Spacer(modifier = Modifier.height(if (showSearchHeader) 20.dp else 24.dp))
+
+        }
+    }
+    when(screenState) {
+        ScreenState.CATALOG -> {
+            AnimatedVisibility(
+                visible = true,
+                modifier = Modifier.fillMaxSize(),
+                enter = expandVertically(
+                    animationSpec = tween(700),
+                    expandFrom = Alignment.Top
+                ) + fadeIn(animationSpec = tween(700)),
+                exit = shrinkVertically(
+                    animationSpec = tween(700),
+                    shrinkTowards = Alignment.Top
+                ) + fadeOut(animationSpec = tween(700))
+            ) {
+
+                HorizontalPager(
+                    beyondViewportPageCount = catalog.size,
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize(),
+                ) { page ->
+
+                    val currentSubcategory = if (page == 0) null else catalog[page]
+
+                    val productsForPage = remember(
+                        state.popularProducts,
+                        page,
+                        catalog,
+                    ) {
+                        derivedStateOf {
+                            state.popularProducts.filter { product ->
+                                val matchesSubcategory = currentSubcategory == null ||
+                                        currentSubcategory == all ||
+                                        product.subcategory == currentSubcategory
+
+                                matchesSubcategory
+                            }
+                        }
+                    }.value
+
+                    if (productsForPage.isEmpty()) {
+                        EmptyContent(
+                            icon = R.drawable.ic_orders,
+                            emptyText = R.string.empty_arrivals
+                        )
+                    } else {
+                        CatalogProducts(
+                            addedInCart = addedInCart,
+                            openCartScreen = openCartScreen,
+                            openDetailScreen = openDetailScreen,
+                            addedInFavorite = addedInFavorite,
+                            cartItems = state.isEnableDot,
+                            products = productsForPage,
+                        )
+                    }
+                }
+            }
+        }
+
+        else -> {}
+    }
+}
+
+@Composable
+fun MainContent(
+    catalogScreen: Boolean,
+    openArrivalsScreen: () -> Unit,
+    showSearchHeader: Boolean,
+    openPopularScreen: () -> Unit,
+    openCartScreen: () -> Unit,
+    openDetailScreen: (Long) -> Unit,
+    addedInCart: (Long) -> Unit,
+    addedInFavorite: (Long, Boolean) -> Unit,
+    popularProduct: List<Product>,
+    state: MainScreenContract.State.Loaded
+
+) {
+    AnimatedVisibility(
+        visible = !catalogScreen && !showSearchHeader,
+        enter = expandVertically(
+            animationSpec = tween(700),
+            expandFrom = Alignment.Top
+        ) + fadeIn(animationSpec = tween(700)),
+        exit = shrinkVertically(
+            animationSpec = tween(700),
+            shrinkTowards = Alignment.Top
+        ) + fadeOut(animationSpec = tween(700))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            PopularCard(
+                openPopularScreen = openPopularScreen,
+                addedInCart = addedInCart,
+                openCartScreen = openCartScreen,
+                openDetailScreen = openDetailScreen,
+                popularProducts = popularProduct,
+                addedInFavorite = addedInFavorite,
+                cartItems = state.isEnableDot
+            )
+            Spacer(modifier = Modifier.height(29.dp))
+            ArrivalsCard(
+                openArrivalsScreen = openArrivalsScreen,
+                promotions = state.promotions
+            )
+        }
+    }
 }
 
 @Composable

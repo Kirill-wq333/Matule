@@ -1,5 +1,6 @@
 package com.example.matule.ui.presentation.shared.main
 
+import android.media.AudioRecord
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -40,19 +41,15 @@ import com.example.matule.ui.presentation.theme.MatuleTypography
 
 @Composable
 fun CatalogCard(
-    onCategorySelected: (Long?) -> Unit,
+    onCategorySelected: (Int) -> Unit,
     pagerState: PagerState,
-    categories: List<Category>,
+    catalog: List<String>,
+    categories: List<Product>,
+    isSelected: Boolean
 ) {
-
     val lazyListState = rememberLazyListState()
 
-    val all = stringResource(R.string.all)
-
-    val catalog = remember(categories) {
-        listOf(all) + categories.map { it.name }
-    }
-    var wasSelected by remember { mutableStateOf(false) }
+    var wasSelected by remember { mutableStateOf(isSelected) }
 
     LaunchedEffect(pagerState.currentPage) {
         lazyListState.animateScrollToItem(pagerState.currentPage)
@@ -75,14 +72,13 @@ fun CatalogCard(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             itemsIndexed(catalog) { index, category ->
-
+                val isItemSelected = pagerState.currentPage == index
                 Item(
                     text = category,
-                    isSelected = if(wasSelected) index == pagerState.currentPage else false,
+                    isSelected = if(wasSelected) isItemSelected else false,
                     onClick = {
                         wasSelected = true
-                        val categoryId = if (index == 0) 0L else categories.getOrNull(index - 1)?.id
-                        onCategorySelected(categoryId)
+                        onCategorySelected(index)
                     }
                 )
             }
